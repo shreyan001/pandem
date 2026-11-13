@@ -1,0 +1,45 @@
+# deps and builds
+node_modules/
+.pnpm-store/
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+*.wasm
+
+# secrets: never commit keys, seeds, API tokens or 1Click JWTs
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+**/credentials*.json
+.near-credentials/
+
+# local tooling state
+.vercel/
+.DS_Store
+Thumbs.db
+*.log
+.gemini/tmp/
+# hackathon submission payload holds personal data (HACKATHON.md says do not commit it)
+submission-payload.json
+
+# bulky raw context kept only on the local machine (summarised in context/)
+context/raw/
+context/stillworks-repo/
+context/**/*.zip
+
+# agent state (inference logs)
+agent/data/
+*.sqlite
+*.sqlite-*
+agent/.killswitch
+
+# Rust / NEAR contracts
+target/
+**/target/
+.near-credentials/
+neardev/
