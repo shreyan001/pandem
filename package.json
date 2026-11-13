@@ -1,0 +1,14 @@
+{
+  "name": "pandem",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "agent",
+    "web"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}
