@@ -4,17 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useNearWallet } from "../context/NearWalletContext";
+import { Wallet, Plus, LogOut, ShieldCheck, X } from "lucide-react";
 
 interface NavLink {
   href: string;
   label: string;
-  badge?: string;
 }
 
 const NAV_LINKS: NavLink[] = [
   { href: "/#storefront", label: "Storefront" },
-  { href: "/dashboard", label: "Dashboard", badge: "Sub" },
-  { href: "/dev/dashboard", label: "Developer", badge: "Dev" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/dev/dashboard", label: "Developer" },
 ];
 
 export function Navbar() {
@@ -52,29 +52,26 @@ export function Navbar() {
   };
 
   return (
-    <nav className="border-b border-[#2E2E2E] bg-[#0D0D0D] sticky top-0 z-50 rounded-none font-sans" suppressHydrationWarning>
+    <nav className="sticky top-0 z-50 bg-[#0D0D0D]/90 backdrop-blur-md border-b border-[#222222] font-sans" suppressHydrationWarning>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Brand & Clean Nav Links */}
+        {/* Brand & Nav Links */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <span className="w-8 h-8 rounded-none bg-[#894DEF] border border-[#FAFAFA] flex items-center justify-center font-mono font-bold text-[#FAFAFA] text-sm">
-              P
-            </span>
-            <div className="flex flex-col">
-              <span className="font-bold text-[#FAFAFA] text-base tracking-tight flex items-center gap-2 leading-tight">
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="w-8 h-8 bg-[#894DEF] flex items-center justify-center text-white">
+              <ShieldCheck className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold text-[#FAFAFA] tracking-tight">
                 Pandem
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-[#171717] text-[#894DEF] border border-[#2E2E2E]">
-                  TESTNET
-                </span>
               </span>
-              <span className="text-[11px] text-[#B8B8B8] font-mono hidden sm:inline leading-none mt-0.5">
-                Sovereign SaaS & Enclaves
+              <span className="text-[11px] font-medium text-[#A1A1A1] bg-[#1A1A1A] px-2 py-0.5 border border-[#2A2A2A]">
+                Testnet
               </span>
             </div>
           </Link>
 
-          {/* Clean Nav Links: Storefront, Dashboard, Developer ONLY */}
-          <div className="hidden md:flex items-center gap-2" suppressHydrationWarning>
+          {/* Nav Links */}
+          <div className="hidden md:flex items-center gap-1" suppressHydrationWarning>
             {NAV_LINKS.map((link) => {
               const isActive = mounted
                 ? link.href.startsWith("/#")
@@ -86,60 +83,57 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3.5 py-2 rounded-none text-xs font-mono font-medium transition-colors flex items-center gap-2 border ${
+                  className={`px-3 py-1.5 text-sm transition-colors ${
                     isActive
-                      ? "bg-[#171717] text-[#FAFAFA] border-[#894DEF]"
-                      : "text-[#B8B8B8] hover:text-[#FAFAFA] hover:bg-[#171717] border-transparent"
+                      ? "text-[#FAFAFA] font-medium bg-[#1A1A1A]"
+                      : "text-[#A1A1A1] hover:text-[#FAFAFA] hover:bg-[#141414]"
                   }`}
                 >
-                  <span>{link.label}</span>
-                  {link.badge && (
-                    <span className="text-[9px] px-1 py-0.5 rounded-none bg-[#262626] text-[#894DEF] border border-[#2E2E2E] font-bold">
-                      {link.badge}
-                    </span>
-                  )}
+                  {link.label}
                 </Link>
               );
             })}
           </div>
         </div>
 
-        {/* Right Action Buttons */}
+        {/* Right Actions */}
         <div className="flex items-center gap-3 shrink-0" suppressHydrationWarning>
-          {/* Launch Product CTA */}
           <Link
             href="/dev/onboarding"
-            className="px-4 py-2 rounded-none text-xs sm:text-sm font-bold bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] transition-colors flex items-center gap-1.5 shadow-none"
+            className="bg-[#894DEF] hover:bg-[#7839DF] text-white px-4 py-2 font-medium text-xs transition-colors flex items-center gap-1.5"
           >
-            <span>+ Launch Product</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Launch Product</span>
           </Link>
 
-          {/* Wallet State */}
           {mounted && isConnected ? (
             <div className="flex items-center gap-2" suppressHydrationWarning>
-              <div className="flex flex-col items-end px-3 py-1 rounded-none bg-[#171717] border border-[#2E2E2E] text-xs">
-                <span className="font-mono text-[#FAFAFA] font-medium text-[11px] sm:text-xs">
-                  {accountId?.slice(0, 16)}
-                  {accountId && accountId.length > 16 ? "..." : ""}
+              <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#141414] border border-[#2A2A2A] text-xs">
+                <span className="w-1.5 h-1.5 bg-[#22C55E]" />
+                <span className="font-mono text-[#FAFAFA] text-xs">
+                  {accountId?.slice(0, 14)}
+                  {accountId && accountId.length > 14 ? "..." : ""}
                 </span>
-                <span className="font-mono text-[#894DEF] text-[10px] sm:text-[11px] font-semibold">
+                <span className="text-[#737373]">|</span>
+                <span className="font-mono text-[#A1A1A1] text-xs">
                   {formatBalance(tokenBalance)} wNEAR
                 </span>
               </div>
               <button
                 onClick={disconnect}
-                className="px-3 py-2 rounded-none text-xs font-mono bg-[#171717] hover:bg-[#262626] border border-[#2E2E2E] text-[#B8B8B8] hover:text-[#FAFAFA] transition-colors"
-                title="Disconnect Wallet"
+                className="p-2 bg-[#141414] hover:bg-[#1A1A1A] border border-[#2A2A2A] text-[#A1A1A1] hover:text-[#FAFAFA] transition-colors"
+                title="Disconnect wallet"
               >
-                Sign Out
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
             <button
               onClick={connect}
-              className="px-4 py-2 rounded-none text-xs sm:text-sm font-semibold bg-[#171717] hover:bg-[#262626] text-[#FAFAFA] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-2 text-xs font-medium bg-[#141414] hover:bg-[#1A1A1A] text-[#FAFAFA] border border-[#2A2A2A] hover:border-[#383838] transition-colors flex items-center gap-2"
             >
-              Connect Wallet
+              <Wallet className="w-3.5 h-3.5 text-[#A1A1A1]" />
+              <span>Connect Wallet</span>
             </button>
           )}
         </div>
@@ -147,51 +141,19 @@ export function Navbar() {
 
       {/* Gentle Wallet Notice Banner */}
       {walletError && (
-        <div className="bg-[#171717] border-t border-b border-[#2E2E2E] px-4 py-2 text-xs flex items-center justify-between gap-2 text-[#FAFAFA]">
+        <div className="bg-[#141414] border-t border-[#222222] px-4 py-2 text-xs flex items-center justify-between gap-2 text-[#FAFAFA]">
           <div className="flex items-center gap-2">
-            <span className="font-bold font-mono text-[#894DEF]">ℹ</span>
-            <span>{walletError}</span>
+            <span className="text-[#894DEF]">Notice:</span>
+            <span className="text-[#A1A1A1]">{walletError}</span>
           </div>
           <button
             onClick={clearWalletError}
-            className="text-[#B8B8B8] hover:text-[#FAFAFA] text-xs font-mono px-2 py-0.5 rounded-none bg-[#262626] border border-[#2E2E2E]"
+            className="text-[#737373] hover:text-[#FAFAFA] p-1"
           >
-            Dismiss
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
-
-      {/* Mobile Nav Row */}
-      <div
-        className="md:hidden border-t border-[#2E2E2E] bg-[#171717] px-4 py-2 flex items-center gap-2 overflow-x-auto"
-        suppressHydrationWarning
-      >
-        {NAV_LINKS.map((link) => {
-          const isActive = mounted
-            ? link.href.startsWith("/#")
-              ? pathname === "/"
-              : pathname === link.href
-            : false;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`px-3 py-1 rounded-none text-xs font-mono whitespace-nowrap transition-colors shrink-0 border ${
-                isActive
-                  ? "bg-[#262626] text-[#FAFAFA] border-[#894DEF] font-semibold"
-                  : "text-[#B8B8B8] hover:text-[#FAFAFA] hover:bg-[#262626] border-transparent"
-              }`}
-            >
-              {link.label}
-              {link.badge && (
-                <span className="ml-1 text-[9px] px-1 py-0.2 rounded-none bg-[#0D0D0D] text-[#894DEF] border border-[#2E2E2E]">
-                  {link.badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </div>
     </nav>
   );
 }

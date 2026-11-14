@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ProductHuntLeaderboard } from "../components/ProductHuntLeaderboard";
 import { ProductDetailModal } from "../components/ProductDetailModal";
@@ -8,14 +8,36 @@ import { SubscribeModal } from "../components/SubscribeModal";
 import { CatalogItem } from "@pandem/shared";
 import catalogData from "../../../shared/catalog.json";
 import { useNearWallet } from "../context/NearWalletContext";
+import {
+  Shield,
+  Cpu,
+  Database,
+  Lock,
+  Server,
+  Check,
+  X,
+  AlertTriangle,
+  Terminal,
+  Activity,
+  Layers,
+  Search,
+  Code,
+  Sparkles,
+  ArrowRight,
+  ExternalLink,
+} from "lucide-react";
 
 export default function Home() {
   const { accountId, isConnected } = useNearWallet();
   const [detailProduct, setDetailProduct] = useState<CatalogItem | null>(null);
   const [subscribeProduct, setSubscribeProduct] = useState<CatalogItem | null>(null);
-  const [activeXrayStep, setActiveXrayStep] = useState<number>(0);
+  const [activeConsoleTab, setActiveConsoleTab] = useState<"settlement" | "tee" | "storage">("settlement");
   const [catalog, setCatalog] = useState<CatalogItem[]>(() => catalogData as unknown as CatalogItem[]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [monthlySimAmount, setMonthlySimAmount] = useState<number>(50);
+  const [quoteVerified, setQuoteVerified] = useState<boolean>(true);
 
+  // Dynamic catalog fetch from API
   useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
@@ -62,417 +84,548 @@ export default function Home() {
     setSubscribeProduct(product);
   };
 
+  const filteredCatalog = useMemo(() => {
+    if (!searchQuery.trim()) return catalog;
+    const q = searchQuery.toLowerCase();
+    return catalog.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.tagline.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+    );
+  }, [catalog, searchQuery]);
+
+  // Settlement calculations
+  const devShare = (monthlySimAmount * 0.475).toFixed(2);
+  const opexShare = (monthlySimAmount * 0.30).toFixed(2);
+  const shieldShare = (monthlySimAmount * 0.20).toFixed(2);
+  const protocolShare = (monthlySimAmount * 0.025).toFixed(2);
+
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-20 bg-[#0D0D0D] text-[#FAFAFA] font-sans">
-      {/* 2.1 Above-the-Fold Hero Section */}
-      <section className="text-center pt-8 pb-14 border-b border-[#2E2E2E] space-y-8 relative">
-        <div className="absolute inset-0 bg-grid opacity-25 pointer-events-none" />
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24 bg-[#0D0D0D] text-[#FAFAFA] font-sans">
+      {/* 1. Hero Section */}
+      <section className="space-y-10 pt-4">
+        <div className="max-w-4xl space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#141414] border border-[#262626] text-xs text-[#A1A1A1]">
+            <span className="w-1.5 h-1.5 bg-[#22C55E]" />
+            <span>NEAR Confidential Intents</span>
+            <span className="text-[#525252]">·</span>
+            <span>Intel TDX</span>
+            <span className="text-[#525252]">·</span>
+            <span>NVIDIA H100 TEE</span>
+          </div>
 
-        {/* Eyebrow Badge */}
-        <div className="relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-[#171717] border border-[#2E2E2E] text-xs font-mono tracking-wider shadow-sm">
-          <span className="w-2 h-2 rounded-none bg-[#4ADE80] animate-pulse" />
-          <span className="text-[#894DEF] font-bold">PANDEM LAUNCHPAD</span>
-          <span className="text-[#6B6B6B]">·</span>
-          <span className="text-[#FAFAFA]">SOVEREIGN SAAS & TEE INFRASTRUCTURE ON NEAR</span>
-          <span className="text-[#6B6B6B]">·</span>
-          <span className="text-[#4ADE80] font-bold">INTEL TDX & H100</span>
+          <h1 className="text-4xl sm:text-6xl font-semibold tracking-[-0.03em] text-[#FAFAFA] leading-[1.08]">
+            Software subscriptions that settle in complete secrecy.
+          </h1>
+
+          <p className="text-base sm:text-lg text-[#A1A1A1] max-w-3xl leading-relaxed">
+            Standard software asks you to trust a written privacy policy while exposing your database, memory state, and payment trail.
+            Pandem is the sovereign software storefront where subscriptions settle via NEAR Confidential Intents, applications self-fund their AI and compute infrastructure through smart contract escrow, and hardware enclaves guarantee that no one can inspect your data.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <a
+              href="#storefront"
+              className="bg-[#894DEF] hover:bg-[#7839DF] text-white px-6 py-3 text-sm font-medium transition-colors"
+            >
+              Explore Storefront
+            </a>
+
+            <Link
+              href="/dev/onboarding"
+              className="bg-[#141414] hover:bg-[#1A1A1A] text-[#FAFAFA] border border-[#2A2A2A] hover:border-[#383838] px-6 py-3 text-sm font-medium transition-colors"
+            >
+              Launch an Application
+            </Link>
+          </div>
         </div>
 
-        {/* Hero Headline (H1) */}
-        <h1 className="relative text-3xl sm:text-5xl lg:text-6xl font-black text-[#FAFAFA] tracking-tight max-w-5xl mx-auto leading-tight sm:leading-none uppercase">
-          Subscribe in Complete Secrecy. <br className="hidden sm:inline" />
-          <span className="text-[#894DEF]">Run Inside Hardware Enclaves.</span> <br className="hidden sm:inline" />
-          The Launchpad for Sovereign AI.
-        </h1>
-
-        {/* Hero Sub-headline */}
-        <p className="relative text-sm sm:text-base lg:text-lg text-[#B8B8B8] max-w-3xl mx-auto leading-relaxed">
-          Standard SaaS asks you to trust a marketing privacy policy while exposing your LangGraph state, user database, and payment trail.
-          Pandem is the sovereign launchpad where confidential software products launch with hardware-enforced privacy: subscriptions settle invisibly via NEAR Confidential Intents, applications self-fund their own AI and database enclaves through a Tripartite Smart Contract, and neither developers nor cloud hosts can ever inspect user data.
-        </p>
-
-        {/* Primary Call-to-Action Buttons */}
-        <div className="relative flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-          <a
-            href="#storefront"
-            className="w-full sm:w-auto px-8 py-4 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-bold text-sm font-mono tracking-wide transition-colors flex items-center justify-center gap-2 shadow-md"
-          >
-            <span>Explore Launchpad Storefront</span>
-            <span>↓</span>
-          </a>
-
-          <Link
-            href="/dev/onboarding"
-            className="w-full sm:w-auto px-8 py-4 rounded-none bg-[#171717] hover:bg-[#262626] text-[#FAFAFA] border border-[#2E2E2E] hover:border-[#894DEF] font-bold text-sm font-mono tracking-wide transition-colors flex items-center justify-center gap-2"
-          >
-            <span>Deploy on Launchpad (Instant AI & DB Credits)</span>
-            <span>→</span>
-          </Link>
-        </div>
-
-        {/* Role Routing Selector */}
-        <div className="relative pt-4 max-w-2xl mx-auto">
-          {isConnected && accountId ? (
-            <div className="p-4 rounded-none bg-[#171717] border border-[#894DEF] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-left shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-none bg-[#4ADE80] animate-pulse" />
-                <span className="text-[#B8B8B8]">Connected as:</span>
-                <strong className="text-[#FAFAFA]">{accountId}</strong>
-                <span className="px-1.5 py-0.5 text-[10px] bg-[#262626] text-[#4ADE80] border border-[#4ADE80]/40">Active</span>
+        {/* Role Navigation Banner */}
+        {isConnected && accountId ? (
+          <div className="p-4 bg-[#141414] border border-[#2A2A2A] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-[#22C55E]" />
+              <span className="text-[#737373]">Active wallet:</span>
+              <span className="font-mono text-[#FAFAFA] font-medium">{accountId}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard"
+                className="px-3 py-1.5 bg-[#1A1A1A] hover:bg-[#222222] text-[#FAFAFA] border border-[#2E2E2E] transition-colors"
+              >
+                Subscriber Dashboard
+              </Link>
+              <Link
+                href="/dev/dashboard"
+                className="px-3 py-1.5 bg-[#894DEF] hover:bg-[#7839DF] text-white transition-colors"
+              >
+                Developer Dashboard
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <a
+              href="#storefront"
+              className="p-5 bg-[#141414] border border-[#222222] hover:border-[#383838] hover:bg-[#181818] transition-colors group"
+            >
+              <div className="text-[#22C55E] font-medium text-xs">For Subscribers</div>
+              <div className="text-sm font-medium text-[#FAFAFA] mt-1 group-hover:text-[#C084FC] transition-colors">
+                Subscribe privately with zero-knowledge credentials
               </div>
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/dashboard"
-                  className="px-3 py-1.5 rounded-none bg-[#262626] hover:bg-[#0D0D0D] text-[#FAFAFA] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors"
-                >
-                  Subscriber Dashboard →
-                </Link>
-                <Link
-                  href="/dev/dashboard"
-                  className="px-3 py-1.5 rounded-none bg-[#894DEF] text-[#FAFAFA] border border-[#FAFAFA] font-semibold transition-colors"
-                >
-                  Developer Portal →
-                </Link>
+              <p className="text-xs text-[#737373] mt-1.5 leading-relaxed">
+                Transactions settle on shielded shards. No credit card records, public wallet linkages, or behavioral tracking.
+              </p>
+            </a>
+
+            <Link
+              href="/dev/onboarding"
+              className="p-5 bg-[#141414] border border-[#222222] hover:border-[#383838] hover:bg-[#181818] transition-colors group"
+            >
+              <div className="text-[#C084FC] font-medium text-xs">For Developers</div>
+              <div className="text-sm font-medium text-[#FAFAFA] mt-1 group-hover:text-[#C084FC] transition-colors">
+                Launch confidential SaaS with automated OpEx streaming
+              </div>
+              <p className="text-xs text-[#737373] mt-1.5 leading-relaxed">
+                Deploy LangGraph & Postgres inside hardware enclaves. Smart contracts provision scoped inference keys automatically.
+              </p>
+            </Link>
+          </div>
+        )}
+
+        {/* 2. Hero Centerpiece: Hardware Enclave Architecture Viewer */}
+        <div className="border border-[#222222] bg-[#141414]">
+          {/* Console Header Tabs */}
+          <div className="flex items-center justify-between border-b border-[#222222] px-4 bg-[#111111] overflow-x-auto">
+            <div className="flex items-center">
+              <button
+                onClick={() => setActiveConsoleTab("settlement")}
+                className={`flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 transition-colors ${
+                  activeConsoleTab === "settlement"
+                    ? "border-[#894DEF] text-[#FAFAFA]"
+                    : "border-transparent text-[#737373] hover:text-[#FAFAFA]"
+                }`}
+              >
+                <Lock className="w-3.5 h-3.5 text-[#894DEF]" />
+                <span>Confidential Settlement</span>
+              </button>
+
+              <button
+                onClick={() => setActiveConsoleTab("tee")}
+                className={`flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 transition-colors ${
+                  activeConsoleTab === "tee"
+                    ? "border-[#894DEF] text-[#FAFAFA]"
+                    : "border-transparent text-[#737373] hover:text-[#FAFAFA]"
+                }`}
+              >
+                <Cpu className="w-3.5 h-3.5 text-[#22C55E]" />
+                <span>Hardware TEE Verification</span>
+              </button>
+
+              <button
+                onClick={() => setActiveConsoleTab("storage")}
+                className={`flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 transition-colors ${
+                  activeConsoleTab === "storage"
+                    ? "border-[#894DEF] text-[#FAFAFA]"
+                    : "border-transparent text-[#737373] hover:text-[#FAFAFA]"
+                }`}
+              >
+                <Database className="w-3.5 h-3.5 text-[#EAB308]" />
+                <span>Verifiable Web & DB</span>
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 text-[11px] text-[#737373]">
+              <span className="w-1.5 h-1.5 bg-[#22C55E]" />
+              <span>NEAR Testnet Invariant Active</span>
+            </div>
+          </div>
+
+          {/* Tab 1 Content: Confidential Settlement */}
+          {activeConsoleTab === "settlement" && (
+            <div className="p-6 sm:p-8 space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="lg:col-span-7 space-y-5">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-[#FAFAFA] tracking-tight">
+                      Tripartite Escrow & OpEx Streaming
+                    </h3>
+                    <p className="text-sm text-[#A1A1A1] leading-relaxed">
+                      When a user subscribes, payment never touches the developer directly. Funds flow through an autonomous smart contract (<code className="font-mono text-[#FAFAFA]">pandem-escrow.testnet</code>) that distributes capital according to verifiable protocol rules.
+                    </p>
+                  </div>
+
+                  {/* Flow Steps */}
+                  <div className="space-y-3 pt-2">
+                    <div className="p-4 bg-[#181818] border border-[#262626] space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-[#FAFAFA]">1. Shielded Subscription Intent</span>
+                        <span className="text-[#22C55E] text-[11px]">Zero Public Link</span>
+                      </div>
+                      <p className="text-xs text-[#737373] leading-relaxed">
+                        Subscriber routes funds via <code className="font-mono text-[#FAFAFA]">intents.near</code>. The contract records a blind commitment hash <code className="font-mono text-[#FAFAFA]">sha256(secret + product_id)</code>. Your wallet is never linked to the product.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-[#181818] border border-[#262626] space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-[#FAFAFA]">2. Autonomous 30% Compute Provisioning</span>
+                        <span className="text-[#894DEF] text-[11px]">Direct to TEE</span>
+                      </div>
+                      <p className="text-xs text-[#737373] leading-relaxed">
+                        30% of funds stream directly to compute providers (<code className="font-mono text-[#FAFAFA]">cloud-api.near.ai</code> and Phala <code className="font-mono text-[#FAFAFA]">dstack</code>). The developer cannot divert or misuse inference funds.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-[#181818] border border-[#262626] space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-[#FAFAFA]">3. 7-Day Misuse Protection</span>
+                        <span className="text-[#EAB308] text-[11px]">compose-hash Verified</span>
+                      </div>
+                      <p className="text-xs text-[#737373] leading-relaxed">
+                        Developer revenue is locked for 7 rolling days. If the developer alters the enclave container or attempts prompt exfiltration, the hardware measurement changes and funds automatically claw back.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Interactive Split Calculator */}
+                <div className="lg:col-span-5 bg-[#181818] border border-[#262626] p-6 space-y-5">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#262626]">
+                    <span className="text-xs font-semibold text-[#FAFAFA]">
+                      Escrow Split Simulator
+                    </span>
+                    <span className="text-xs text-[#737373] font-mono">
+                      Per Subscription Period
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#A1A1A1]">Subscription Amount:</span>
+                      <span className="font-mono text-[#FAFAFA] font-semibold">${monthlySimAmount} USDC</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={10}
+                      max={200}
+                      step={5}
+                      value={monthlySimAmount}
+                      onChange={(e) => setMonthlySimAmount(Number(e.target.value))}
+                      className="w-full accent-[#894DEF] bg-[#262626] h-1.5 cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[11px] text-[#525252] font-mono">
+                      <span>$10</span>
+                      <span>$100</span>
+                      <span>$200</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5 pt-2">
+                    <div className="flex items-center justify-between p-3 bg-[#141414] border border-[#222222] text-xs">
+                      <div>
+                        <div className="font-medium text-[#FAFAFA]">Developer Revenue (47.5%)</div>
+                        <div className="text-[11px] text-[#737373]">7-Day rolling timelock</div>
+                      </div>
+                      <span className="font-mono text-[#FAFAFA] font-semibold">${devShare}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-[#141414] border border-[#222222] text-xs">
+                      <div>
+                        <div className="font-medium text-[#894DEF]">Autonomous OpEx (30.0%)</div>
+                        <div className="text-[11px] text-[#737373]">Direct to H100 & CVM compute</div>
+                      </div>
+                      <span className="font-mono text-[#894DEF] font-semibold">${opexShare}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-[#141414] border border-[#222222] text-xs">
+                      <div>
+                        <div className="font-medium text-[#22C55E]">Contingency Shield (20.0%)</div>
+                        <div className="text-[11px] text-[#737373]">Automated refund buffer</div>
+                      </div>
+                      <span className="font-mono text-[#22C55E] font-semibold">${shieldShare}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-[#141414] border border-[#222222] text-xs">
+                      <div>
+                        <div className="font-medium text-[#737373]">Protocol Maintenance (2.5%)</div>
+                        <div className="text-[11px] text-[#525252]">On-chain contract operations</div>
+                      </div>
+                      <span className="font-mono text-[#737373]">${protocolShare}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono text-left">
-              <a
-                href="#storefront"
-                className="p-4 rounded-none bg-[#171717] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors group"
-              >
-                <div className="text-[10px] text-[#4ADE80] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-none bg-[#4ADE80]" />
-                  <span>Subscriber Track · Invisible Subscriptions</span>
-                </div>
-                <div className="text-sm font-bold text-[#FAFAFA] mt-1 group-hover:text-[#894DEF] transition-colors">
-                  Explore Zero-Knowledge Apps
-                </div>
-                <p className="text-[11px] text-[#B8B8B8] mt-1 leading-relaxed">
-                  View TEE hardware proofs, anonymous intent subscription quotes, and walkaway exports.
-                </p>
-              </a>
+          )}
 
-              <Link
-                href="/dev/onboarding"
-                className="p-4 rounded-none bg-[#171717] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors group"
-              >
-                <div className="text-[10px] text-[#894DEF] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-none bg-[#894DEF]" />
-                  <span>Developer Track · Launchpad Onboarding</span>
+          {/* Tab 2 Content: Hardware TEE Verification */}
+          {activeConsoleTab === "tee" && (
+            <div className="p-6 sm:p-8 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#222222]">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#FAFAFA] tracking-tight">
+                    Cryptographic Remote Attestation Quote
+                  </h3>
+                  <p className="text-xs text-[#A1A1A1] mt-1">
+                    Verified through Intel PCS and NVIDIA Remote Attestation Service (NRAS)
+                  </p>
                 </div>
-                <div className="text-sm font-bold text-[#FAFAFA] mt-1 group-hover:text-[#894DEF] transition-colors">
-                  Deploy Enclave SaaS & Get Credits
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setQuoteVerified(true)}
+                    className="px-3.5 py-1.5 bg-[#181818] hover:bg-[#222222] border border-[#2A2A2A] text-xs font-medium text-[#FAFAFA] transition-colors flex items-center gap-1.5"
+                  >
+                    <Check className="w-3.5 h-3.5 text-[#22C55E]" />
+                    <span>Verified Active</span>
+                  </button>
                 </div>
-                <p className="text-[11px] text-[#B8B8B8] mt-1 leading-relaxed">
-                  Connect LangGraph & Postgres. Contract automatically provisions scoped AI inference keys.
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-[#181818] border border-[#262626] space-y-2">
+                  <div className="text-xs text-[#737373]">Processor Architecture</div>
+                  <div className="text-sm font-medium text-[#FAFAFA]">Intel Xeon Scalable (4th Gen)</div>
+                  <div className="text-xs text-[#22C55E] flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>TDX Trust Domain Extensions enabled</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-[#181818] border border-[#262626] space-y-2">
+                  <div className="text-xs text-[#737373]">Inference Accelerator</div>
+                  <div className="text-sm font-medium text-[#FAFAFA]">NVIDIA H100 SXM5 80GB</div>
+                  <div className="text-xs text-[#22C55E] flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Confidential Compute Mode active</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Code Snippet Box */}
+              <div className="bg-[#0A0A0A] border border-[#262626] p-4 font-mono text-xs text-[#A1A1A1] space-y-1.5 overflow-x-auto">
+                <div className="text-[#525252]">// Intel TDX Quote v4 Signature Verification</div>
+                <div><span className="text-[#894DEF]">mr_enclave:</span> <span className="text-[#FAFAFA]">&quot;0x9f83ea0182470fbe76a0c0e74f826315&quot;</span></div>
+                <div><span className="text-[#894DEF]">mr_signer:</span>  <span className="text-[#FAFAFA]">&quot;0x44c8d371109a471b0294b30171a81230&quot;</span></div>
+                <div><span className="text-[#894DEF]">isv_svn:</span>    <span className="text-[#FAFAFA]">&quot;0x0002&quot;</span></div>
+                <div><span className="text-[#894DEF]">quote_status:</span> <span className="text-[#22C55E]">&quot;200 OK — Hardware Signature Validated by Intel PCS&quot;</span></div>
+                <div><span className="text-[#894DEF]">host_privileges:</span> <span className="text-[#EF4444]">&quot;Ring -1 Root Host Access Blocked by CPU Microcode&quot;</span></div>
+              </div>
+
+              <p className="text-xs text-[#737373] leading-relaxed">
+                Because memory encryption keys are generated randomly inside the CPU on boot and never exposed outside the silicon package, neither the cloud datacenter administrator nor any host process can dump enclave memory or inspect prompts.
+              </p>
+            </div>
+          )}
+
+          {/* Tab 3 Content: Verifiable Web & DB */}
+          {activeConsoleTab === "storage" && (
+            <div className="p-6 sm:p-8 space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold text-[#FAFAFA] tracking-tight">
+                  Decentralized Web & Walkaway Portability
+                </h3>
+                <p className="text-xs text-[#A1A1A1]">
+                  Self-healing storage, KMS-sealed databases, and zero proprietary cloud lock-in.
                 </p>
-              </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-5 bg-[#181818] border border-[#262626] space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-[#FAFAFA]">Decentralized Web Hosting</span>
+                    <span className="text-[#22C55E]">Filecoin x402</span>
+                  </div>
+                  <p className="text-xs text-[#A1A1A1] leading-relaxed">
+                    Product frontends are pinned to IPFS and Filecoin via Lighthouse x402 micro-renewals. Domains cannot be revoked or redirected by single DNS authorities.
+                  </p>
+                  <div className="p-2.5 bg-[#141414] border border-[#222222] font-mono text-[11px] text-[#737373]">
+                    CID: bafybeid5q27vovh7n6wq3k2m...
+                  </div>
+                </div>
+
+                <div className="p-5 bg-[#181818] border border-[#262626] space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-[#FAFAFA]">Walkaway & Fork Guarantee</span>
+                    <span className="text-[#894DEF]">Sovereign Export</span>
+                  </div>
+                  <p className="text-xs text-[#A1A1A1] leading-relaxed">
+                    Every service publishes a signed Docker Compose bundle. If a developer abandons maintenance, subscribers can export their KMS-decrypted database and run the agent in their private enclave.
+                  </p>
+                  <div className="p-2.5 bg-[#141414] border border-[#222222] font-mono text-[11px] text-[#737373]">
+                    $ docker compose -f pandem-export.yml up
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
-
-        {/* Interactive Hero Visual ("Pandem Live Privacy & Escrow X-Ray") */}
-        <div className="relative pt-6 text-left">
-          <div className="flex items-center justify-between pb-3 border-b border-[#2E2E2E] mb-4">
-            <span className="text-xs font-mono font-bold text-[#FAFAFA] uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
-              <span>Interactive Privacy & Escrow X-Ray Architecture</span>
-            </span>
-            <span className="text-[11px] font-mono text-[#4ADE80] flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-none bg-[#4ADE80]" />
-              <span>3-Layer Physical Enclave Isolation</span>
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Panel 1 */}
-            <div
-              onClick={() => setActiveXrayStep(0)}
-              className={`p-6 rounded-none bg-[#171717] border transition-colors cursor-pointer space-y-3 ${
-                activeXrayStep === 0 ? "border-[#894DEF] shadow-md" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#4ADE80] font-bold border border-[#2E2E2E]">
-                  01 · INVISIBLE PAYMENT
-                </span>
-                <span className="text-[#4ADE80] text-[11px]">Shielded Shard</span>
-              </div>
-              <h3 className="text-base font-bold text-[#FAFAFA] tracking-tight">Confidential Intent Routing</h3>
-              <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-xs text-[#B8B8B8] space-y-1">
-                <div>Subscriber Wallet (Shielded Shard)</div>
-                <div className="text-[#894DEF]">↓ intents.near (Private Shard)</div>
-                <div>↓ pandem-tripartite.near</div>
-                <div className="text-[10px] text-[#4ADE80] pt-1 font-bold">
-                  ✓ 0 Public Wallet Links Recorded
-                </div>
-              </div>
-              <p className="text-xs text-[#B8B8B8] leading-relaxed">
-                Blind commitment hash <code className="text-[#FAFAFA]">sha256(secret + product_id)</code> is stored on-chain. Nobody can scan your wallet to discover what tools you subscribe to.
-              </p>
-            </div>
-
-            {/* Panel 2 */}
-            <div
-              onClick={() => setActiveXrayStep(1)}
-              className={`p-6 rounded-none bg-[#171717] border transition-colors cursor-pointer space-y-3 ${
-                activeXrayStep === 1 ? "border-[#894DEF] shadow-md" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] font-bold border border-[#2E2E2E]">
-                  02 · TRIPARTITE OPEX
-                </span>
-                <span className="text-[#894DEF] text-[11px]">30% Scoped Key</span>
-              </div>
-              <h3 className="text-base font-bold text-[#FAFAFA] tracking-tight">Autonomous 30% OpEx & Scoped Key</h3>
-              <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-xs text-[#B8B8B8] space-y-1">
-                <div>Contract mints pk-pandem-tee-...</div>
-                <div className="text-[#894DEF]">↓ cloud-api.near.ai (H100 TEE)</div>
-                <div>↓ Phala dstack Postgres Enclave</div>
-                <div className="text-[10px] text-[#894DEF] pt-1 font-bold">
-                  ✓ Hardware Sealed RAM & Disk
-                </div>
-              </div>
-              <p className="text-xs text-[#B8B8B8] leading-relaxed">
-                Contract streams USDC via intents.near directly to compute providers. Developer never gets custody of inference credits or raw database keys.
-              </p>
-            </div>
-
-            {/* Panel 3 */}
-            <div
-              onClick={() => setActiveXrayStep(2)}
-              className={`p-6 rounded-none bg-[#171717] border transition-colors cursor-pointer space-y-3 ${
-                activeXrayStep === 2 ? "border-[#894DEF] shadow-md" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#FBBF24] font-bold border border-[#2E2E2E]">
-                  03 · 7-DAY SHIELD
-                </span>
-                <span className="text-[#FBBF24] text-[11px]">compose-hash Lock</span>
-              </div>
-              <h3 className="text-base font-bold text-[#FAFAFA] tracking-tight">7-Day Credit Misuse Shield</h3>
-              <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-xs text-[#B8B8B8] space-y-1">
-                <div>50% Dev Payout: 7-Day Timelock</div>
-                <div className="text-[#894DEF]">↓ Hardware Telemetry Monitor</div>
-                <div>↓ compose-hash verification</div>
-                <div className="text-[10px] text-[#FBBF24] pt-1 font-bold">
-                  ✓ Auto-Clawback if Container Altered
-                </div>
-              </div>
-              <p className="text-xs text-[#B8B8B8] leading-relaxed">
-                If the developer tampers with the container or attempts prompt exfiltration, the compose-hash changes and locked funds claw back to subscribers.
-              </p>
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* 2.2 Comparison Table: Policy Privacy vs. Standard Crypto AI vs. Pandem Hardware Privacy */}
-      <section className="space-y-6">
+      {/* 3. Hardware Privacy Benchmark */}
+      <section className="space-y-8">
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-none text-xs font-mono font-bold bg-[#171717] text-[#894DEF] border border-[#2E2E2E]">
-              SECURITY AUDIT BENCHMARK
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#FAFAFA] tracking-tight">
-            Policy Privacy vs. Pandem Hardware Privacy
+          <h2 className="text-2xl sm:text-3xl font-semibold text-[#FAFAFA] tracking-tight">
+            Hardware Isolation vs. Policy Privacy
           </h2>
-          <p className="text-xs sm:text-sm text-[#B8B8B8] max-w-3xl leading-relaxed">
-            Even when a developer uses a private inference API (or when a provider like Claude states they do not train on customer data), running LangGraph and the user database on a standard server exposes every node transition, prompt, and user record in plaintext RAM before and after the LLM call. Pandem seals the entire loop inside verifiable hardware enclaves and content-addressed storage.
+          <p className="text-sm text-[#A1A1A1] max-w-3xl leading-relaxed">
+            Written terms of service and marketing privacy claims offer no technical barrier against insider threats, subpoena orders, or memory scraping. Hardware enclaves enforce privacy at the physical layer.
           </p>
         </div>
 
-        {/* Table Container */}
-        <div className="overflow-x-auto rounded-none border border-[#2E2E2E] bg-[#171717]">
-          <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#0D0D0D] text-[#FAFAFA] border-b border-[#2E2E2E]">
+        <div className="overflow-x-auto border border-[#222222] bg-[#141414]">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#111111] text-[#FAFAFA] border-b border-[#222222]">
               <tr>
-                <th className="py-3.5 px-4 font-bold uppercase tracking-wider">Stack Layer</th>
-                <th className="py-3.5 px-4 font-bold uppercase tracking-wider text-[#6B6B6B]">Web2 Policy Privacy</th>
-                <th className="py-3.5 px-4 font-bold uppercase tracking-wider text-[#B8B8B8]">Standard Crypto AI App</th>
-                <th className="py-3.5 px-4 font-bold uppercase tracking-wider text-[#894DEF] bg-[#262626]/50">Pandem Privacy Suite</th>
+                <th className="py-4 px-5 font-semibold text-[#A1A1A1]">Stack Layer</th>
+                <th className="py-4 px-5 font-semibold text-[#737373]">Traditional SaaS (Stripe + AWS)</th>
+                <th className="py-4 px-5 font-semibold text-[#737373]">Typical Crypto AI (Plaintext VPS)</th>
+                <th className="py-4 px-5 font-semibold text-[#C084FC] bg-[#1A1A1A]">Pandem Hardware Enclave</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2E2E2E] text-[#B8B8B8]">
-              <tr className="hover:bg-[#262626]/30 transition-colors">
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">LLM Inference</td>
-                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Plaintext API logs & retention</td>
-                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Private API only (stateless)</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40 flex items-center gap-1.5">
-                  <span className="text-[#4ADE80] font-bold">✓</span> NEAR AI Cloud H100 TEE
+            <tbody className="divide-y divide-[#222222] text-[#A1A1A1]">
+              <tr className="hover:bg-[#181818] transition-colors">
+                <td className="py-4 px-5 font-medium text-[#FAFAFA]">LLM Inference</td>
+                <td className="py-4 px-5 text-[#EF4444] flex items-center gap-1.5">
+                  <X className="w-3.5 h-3.5 shrink-0" />
+                  <span>Plaintext API logs & retention</span>
+                </td>
+                <td className="py-4 px-5 text-[#EAB308]">
+                  <span className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Private API only (stateless)</span>
+                  </span>
+                </td>
+                <td className="py-4 px-5 font-medium text-[#FAFAFA] bg-[#1A1A1A]">
+                  <span className="text-[#22C55E] flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span>NEAR AI Cloud H100 TEE</span>
+                  </span>
                 </td>
               </tr>
-              <tr className="hover:bg-[#262626]/30 transition-colors">
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">LangGraph Node</td>
-                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Plaintext cloud RAM</td>
-                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Leaked on founder VPS</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
-                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> Intel TDX Enclave CVM
+
+              <tr className="hover:bg-[#181818] transition-colors">
+                <td className="py-4 px-5 font-medium text-[#FAFAFA]">Agent Memory & State</td>
+                <td className="py-4 px-5 text-[#EF4444] flex items-center gap-1.5">
+                  <X className="w-3.5 h-3.5 shrink-0" />
+                  <span>Plaintext cloud RAM dumps</span>
+                </td>
+                <td className="py-4 px-5 text-[#EAB308]">
+                  <span className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Leaked in founder VPS memory</span>
+                  </span>
+                </td>
+                <td className="py-4 px-5 font-medium text-[#FAFAFA] bg-[#1A1A1A]">
+                  <span className="text-[#22C55E] flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span>Intel TDX Enclave CVM</span>
+                  </span>
                 </td>
               </tr>
-              <tr className="hover:bg-[#262626]/30 transition-colors">
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">User Database</td>
-                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Host datacenter can dump DB</td>
-                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Plaintext Postgres disk</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
-                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> KMS-Sealed Enclave DB (dstack)
+
+              <tr className="hover:bg-[#181818] transition-colors">
+                <td className="py-4 px-5 font-medium text-[#FAFAFA]">Application Database</td>
+                <td className="py-4 px-5 text-[#EF4444] flex items-center gap-1.5">
+                  <X className="w-3.5 h-3.5 shrink-0" />
+                  <span>Host datacenter can dump Postgres</span>
+                </td>
+                <td className="py-4 px-5 text-[#EAB308]">
+                  <span className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Unencrypted disk storage</span>
+                  </span>
+                </td>
+                <td className="py-4 px-5 font-medium text-[#FAFAFA] bg-[#1A1A1A]">
+                  <span className="text-[#22C55E] flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span>KMS-Sealed Enclave PostgreSQL</span>
+                  </span>
                 </td>
               </tr>
-              <tr className="hover:bg-[#262626]/30 transition-colors">
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">Frontend Host</td>
-                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Mutable Vercel / Cloudflare DNS</td>
-                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Centralized domain endpoint</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
-                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> Filecoin + FastFS Pinning
+
+              <tr className="hover:bg-[#181818] transition-colors">
+                <td className="py-4 px-5 font-medium text-[#FAFAFA]">Web Frontend Delivery</td>
+                <td className="py-4 px-5 text-[#EF4444] flex items-center gap-1.5">
+                  <X className="w-3.5 h-3.5 shrink-0" />
+                  <span>Mutable Vercel / Cloudflare DNS</span>
+                </td>
+                <td className="py-4 px-5 text-[#EAB308]">
+                  <span className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Single centralized IP address</span>
+                  </span>
+                </td>
+                <td className="py-4 px-5 font-medium text-[#FAFAFA] bg-[#1A1A1A]">
+                  <span className="text-[#22C55E] flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span>Filecoin + FastFS Pinning</span>
+                  </span>
                 </td>
               </tr>
-              <tr className="hover:bg-[#262626]/30 transition-colors">
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">Payment Trail</td>
-                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Stripe KYC tracks identity</td>
-                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Public wallet history indexed</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
-                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> NEAR Confidential Intents
+
+              <tr className="hover:bg-[#181818] transition-colors">
+                <td className="py-4 px-5 font-medium text-[#FAFAFA]">Subscription Settlement</td>
+                <td className="py-4 px-5 text-[#EF4444] flex items-center gap-1.5">
+                  <X className="w-3.5 h-3.5 shrink-0" />
+                  <span>Stripe KYC links identity to app</span>
+                </td>
+                <td className="py-4 px-5 text-[#EAB308]">
+                  <span className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Public block explorer history</span>
+                  </span>
+                </td>
+                <td className="py-4 px-5 font-medium text-[#FAFAFA] bg-[#1A1A1A]">
+                  <span className="text-[#22C55E] flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span>NEAR Confidential Intents</span>
+                  </span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </section>
 
-      {/* 2.3 Private Subscriptions Section ("How Pandem Hides Who You Are & What You Buy") */}
-      <section className="space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-none text-xs font-mono font-bold bg-[#171717] text-[#894DEF] border border-[#2E2E2E]">
-              ZERO-KNOWLEDGE ARCHITECTURE
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#FAFAFA] tracking-tight">
-            How Pandem Hides Who You Are & What You Buy
-          </h2>
-          <p className="text-xs sm:text-sm text-[#B8B8B8] max-w-2xl leading-relaxed">
-            Complete cryptographic anonymity from payment to execution. Neither your credit card, wallet address, nor browsing fingerprint is ever linked on-chain.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-6 rounded-none bg-[#171717] border border-[#2E2E2E] space-y-3">
-            <div className="w-8 h-8 rounded-none bg-[#262626] border border-[#2E2E2E] font-mono text-xs font-bold text-[#894DEF] flex items-center justify-center">
-              1
-            </div>
-            <h3 className="text-base font-bold text-[#FAFAFA]">Confidential Intent Routing</h3>
-            <p className="text-xs text-[#B8B8B8] leading-relaxed">
-              Pay in USDC or native NEAR. The transaction settles via NEAR&apos;s Confidential Intents private shard, where balances and transfers are mathematically shielded from public block explorers.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-none bg-[#171717] border border-[#2E2E2E] space-y-3">
-            <div className="w-8 h-8 rounded-none bg-[#262626] border border-[#2E2E2E] font-mono text-xs font-bold text-[#894DEF] flex items-center justify-center">
-              2
-            </div>
-            <h3 className="text-base font-bold text-[#FAFAFA]">Blind Commitment Storage</h3>
-            <p className="text-xs text-[#B8B8B8] leading-relaxed">
-              Instead of recording <code className="text-[#FAFAFA]">alice.near subscribed to app-x</code>, the solver passes a blind commitment hash (<code className="text-[#FAFAFA]">sha256(secret + product_id)</code>) to <code className="text-[#FAFAFA]">pandem-tripartite.near</code>.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-none bg-[#171717] border border-[#2E2E2E] space-y-3">
-            <div className="w-8 h-8 rounded-none bg-[#262626] border border-[#2E2E2E] font-mono text-xs font-bold text-[#894DEF] flex items-center justify-center">
-              3
-            </div>
-            <h3 className="text-base font-bold text-[#FAFAFA]">Zero-Knowledge RA-TLS Login</h3>
-            <p className="text-xs text-[#B8B8B8] leading-relaxed">
-              To use the app, your browser proves ownership of <code className="text-[#FAFAFA]">local_secret</code> directly over Remote-Attested TLS to the Intel TDX enclave—never revealing your wallet identity to anyone.
-            </p>
-          </div>
+        <div className="p-4 bg-[#141414] border border-[#222222] text-xs text-[#737373] leading-relaxed">
+          <strong className="text-[#FAFAFA]">Why end-to-end sealing matters:</strong> If a developer uses a private LLM API but runs their agent memory on an unsealed cloud server, your private prompts and business data are exposed in plaintext memory before and after inference. Pandem closes every seam in the stack.
         </div>
       </section>
 
-      {/* 2.4 Agentic Privacy Suite & Progressive Decentralization Section */}
-      <section className="space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-none text-xs font-mono font-bold bg-[#171717] text-[#894DEF] border border-[#2E2E2E]">
-              SOVEREIGNTY & PROGRESSIVE DECENTRALIZATION
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#FAFAFA] tracking-tight">
-            Agentic Privacy Suite & Walkaway Sovereignty
-          </h2>
-          <p className="text-xs sm:text-sm text-[#B8B8B8] max-w-2xl leading-relaxed">
-            Software you cannot fork or export is not sovereign. Pandem guarantees that subscribers can walk away with their agent stack at any time.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 rounded-none bg-[#171717] border border-[#2E2E2E] space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-[#FAFAFA]">User-Forkable Agent Offerings</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] border border-[#2E2E2E]">
-                Self-Hostable
-              </span>
-            </div>
-            <p className="text-xs text-[#B8B8B8] leading-relaxed">
-              Every product listed on Pandem publishes an encrypted <strong>Walkaway & Fork Bundle</strong> (Docker Compose manifest + schema + migration script).
-              If a developer abandons an app or increases pricing, any subscriber can export their KMS-decrypted database and run the exact same agent in their private local enclave.
-            </p>
-            <div className="p-3.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-[11px] text-[#B8B8B8] space-y-1">
-              <div>$ docker compose -f pandem-bundle.yml up</div>
-              <div className="text-[#894DEF]">✓ KMS volumes mounted locally</div>
-              <div className="text-[10px] text-[#6B6B6B]">Zero proprietary cloud lock-in</div>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-none bg-[#171717] border border-[#2E2E2E] space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-[#FAFAFA]">Public Bug & Upgrade Portal (17.5% Buffer)</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-[#262626] text-[#FAFAFA] border border-[#2E2E2E]">
-                17.5% Bounty Pool
-              </span>
-            </div>
-            <p className="text-xs text-[#B8B8B8] leading-relaxed">
-              Subscribers post bug reports or feature requests directly to Pandem&apos;s public portal. Because <strong>50% of revenue sits in a 7-day review lock</strong>, developers have immediate incentive to push attested fixes—or external contributors can submit PRs and claim automated bounties from the 17.5% Update Buffer.
-            </p>
-            <div className="p-3.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-[11px] text-[#B8B8B8] space-y-1">
-              <div>Solve-to-Pay Contract Logic</div>
-              <div className="text-[#894DEF]">✓ 17.5% Allocated for Verified Patches</div>
-              <div className="text-[10px] text-[#6B6B6B]">Guaranteed response SLA without customer support bureaucracy</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2.5 Live Storefront & Leaderboard (id="storefront") */}
-      <section id="storefront" className="pt-8 border-t border-[#2E2E2E] space-y-6 scroll-mt-20">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2E2E2E]">
+      {/* 4. Live Storefront Directory */}
+      <section id="storefront" className="space-y-6 pt-4 border-t border-[#222222] scroll-mt-20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#222222]">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-none bg-[#4ADE80] animate-pulse" />
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#FAFAFA] tracking-tight">
-                Sovereign SaaS & AI Launchpad Directory
-              </h2>
-            </div>
-            <p className="text-xs text-[#B8B8B8] font-mono mt-1">
-              Curated hardware-attested services. Vote for launches, verify cryptographic TEE proofs, and subscribe via native tripartite escrow.
+            <h2 className="text-2xl sm:text-3xl font-semibold text-[#FAFAFA] tracking-tight">
+              Storefront Directory
+            </h2>
+            <p className="text-xs text-[#737373] mt-1">
+              Curated hardware-attested services. Vote for launches, inspect remote attestation proofs, and subscribe via native escrow.
             </p>
           </div>
-          <div className="flex items-center gap-3 text-xs font-mono">
-            <span className="px-2.5 py-1 bg-[#171717] border border-[#2E2E2E] text-[#4ADE80] flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-none bg-[#4ADE80]" />
-              <span>{catalog.length} Enclaves Active</span>
-            </span>
-            <span className="px-2.5 py-1 bg-[#171717] border border-[#2E2E2E] text-[#894DEF]">
-              NEAR Testnet Verified
+
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-[#737373] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search services..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-3 py-1.5 bg-[#141414] border border-[#262626] focus:border-[#894DEF] text-xs text-[#FAFAFA] placeholder-[#525252] outline-none w-48 sm:w-60 transition-colors"
+              />
+            </div>
+
+            <span className="text-xs text-[#737373] whitespace-nowrap">
+              {filteredCatalog.length} Live
             </span>
           </div>
         </div>
 
         <ProductHuntLeaderboard
-          products={catalog}
+          products={filteredCatalog}
           onSelectProduct={handleSelectProduct}
         />
       </section>

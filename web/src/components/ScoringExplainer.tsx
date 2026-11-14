@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Zap } from "lucide-react";
 
 export interface ScoreParameters {
   upvotes: number;
@@ -275,7 +276,7 @@ export function ScoreBadge({
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-[#171717] text-[#FAFAFA] border border-[#2E2E2E] hover:border-[#894DEF] font-mono text-xs font-bold transition-colors cursor-help">
-        <span className="text-[#894DEF] text-[11px]">⚡</span>
+        <Zap className="w-3 h-3 text-[#894DEF]" />
         <span>{score.totalScore}</span>
         {showLabel && <span className="text-[10px] text-[#B8B8B8] font-normal">pts</span>}
       </div>

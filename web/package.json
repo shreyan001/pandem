@@ -12,6 +12,7 @@
     "@hot-labs/near-connect": "^0.12.0",
     "@pandem/shared": "*",
     "@upstash/redis": "^1.41.0",
+    "lucide-react": "^1.73.0",
     "near-api-js": "^7.2.0",
     "near-connect-hooks": "^1.1.6",
     "next": "^16.4.6",
