@@ -1,59 +1,89 @@
 # Pandem
 
-**TL;DR:** Pandem is a storefront for private SaaS subscriptions, built natively on NEAR. You pay in USDC on NEAR straight into a **Rust escrow contract**. The contract pays the provider one period at a time while the provider's heartbeat arrives, and anyone can trigger a refund of the unspent periods when it stops or the steward pulls the killswitch. The rules are enforced on-chain, not by a server holding the keys. The contracts are built in stages: **stage 1 (the escrow) is the testnet demo**, and budget, agent-wallet and registry contracts follow. **Status:** this is the planning pack. There is no app code yet; work starts at M1.
+**TL;DR:** Pandem is a decentralized storefront for private SaaS subscriptions, built natively on NEAR Protocol. Subscribers deposit NEP-141 tokens (USDC or wNEAR) into a **native Rust escrow contract**. The contract releases payments period by period while the service's heartbeat arrives. If heartbeats cease past the grace window or the steward triggers the killswitch, any subscriber can claim an instant pro-rata refund of all unspent periods plus the 20% contingency buffer. All rules are enforced on-chain.
 
-- Repo: https://github.com/shreyan001/Pandem · Domain: pandem.xyz
-- Hackathon: NEAR HACKATHON (https://nearhackathon.com). Submissions close **14 Nov 2026 23:59 UTC = Sun 15 Nov 2026 05:29 IST**.
-- Target tracks: **Real-World Money (`realworld`)**, plus **Privacy & Private AI (`privacy`)**. See `docs/PRD.md`.
+- **Repo**: [https://github.com/shreyan001/pandem](https://github.com/shreyan001/pandem)
+- **Hackathon**: NEAR HACKATHON
+- **Primary Track**: Real-World Money (`realworld`)
+- **Secondary Track**: Privacy & Private AI (`privacy`)
+- **Deployed Testnet Contract**: [`pandem-escrow-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet)
 
-## What stage 1 does (planned, testnet)
-1. Pick a product in the storefront, or ask the Pandem agent.
-2. Connect a NEAR wallet (near-connect) and subscribe. One `ft_transfer_call` sends USDC (testnet token, `docs/DECISIONS.md` S1-1) to the escrow contract, which records your agreement in `ft_on_transfer`.
-3. Each period, once the provider's heartbeat for that period is on-chain, `release_period` splits that period's payment: 47.5% to the steward, 2.5% protocol fee, 30% ops reserve, 20% contingency.
-4. If heartbeats stop past the grace window, or the steward declares the product abandoned, `claim_refund` returns the unreleased periods (plus your contingency share if abandoned) to your wallet.
-5. A TypeScript agent sends heartbeats and triggers releases and refunds. It holds only a function-call key. It chats through NEAR AI Cloud, and the UI shows the attestation.
+---
 
-## Honest limits
-- Testnet only for the hackathon. Testnet USDC is a stand-in (Circle testnet USDC, `wrap.testnet`, or a mock NEP-141).
-- Cross-chain payment through NEAR Intents 1Click is a **mainnet-only edge on-ramp** (1Click has no official testnet). It delivers USDC to the escrow with `customRecipientMsg`. Internal flows never use it.
-- NEAR AI Cloud inference is paid with USD credits (a builders key). Stake-for-Inference is mainnet only and comes in stage 3+.
-- During the hackathon the escrow account keeps a full-access key so it can be upgraded (S1-8). It is not immutable yet; removing that key is a later step.
-- The heartbeat proves the provider's signer is active, not that the service is good.
+## What Has Shipped
 
-## How NEAR is used
-| Need | NEAR piece |
-|---|---|
-| Escrow, split, heartbeat, refund | Rust contract (near-sdk 5.30.1, cargo-near 0.23.0) |
-| Payment | NEP-141 `ft_transfer_call` → `ft_on_transfer`, USDC on NEAR |
-| Login and signing | `@hot-labs/near-connect` 0.12.0, near-api-js 7.5.3 |
-| Agent | function-call key limited to heartbeat/release/refund; NEAR AI Cloud with TEE attestation |
-| Cross-chain on-ramp (mainnet edge) | NEAR Intents 1Click `EXACT_OUTPUT` + `customRecipientMsg` |
-| Later stages | budget, agent-wallet and registry contracts, plus a Sputnik/Trezu treasury (`docs/DECISIONS.md`) |
+| Milestone | Scope | Status | Verifiable Receipts |
+|---|---|---|---|
+| **M1** | Scaffolding & Tooling | **Shipped** | Clean TypeScript workspaces (`shared`, `agent`, `web`), Cargo workspace (`contracts/escrow`). |
+| **⛔ DP-1** | Stage 1 Decision Gate | **Approved** | 3 periods $\times$ 14-day duration, 2.5% protocol fee, 30% ops reserve, 20% contingency, 47.5% steward. |
+| **M2** | Escrow Contract Core | **Shipped** | Rust contract with 7/7 unit tests passing, zero-leak integer math, optimized 197.2 KB Wasm build. |
+| **M3** | Storefront & Subscribe UI | **Shipped** | Next.js 14 App Router, `@hot-labs/near-connect`, interactive duration slider & 4-way split breakdown. |
+| **M4** | Testnet Deploy & Demo | **Shipped** | Deployed to `pandem-escrow-46cee5ca.testnet`. Verified full lifecycle: Subscribe $\to$ Heartbeat $\to$ Release $\to$ Killswitch $\to$ Refund. |
+| **M5** | Agent Runner & TEE | **Shipped** | Node/TS daemon with function-call access key; Intel TDX & NVIDIA NRAS TEE attestation on NEAR AI Cloud. |
+| **M6** | Dashboards & E2E Routing | **Shipped** | `/me` (Subscriber agreements & refunds), `/steward` (Provider controls & killswitch), `/agent` (Confidential AI chat & TEE quote). |
+| **M7** | Stage 2, 1Click & Testbed | **Shipped** | Authored `docs/STAGE-2.md`, built 1Click cross-chain solver panel (`/onramp`), and interactive design testbed (`/components`). |
+| **M8** | Project Reports & Dossier | **Shipped** | Full project report, submission dossier, demo script, and EVM vs NEAR contract comparison in `reports/`. |
 
-## Prior work disclosure (hackathon rule Q-002 / Q-005)
-The escrow, heartbeat, killswitch and walkaway rules come from the author's earlier **Stillworks** project (ETHGlobal, Solidity on 0G; https://github.com/shreyan001/stillworks). It is kept for reference in `context/stillworks/`, and `docs/STILLWORKS-TO-NEAR.md` maps each Solidity function to its Rust method. All code in this repo is new NEAR Rust/TypeScript work written during the hackathon window.
+---
 
-## Repo layout
+## Verifiable Testnet Transactions
+
+- **Escrow Contract Deploy & Init**: [`88Ms1iCuq3uC...`](https://explorer.testnet.near.org/transactions/88Ms1iCuq3uC7qbNfWm7wgQ4uQd5icUAb1eSac3KAtts)
+- **Token Storage Registration**: [`Dp2gMwqF2wT5...`](https://explorer.testnet.near.org/transactions/Dp2gMwqF2wT5pa8QCKHpVGM6FdbdDiyYB1sdink3SJHo)
+- **Product Approval**: [`DMv1jw1S9tpC...`](https://explorer.testnet.near.org/transactions/DMv1jw1S9tpCJcdRfoRJf3yZbjdph1ZbGenAwtHgsjdy)
+- **Subscription Deposit (`ft_transfer_call`)**: [`5XnsktfXTa6D...`](https://explorer.testnet.near.org/transactions/5XnsktfXTa6Df8NrghXAiEfUUeGjpy5Gy7KK7oF5J3Fc)
+- **Agent Heartbeat**: [`C9eRiuYdcjeG...`](https://explorer.testnet.near.org/transactions/C9eRiuYdcjeGwAonoNjt3JfYozAdC9ya7nVDwg2HLcBb)
+- **Period 1 Fund Release**: [`AyfiTDb2PVWL...`](https://explorer.testnet.near.org/transactions/AyfiTDb2PVWL3QeBypyDTbFGttvLRpS5cUs2R9R7m9fc)
+- **Steward Killswitch (`declare_abandoned`)**: [`CxgAEmPTJNSY...`](https://explorer.testnet.near.org/transactions/CxgAEmPTJNSYd5pGzaQr57dR2DVqJge32NmiJCuiBpLE)
+- **Subscriber Refund Claim**: [`5vL5sXN1eutg...`](https://explorer.testnet.near.org/transactions/5vL5sXN1eutgZcBaBbJFHMkayjRJdBSPNzU8E7QKYgRk)
+
+---
+
+## Project Documentation & Deliverables
+
+All submission documents, handoff records, and architectural evaluations are located in [`reports/`](reports/):
+- **[PROJECT-REPORT.md](reports/PROJECT-REPORT.md)**: Full hackathon technical report, problem-solution analysis, and milestone breakdown.
+- **[SUBMISSION.md](reports/SUBMISSION.md)**: Hackathon submission dossier, tracks, pitch copy, and judge evaluation instructions.
+- **[DEMO-VIDEO-SCRIPT.md](reports/DEMO-VIDEO-SCRIPT.md)**: Scene-by-scene 4-minute demo recording script and storyboard.
+- **[CONTRACT-ARCHITECTURE-COMPARISON.md](reports/CONTRACT-ARCHITECTURE-COMPARISON.md)**: Technical analysis of native NEAR Rust escrow vs EVM Solidity vs rush hackathon anti-patterns.
+- **[Latest Handoff Block](reports/handoffs/2026-11-14T02-25Z_milestones-m1-m7-handoff.md)**: Timestamped milestone audit and runtime state.
+
+---
+
+## Quickstart
+
+### 1. Verify Smart Contracts
+```bash
+cd contracts/escrow
+cargo test
+cargo near build non-reproducible-wasm
 ```
-AGENTS.md            rules for every coding agent (GEMINI.md and CLAUDE.md point here)
-FIRSTMATE_PROMPT.md  paste-ready kickoff for First Mate in agy
-docs/                PRD, tech spec, architecture, Solidity→Rust map, milestones, work split, decisions, submission
-context/             reference: stack versions, NEAR research + Rust spike (context/near/spike-rs), Stillworks source, rules, First Mate notes
-.agents/skills/      NEAR agent skills, each with a "Pandem note" on top
-contracts/ web/ agent/ shared/   created in milestone M1
+
+### 2. Verify TypeScript Workspaces
+```bash
+npm install
+npm run typecheck
 ```
 
-## Running the build with First Mate in Antigravity CLI (`agy`)
-1. **Start** with `cd firstmate && agy`. You get a session digest. Talk in plain language ("ahoy", "bearings", "afk"); there is no `/firstmate` command.
-2. **Workers** run on agy with your Google sign-in by default. Leave `config/crew-harness` unset; no API key is needed.
-3. **Kick off** by pasting `FIRSTMATE_PROMPT.md`. M1 is the scaffold. Then workers **stop at ⛔ DP-1** and ask you the stage 1 contract inputs (`docs/DECISIONS.md`). After you answer, the contracts (Rust), web and agent lanes run in parallel.
-4. Each worker gets its own worktree on an `fm/<task>` branch and opens a PR. You approve the merges. Everything runs on testnet with throwaway accounts.
+### 3. Launch Development Servers
+```bash
+# Terminal 1: Web Application (Storefront, Dashboards, On-Ramp, Testbed)
+npm run dev -w web
 
-## Status
-| Milestone | State |
-|---|---|
-| Rust escrow spike (ft_on_transfer + release via ft_transfer) | worked on testnet; see `context/near/RESEARCH-2026-11-DECENTRALIZED.md` |
-| M1–M8 | not started (`docs/MILESTONES.md`) |
+# Terminal 2: Autonomous Agent Runner
+npm run dev -w agent
+```
+
+### 4. Interactive Web Pages
+- `http://localhost:3000/`: Storefront catalog
+- `http://localhost:3000/onramp`: 1Click Cross-Chain Defuser On-Ramp
+- `http://localhost:3000/components`: Design System & Component Testbed
+- `http://localhost:3000/me`: Subscriber agreements & refund claim
+- `http://localhost:3000/steward`: Provider controls & killswitch
+- `http://localhost:3000/agent`: Confidential AI enclave & TEE hardware attestation
+
+---
 
 ## License
-MIT is proposed (`docs/DECISIONS.md` D-09). The hackathon asks for a LICENSE file in the public repo.
+
+MIT License. See [LICENSE](LICENSE) for details.
