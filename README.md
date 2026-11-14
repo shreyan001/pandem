@@ -62,7 +62,7 @@ Pandem is architected as a modular suite of three native Rust smart contracts co
              |
              | 1. ft_transfer_call(deposit, { agreement_id, product_id, periods })
              v
-+----------------------------- [pandem-escrow-46cee5ca.testnet] ----------------------------------+
++----------------------- [escrow-d64-40ba.test-pandem-alice-1.testnet] ----------------------------+
 |                                                                                                  |
 |   - Stores Agreements & Products                                                                 |
 |   - NEP-141 Receiver (ft_on_transfer)                                                            |
@@ -91,24 +91,30 @@ Pandem is architected as a modular suite of three native Rust smart contracts co
 
 | Contract | Source | Testnet Account | Tests | Role & Capabilities |
 |---|---|---|---|---|
-| **`pandem-escrow`** | [`contracts/escrow/src/lib.rs`](contracts/escrow/src/lib.rs) | [`pandem-escrow-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet) | 8/8 pass | 12 product listings, NEP-141 `ft_on_transfer` deposit locking on 6-decimal tUSDC, 4-way deterministic split, heartbeat gating, killswitch (`declare_abandoned`), and 1-click pro-rata refunds. |
+| **`pandem-escrow`** | [`contracts/escrow/src/lib.rs`](contracts/escrow/src/lib.rs) | [`escrow-d64-40ba.test-pandem-alice-1.testnet`](https://explorer.testnet.near.org/accounts/escrow-d64-40ba.test-pandem-alice-1.testnet) | 15/15 pass | 12 product listings, graded tiers (Free/Pro/Max), yearly billing discounts (12 mo billed as 10), prorated upgrades, renew, cancel with immediate future-period refund, automated 30% ops forwarding to budget, NEP-141 `ft_on_transfer` deposit locking on 6-decimal tUSDC, 4-way deterministic split, heartbeat gating, killswitch (`declare_abandoned`), and pro-rata refunds. |
 | **`pandem-budget`** | [`contracts/budget/src/lib.rs`](contracts/budget/src/lib.rs) | [`pandem-budget-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-d1-8f199e48.testnet) | 9/9 pass | Operational budget streaming (30% share), period draw caps, direct agent inference draws, and on-chain telemetry. |
 | **`pandem-registry`** | [`contracts/registry/src/lib.rs`](contracts/registry/src/lib.rs) | [`pandem-registry-v2-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-v2-46cee5ca.testnet) | 9/9 pass | 12 privacy/AI SaaS directory listings, algorithmic composite scoring, and Waterfall Contingency Hub. |
 | **`pandem-mock-tusdc`** | [`contracts/mock_tusdc/src/lib.rs`](contracts/mock_tusdc/src/lib.rs) | [`pandem-tusdc-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-tusdc-46cee5ca.testnet) | 5/5 pass | Mock NEP-141 USDC token with self-registering faucet (100 tUSDC / 24h). |
 | **`pandem-tripartite`** *(Experimental)* | [`contracts/pandem-tripartite/src/lib.rs`](contracts/pandem-tripartite/src/lib.rs) | Not deployed (Stage 2 experimental) | 8/8 pass | Experimental contract targeting mainnet intents.near with 50/30/17.5/2.5 split and dispute voting. Not wired for Stage 1 D1 money path. |
 
-**Total Test Coverage:** **39 passed, 0 failed, 0 errors** (`cd contracts && cargo test`).
+**Total Test Coverage:** **46 passed, 0 failed, 0 errors** (`cd contracts && cargo test`: 15 escrow, 9 budget, 9 registry, 5 mock_tusdc, 8 tripartite).
 
 ---
 
-## 3. Verifiable Testnet Explorer Receipts (D1 & D4 End-to-End)
+## 3. Verifiable Testnet Explorer Receipts (D1, D4 & D6 End-to-End)
 
 Every operational state transition is executed and persistently verified on NEAR Testnet:
 
 | Action / Capability | Transaction ID / Explorer Receipt | Value / Outcome |
 |---|---|---|
-| **tUSDC Storage Deposit** | [`YJbKbNUQHXCb...`](https://explorer.testnet.near.org/transactions/YJbKbNUQHXCbFJWb38Aaz51MySYKKtuX18ayGRd7CjP) | Subscriber registered storage on `pandem-tusdc-46cee5ca.testnet` |
-| **tUSDC Faucet Claim** | [`DvCav8Bgays4...`](https://explorer.testnet.near.org/transactions/DvCav8Bgays4LvHHoiRoxsw6TqBVKPNF4eQJhSwRwRTr) | 100 tUSDC claimed to fresh subscriber account |
+| **tUSDC Storage Deposit (Onboarding)** | [`DozphQeNfzCP...`](https://explorer.testnet.near.org/transactions/DozphQeNfzCPutXXk9GGq9ypnrY9jfPeDYBW2Mik13gm) | Subscriber registered storage on `pandem-tusdc-46cee5ca.testnet` via Onboarding Drawer |
+| **tUSDC Faucet Claim (100 tUSDC)** | [`GJM3Nke5UovC...`](https://explorer.testnet.near.org/transactions/GJM3Nke5UovC3gUik319G4MAxQgdKmMa18iDvbyfu97) | 100 tUSDC claimed to fresh subscriber account `d61.test-pandem-alice-1.testnet` |
+| **In-Wallet Send tUSDC** | Verified via `scripts/test_f2_send_usdc.mjs` | 21/21 assertions passed; 6-decimal `ft_transfer` with 1 yocto deposit & balance safety guard |
+| **Pro Tier Subscribe (`ft_transfer_call`)** | [`FuSkAiSVCihP...`](https://explorer.testnet.near.org/transactions/FuSkAiSVCihP9Qrkgyv7wagFy5chGPtE2PJXs8hSzAeZ) | 10 tUSDC locked into Escrow for 2 periods (Agreement #1, Pro tier) |
+| **Prorated Tier Upgrade (`ft_transfer_call`)** | [`HzKT8xwouFyi...`](https://explorer.testnet.near.org/transactions/HzKT8xwouFyiCqFxB4537VJg4EkmCvtYY2t5UZsaFtvn) | Prorated upgrade from Pro to Max (+20 tUSDC) |
+| **Agreement Renewal (`ft_transfer_call`)** | [`GMZ4ya8KXwVW...`](https://explorer.testnet.near.org/transactions/GMZ4ya8KXwVWDAgmdW9HQXcJov3jM13fT4Qav62V74Ut) | +1 period Max tier renewal (15 tUSDC) |
+| **Agreement Cancellation & Refund** | [`8FkaGuUcsKirk...`](https://explorer.testnet.near.org/transactions/8FkaGuUcsKirk9xvjkyTXDrK3qVCWX67yLsfZywseN9C) | 30 tUSDC unreleased future periods refunded immediately to subscriber |
+| **Automated Ops Flow to Budget** | [`7f2t1evj8sTr...`](https://explorer.testnet.near.org/transactions/7f2t1evj8sTrWZ7CkNEz3mdexwuBpjym1m6ivGoiZpT7) | Automated cross-contract `ft_transfer_call` release; budget increased by +1.50 tUSDC (30%) |
 | **Ops Budget Funding (`ft_transfer_call`)** | [`HyzVjFL5LkfZ...`](https://explorer.testnet.near.org/transactions/HyzVjFL5LkfZcwShGC37PKReiVTuXTxFxHKDJCfXFd7C) | 1.5 tUSDC seeded to `pandem-budget-d1-8f199e48.testnet` for Product #2 |
 | **Yearly Subscribe (`ft_transfer_call`)** | [`3oW6x2wivZWK...`](https://explorer.testnet.near.org/transactions/3oW6x2wivZWKpC1ydtoi75cHTbzAv3HBhhBhFmUTNjxs) | 60 tUSDC locked into Escrow for 12 periods (Agreement #3) |
 | **Agent AI Inference Draw** | [`DJuY5Jzj45RQ...`](https://explorer.testnet.near.org/transactions/DJuY5Jzj45RQMjn7EtBPqkGDHLZVwfW3wpzuJe7rnxh3) | 0.5 tUSDC drawn by `pandem-agent-46cee5ca.testnet` from Ops Budget |
@@ -121,8 +127,7 @@ Every operational state transition is executed and persistently verified on NEAR
 | **Contingency Reserve Update** | [`GifbYk1neaxd...`](https://explorer.testnet.near.org/transactions/GifbYk1neaxd4nVheJfYqqaozwrVx64hvnkUwcH7z17Q) | Funded contingency reserve pool to 1.0 wNEAR |
 | **Contingency Proposal #1 Creation** | [`BqNZuy17iDo1...`](https://explorer.testnet.near.org/transactions/BqNZuy17iDo1PNcEvsVK21NoKuYWxXioDYKJc7Egt9Rc) | Created failover infrastructure proposal for 0.05 wNEAR |
 | **Contingency Proposal #1 Vote** | [`FJvojngvT2Ed...`](https://explorer.testnet.near.org/transactions/FJvojngvT2Eddn9J74vG3qGPLBiT6HJkVNkkWToXnVaE) | Cast affirmative vote on Proposal #1 on-chain |
-| **Steward Killswitch (`declare_abandoned`)** | [`CxgAEmPTJNSY...`](https://explorer.testnet.near.org/transactions/CxgAEmPTJNSYd5pGzaQr57dR2DVqJge32NmiJCuiBpLE) | Triggered emergency shutdown on agreement |
-| **Subscriber Pro-Rata Refund Claim** | [`5vL5sXN1eutg...`](https://explorer.testnet.near.org/transactions/5vL5sXN1eutgZcBaBbJFHMkayjRJdBSPNzU8E7QKYgRk) | Returned 0.22 wNEAR (2 unreleased periods + 20% contingency) |
+| **Live Bytecode Matrix (/verify)** | FastNEAR RPC `view_code` verified | Code hashes on testnet match `contracts/scripts/deployed.json` build hashes |
 
 ---
 
@@ -165,6 +170,8 @@ Subscribers holding native tokens on Ethereum, Solana, Arbitrum, Base, or Bitcoi
 | **M6** | Dashboards & E2E Routing | `/me` (Subscriber agreements & refunds), `/steward` (Provider controls), `/agent` (Confidential chat). | **Shipped** (Full routing live) |
 | **M7** | Multi-Contract Expansion | Developed `contracts/budget` and `contracts/registry`, 1Click on-ramp panel, component testbed. | **Shipped** (All contracts compiled) |
 | **M8** | Testnet Deploys, Voting & Reports | Deployed Budget & Registry to testnet, verified on-chain voting, cloud payments, and reports dossier. | **Shipped** (23/23 tests pass, clean git) |
+| **D1–D6** | Full User Journey & Real Payments | 1-flow onboarding drawer, graded subscriptions (Free/Pro/Max), NEP-413 gated access, automated 30% ops forwarding to Budget, private commitment mode, `/verify` live bytecode matrix, and NEAR Intents 1Click cross-chain quotes. | **Shipped** (Explorer receipts verified) |
+| **F1–F4** | Final Polish & Freeze | Graded subscriptions on live escrow (`escrow-d64-40ba.test-pandem-alice-1.testnet`), in-wallet Send tUSDC modal, Spectr visual polish (collapsed hero, cover banners, mobile drawer), end-to-end dry run, and code freeze. | **Shipped & Verified** (46/46 tests, 24 routes) |
 
 ---
 
@@ -193,7 +200,7 @@ cd pandem
 npm install
 ```
 
-### 2. Verify Smart Contract Suite (39 Tests Pass)
+### 2. Verify Smart Contract Suite (46 Tests Pass)
 ```bash
 cd contracts
 cargo test
@@ -219,8 +226,10 @@ npm run dev -w agent
 Open your browser to:
 - `http://localhost:3000/`: Spectr Design feed, developer launchpad, enclave inspector, and security matrix.
 - `http://localhost:3000/products/[slug]`: Verifiable product page, monthly/yearly Pro & Max tiers, and subscription modal with off-chain email capture.
-- `http://localhost:3000/dashboard`: Subscriber dashboard, agreement telemetry, and 1-click refund button.
+- `http://localhost:3000/dashboard`: Subscriber dashboard, agreement telemetry, upgrade/renew/cancel actions, and 1-click refund button.
 - `http://localhost:3000/dev/dashboard`: Developer telemetry, live on-chain MRR, ops budget station, and killswitch panel.
+- `http://localhost:3000/verify`: Live FastNEAR RPC code hash audit vs build hashes, deterministic split breakdown, and refund SLA guarantee.
+- `http://localhost:3000/access/[slug]`: NEP-413 Ed25519 signature session gated access page.
 - `http://localhost:3000/agent`: Confidential AI chat, Intel TDX attestation quote, and cloud compute ledger.
 
 ---
@@ -245,6 +254,6 @@ All detailed reports, submission dossiers, and architectural analyses are locate
 
 ---
 
-## 9. License
+## 10. License
 
 MIT License. See [LICENSE](LICENSE) for details.

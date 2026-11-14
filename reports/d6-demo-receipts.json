@@ -8,6 +8,13 @@
     "faucetClaimTx": "GJM3Nke5UovC3gUik319G4MAxQgdKmMa18iDvbyfu97",
     "screenshot": "reports/screens/onboarding-drawer-390.png"
   },
+  "f2_send_usdc": {
+    "signer": "test-pandem-alice-1.testnet",
+    "receiver": "d61.test-pandem-alice-1.testnet",
+    "amount": "1000000",
+    "txHash": "FTk6jq875AaFwhDo3deZFosPji79SaAC1k8zuHkm83pe",
+    "explorerUrl": "https://explorer.testnet.near.org/transactions/FTk6jq875AaFwhDo3deZFosPji79SaAC1k8zuHkm83pe"
+  },
   "d6_2_graded_subscriptions": {
     "escrowContract": "escrow-d6-df23.test-pandem-alice-1.testnet",
     "subscribeTx": "FuSkAiSVCihP9Qrkgyv7wagFy5chGPtE2PJXs8hSzAeZ",

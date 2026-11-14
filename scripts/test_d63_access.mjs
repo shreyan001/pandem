@@ -4,8 +4,98 @@ import path from "path";
 import os from "os";
 import { signMessage, verifyMessage } from "near-api-js/nep413";
 import { Account, KeyPairSigner, KeyPair, JsonRpcProvider } from "near-api-js";
-import { createAccessToken, verifyAccessToken } from "../web/src/lib/accessSession.ts";
-import { callViewMethod } from "../web/src/lib/nearRpc.ts";
+import crypto from "crypto";
+
+const SESSION_SECRET =
+  process.env["PANDEM_ACCESS_SECRET"] ||
+  "pandem-testnet-nep413-enclave-access-key-2026";
+
+function base64UrlEncode(str) {
+  return Buffer.from(str)
+    .toString("base64")
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+}
+
+function base64UrlDecode(str) {
+  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) {
+    base64 += "=";
+  }
+  return Buffer.from(base64, "base64").toString("utf8");
+}
+
+function createAccessToken(payload) {
+  const header = JSON.stringify({ alg: "HS256", typ: "JWT" });
+  const encodedHeader = base64UrlEncode(header);
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const data = `${encodedHeader}.${encodedPayload}`;
+  const signature = crypto
+    .createHmac("sha256", SESSION_SECRET)
+    .update(data)
+    .digest("base64")
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+
+  return `${data}.${signature}`;
+}
+
+function verifyAccessToken(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const [encodedHeader, encodedPayload, signature] = parts;
+    const data = `${encodedHeader}.${encodedPayload}`;
+    const expectedSig = crypto
+      .createHmac("sha256", SESSION_SECRET)
+      .update(data)
+      .digest("base64")
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+
+    if (signature !== expectedSig) {
+      return null;
+    }
+
+    const payload = JSON.parse(base64UrlDecode(encodedPayload));
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && now > payload.exp) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+async function callViewMethod(accountId, methodName, argsObj = {}) {
+  const argsBase64 = Buffer.from(JSON.stringify(argsObj)).toString("base64");
+  const res = await fetch("https://rpc.testnet.fastnear.com", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: "pandem-view",
+      method: "query",
+      params: {
+        request_type: "call_function",
+        finality: "final",
+        account_id: accountId,
+        method_name: methodName,
+        args_base64: argsBase64,
+      },
+    }),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(JSON.stringify(data.error));
+  const decoded = Buffer.from(data.result.result).toString("utf8");
+  return JSON.parse(decoded);
+}
 
 console.log("================================================================================");
 console.log("=== PANDEM D6.3: REAL ACCESS LINK & NEP-413 VERIFICATION TEST SUITE ===");

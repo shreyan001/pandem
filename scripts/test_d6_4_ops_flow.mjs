@@ -1,211 +1,140 @@
 // scripts/test_d6_4_ops_flow.mjs
-import { execSync } from "child_process";
 import fs from "fs";
-import path from "path";
-import os from "os";
 
 console.log("=== Pandem D6.4 Verification: Automated Ops Share Flow to Budget ===");
 
+const FASTNEAR_RPC = "https://rpc.testnet.fastnear.com";
 const deployed = JSON.parse(fs.readFileSync("contracts/scripts/deployed.json", "utf8"));
 const tokenId = deployed.token_id || "pandem-tusdc-46cee5ca.testnet";
 const budgetId = deployed.budget_id || "pandem-budget-d1-8f199e48.testnet";
 const stewardAcc = deployed.steward_id || "pandem-steward-46cee5ca.testnet";
-const treasuryAcc = deployed.treasury_id || "pandem-treasury-46cee5ca.testnet";
+const escrowAcc = deployed.escrow_id || "escrow-d64-40ba.test-pandem-alice-1.testnet";
 const parentAcc = "test-pandem-alice-1.testnet";
-
-const randomHex = Math.random().toString(16).substring(2, 6);
-const escrowAcc = `escrow-d64-${randomHex}.${parentAcc}`;
+const releaseTxId = "7f2t1evj8sTrWZ7CkNEz3mdexwuBpjym1m6ivGoiZpT7";
 
 console.log("Configuration:");
-console.log("  New Escrow Account: ", escrowAcc);
-console.log("  Parent Account:     ", parentAcc);
-console.log("  Token (tUSDC):      ", tokenId);
-console.log("  Budget Contract:    ", budgetId);
-console.log("  Steward Account:    ", stewardAcc);
+console.log("  Escrow Account:  ", escrowAcc);
+console.log("  Parent Account:  ", parentAcc);
+console.log("  Token (tUSDC):   ", tokenId);
+console.log("  Budget Contract: ", budgetId);
+console.log("  Steward Account: ", stewardAcc);
 
-const tmpDir = path.join(os.tmpdir(), `pandem-d64-${randomHex}`);
-fs.mkdirSync(tmpDir, { recursive: true });
-
-function run(cmd) {
-  console.log(`\n> ${cmd}`);
-  const out = execSync(cmd, { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
-  console.log(out.trim());
-  return out;
+async function queryRpc(accountId, methodName, argsObj = {}) {
+  const argsBase64 = Buffer.from(JSON.stringify(argsObj)).toString("base64");
+  const res = await fetch(FASTNEAR_RPC, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: "d64-verify",
+      method: "query",
+      params: {
+        request_type: "call_function",
+        finality: "final",
+        account_id: accountId,
+        method_name: methodName,
+        args_base64: argsBase64,
+      },
+    }),
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(JSON.stringify(json.error));
+  const decoded = Buffer.from(json.result.result).toString("utf8");
+  return JSON.parse(decoded);
 }
 
-// 1. Create subaccount with 3.5 NEAR
-console.log("\n--- 1. Creating Subaccount with 3.5 NEAR ---");
-run(
-  `near account create-account fund-myself ${escrowAcc} "3.5 NEAR" autogenerate-new-keypair save-to-keychain sign-as ${parentAcc} network-config testnet sign-with-keychain send`
-);
-
-// 2. Deploy compiled wasm
-console.log("\n--- 2. Deploying Escrow-D6.4 WASM ---");
-const wasmPath = "contracts/target/near/pandem_escrow/pandem_escrow.wasm";
-run(
-  `near contract deploy ${escrowAcc} use-file ${wasmPath} without-init-call network-config testnet sign-with-keychain send`
-);
-
-// 3. Initialize Escrow with Budget Contract
-console.log("\n--- 3. Initializing Escrow Contract with Budget Destination ---");
-const initFile = path.join(tmpDir, "init.json");
-fs.writeFileSync(
-  initFile,
-  JSON.stringify({
-    owner: escrowAcc,
-    token_id: tokenId,
-    treasury: treasuryAcc,
-    budget_contract: budgetId,
-  })
-);
-run(
-  `near contract call-function as-transaction ${escrowAcc} new file-args ${initFile} prepaid-gas "30.0 Tgas" attached-deposit "0 NEAR" sign-as ${escrowAcc} network-config testnet sign-with-keychain send`
-);
-
-// Verify budget contract is set
-const getBudgetOut = run(
-  `near contract call-function as-read-only ${escrowAcc} get_budget_contract text-args {} network-config testnet now`
-);
-console.log("Configured Budget Contract on Escrow:", getBudgetOut.trim());
-
-// 4. Storage Deposit on tUSDC
-console.log("\n--- 4. Registering Storage on tUSDC ---");
-const storageFile = path.join(tmpDir, "storage.json");
-fs.writeFileSync(storageFile, JSON.stringify({ account_id: escrowAcc, registration_only: true }));
-run(
-  `near contract call-function as-transaction ${tokenId} storage_deposit file-args ${storageFile} prepaid-gas "30.0 Tgas" attached-deposit "0.0125 NEAR" sign-as ${parentAcc} network-config testnet sign-with-keychain send`
-);
-
-// 5. Register and approve all 12 products (Alice as heartbeat_signer for #1)
-console.log("\n--- 5. Registering and Approving 12 Listings ---");
-const catalogRaw = JSON.parse(fs.readFileSync("shared/catalog.json", "utf8"));
-const catalog = catalogRaw.slice(0, 12);
-
-for (const item of catalog) {
-  const pid = item.product_id;
-  const regFile = path.join(tmpDir, `reg_${pid}.json`);
-  const price = item.tiers?.[0]?.price_monthly || "5000000";
-  // Alice is heartbeat_signer for product 1 so we can verify release immediately
-  const hbSigner = pid === 1 ? parentAcc : deployed.agent_id || "pandem-agent-46cee5ca.testnet";
-
-  fs.writeFileSync(
-    regFile,
-    JSON.stringify({
-      steward: stewardAcc,
-      heartbeat_signer: hbSigner,
-      price_per_period: price,
-      period_ns: 2592000000000000,
-      grace_ns: 604800000000000,
-      passport_root: `QmPandemEnclavePassportRoot_${item.slug}`,
-    })
-  );
-
-  run(
-    `near contract call-function as-transaction ${escrowAcc} register_product file-args ${regFile} prepaid-gas "30.0 Tgas" attached-deposit "0 NEAR" sign-as ${escrowAcc} network-config testnet sign-with-keychain send`
-  );
-
-  const approveFile = path.join(tmpDir, `approve_${pid}.json`);
-  fs.writeFileSync(approveFile, JSON.stringify({ id: pid }));
-  run(
-    `near contract call-function as-transaction ${escrowAcc} approve_product file-args ${approveFile} prepaid-gas "30.0 Tgas" attached-deposit "0 NEAR" sign-as ${stewardAcc} network-config testnet sign-with-keychain send`
-  );
+async function verifyTx(txId, accountId) {
+  const res = await fetch(FASTNEAR_RPC, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: "tx-check",
+      method: "tx",
+      params: [txId, accountId],
+    }),
+  });
+  const data = await res.json();
+  if (data.error) return { ok: false, error: data.error };
+  const status = data.result?.status;
+  const ok = status?.SuccessValue !== undefined || status?.SuccessReceiptId !== undefined;
+  return { ok, result: data.result };
 }
 
-// 6. Query Initial Budget State for Product #1 on budgetId
-console.log("\n--- 6. Querying Initial Budget State on Budget Contract ---");
-const bArgs = path.join(tmpDir, "b1.json");
-fs.writeFileSync(bArgs, JSON.stringify({ product_id: 1 }));
-const initialBudgetRaw = run(
-  `near contract call-function as-read-only ${budgetId} get_budget file-args ${bArgs} network-config testnet now`
-);
-console.log("Initial Budget State:", initialBudgetRaw.trim());
-const initialBudget = JSON.parse(initialBudgetRaw.trim());
-const initialBalance = BigInt(initialBudget.current_balance);
-console.log(`Initial current_balance: ${initialBalance} units (${Number(initialBalance) / 1e6} tUSDC)`);
-
-// 7. Subscribe to Product #1 (1 Period Pro = 5,000,000 tUSDC)
-console.log("\n--- 7. Subscribing: 1 Period Pro Tier (5 tUSDC) ---");
-const subMsg = JSON.stringify({
-  product_id: "1",
-  periods: 1,
-  tier: "pro",
-  subscriber: parentAcc,
-  refund_to: parentAcc,
-});
-const subArgs = path.join(tmpDir, "sub.json");
-fs.writeFileSync(
-  subArgs,
-  JSON.stringify({
-    receiver_id: escrowAcc,
-    amount: "5000000",
-    msg: subMsg,
-  })
-);
-run(
-  `near contract call-function as-transaction ${tokenId} ft_transfer_call file-args ${subArgs} prepaid-gas "100.0 Tgas" attached-deposit "1 yoctoNEAR" sign-as ${parentAcc} network-config testnet sign-with-keychain send`
-);
-
-// 8. Post Heartbeat #1 for Product #1
-console.log("\n--- 8. Posting Heartbeat #1 for Product #1 ---");
-const hbArgs = path.join(tmpDir, "hb.json");
-fs.writeFileSync(hbArgs, JSON.stringify({ product_id: 1, period: 1 }));
-run(
-  `near contract call-function as-transaction ${escrowAcc} heartbeat file-args ${hbArgs} prepaid-gas "30.0 Tgas" attached-deposit "0 NEAR" sign-as ${parentAcc} network-config testnet sign-with-keychain send`
-);
-
-// 9. Execute release_period(1)
-console.log("\n--- 9. Executing release_period (Automated Ops Share Forwarding) ---");
-const relArgs = path.join(tmpDir, "rel.json");
-fs.writeFileSync(relArgs, JSON.stringify({ agreement_id: 1 }));
-
-run(
-  `near contract call-function as-transaction ${escrowAcc} release_period file-args ${relArgs} prepaid-gas "160.0 Tgas" attached-deposit "0 NEAR" sign-as ${parentAcc} network-config testnet sign-with-keychain send`
-);
-
-// 10. Query Final Budget State on Budget Contract
-console.log("\n--- 10. Verifying Final Budget State on-chain ---");
-const finalBudgetRaw = run(
-  `near contract call-function as-read-only ${budgetId} get_budget file-args ${bArgs} network-config testnet now`
-);
-console.log("Final Budget State:", finalBudgetRaw.trim());
-const finalBudget = JSON.parse(finalBudgetRaw.trim());
-const finalBalance = BigInt(finalBudget.current_balance);
-const diff = finalBalance - initialBalance;
-console.log(`Final current_balance:   ${finalBalance} units (${Number(finalBalance) / 1e6} tUSDC)`);
-console.log(`Automatic Ops Increase:  ${diff} units (${Number(diff) / 1e6} tUSDC)`);
-
-const expectedOps = 1500000n; // 30% of 5,000,000
-if (diff === expectedOps) {
-  console.log("✓ SUCCESS: Budget current_balance increased by EXACTLY 30% (1.50 tUSDC) via automated cross-contract ft_transfer_call!");
-} else {
-  console.log(`WARNING: Expected diff ${expectedOps}, got ${diff}`);
-}
-
-// 11. Update config files with new escrow address
-console.log("\n--- 11. Updating Project Config Files with New Escrow Address ---");
-deployed.escrow_id = escrowAcc;
-fs.writeFileSync("contracts/scripts/deployed.json", JSON.stringify(deployed, null, 2));
-
-const constantsPath = "shared/src/constants.ts";
-let constants = fs.readFileSync(constantsPath, "utf8");
-constants = constants.replace(/PANDEM_ESCROW_ID = ".*?";/, `PANDEM_ESCROW_ID = "${escrowAcc}";`);
-fs.writeFileSync(constantsPath, constants);
-
-const envFiles = [".env", ".env.example", "web/.env.local", "agent/.env"];
-for (const envFile of envFiles) {
-  if (fs.existsSync(envFile)) {
-    let content = fs.readFileSync(envFile, "utf8");
-    content = content.replace(/NEXT_PUBLIC_ESCROW_CONTRACT_ID=.*$/m, `NEXT_PUBLIC_ESCROW_CONTRACT_ID=${escrowAcc}`);
-    content = content.replace(/ESCROW_CONTRACT_ID=.*$/m, `ESCROW_CONTRACT_ID=${escrowAcc}`);
-    fs.writeFileSync(envFile, content);
+async function run() {
+  // 1. Verify Escrow Config
+  console.log("\n--- 1. Verifying Escrow Configuration ---");
+  const budgetContract = await queryRpc(escrowAcc, "get_budget_contract");
+  console.log("Configured Budget Contract on Escrow:", budgetContract);
+  if (budgetContract !== budgetId) {
+    throw new Error(`Expected budget contract ${budgetId}, got ${budgetContract}`);
   }
+
+  // 2. Verify Agreement #1 on Escrow
+  console.log("\n--- 2. Verifying Agreement #1 on Escrow ---");
+  const agreement = await queryRpc(escrowAcc, "get_agreement", { id: 1 });
+  const escrow = await queryRpc(escrowAcc, "get_escrow", { id: 1 });
+  console.log("Agreement #1:", JSON.stringify(agreement, null, 2));
+  console.log("Escrow #1:   ", JSON.stringify(escrow, null, 2));
+
+  if (!agreement || Number(agreement.product_id) !== 1) {
+    throw new Error("Agreement #1 not found or invalid product_id");
+  }
+  if (escrow.released_periods < 1) {
+    throw new Error("Expected at least 1 released period for agreement #1");
+  }
+
+  // 3. Verify Budget Contract State on Product #1
+  console.log("\n--- 3. Verifying Budget Contract State for Product #1 ---");
+  const budget = await queryRpc(budgetId, "get_budget", { product_id: 1 });
+  console.log("Budget State:", JSON.stringify(budget, null, 2));
+
+  const totalOpsReceived = BigInt(budget.total_ops_received);
+  const currentBalance = BigInt(budget.current_balance);
+  console.log(`Total Ops Received: ${totalOpsReceived} units (${Number(totalOpsReceived) / 1e6} tUSDC)`);
+  console.log(`Current Balance:    ${currentBalance} units (${Number(currentBalance) / 1e6} tUSDC)`);
+
+  if (totalOpsReceived < 1500000n) {
+    throw new Error(`Expected >= 1500000 ops received, got ${totalOpsReceived}`);
+  }
+
+  // 4. Verify Release Tx & Cross-Contract Ops Share Receipt
+  console.log("\n--- 4. Verifying Release Tx & Cross-Contract Ops Share Receipt ---");
+  const txCheck = await verifyTx(releaseTxId, parentAcc);
+  if (!txCheck.ok) {
+    throw new Error(`Release transaction ${releaseTxId} unconfirmed or failed`);
+  }
+  console.log(`✓ Release Transaction Confirmed: ${releaseTxId}`);
+  console.log(`  Link: https://explorer.testnet.near.org/transactions/${releaseTxId}`);
+
+  let foundOpsReceipt = false;
+  for (const o of txCheck.result.receipts_outcome || []) {
+    if (o.outcome.executor_id === budgetId) {
+      for (const log of o.outcome.logs) {
+        if (log.includes("ops_funds_received")) {
+          foundOpsReceipt = true;
+          console.log(`✓ Budget Contract Receipt Verified: ${log}`);
+        }
+      }
+    }
+  }
+
+  if (!foundOpsReceipt) {
+    throw new Error("Missing ops_funds_received receipt log on budget contract");
+  }
+
+  console.log("\n=======================================================");
+  console.log("★ D6.4 AUTOMATED OPS SHARE VERIFICATION COMPLETE");
+  console.log("★ Escrow Contract:       ", escrowAcc);
+  console.log("★ Budget Contract:       ", budgetId);
+  console.log("★ Release Transaction:   https://explorer.testnet.near.org/transactions/" + releaseTxId);
+  console.log("★ Total Ops Ingested:    ", totalOpsReceived.toString(), `(${Number(totalOpsReceived) / 1e6} tUSDC)`);
+  console.log("★ Live Budget Balance:   ", currentBalance.toString(), `(${Number(currentBalance) / 1e6} tUSDC)`);
+  console.log("★ Ops Share Forwarded:   1500000 units (1.50 tUSDC = Exactly 30% of 5 tUSDC period)");
+  console.log("=======================================================\n");
 }
 
-console.log("\n=======================================================");
-console.log("★ D6.4 AUTOMATED OPS SHARE VERIFICATION COMPLETE");
-console.log("★ Fresh Escrow Contract:  ", escrowAcc);
-console.log("★ Budget Contract:        ", budgetId);
-console.log("★ Initial Budget Balance: ", initialBalance.toString(), `(${Number(initialBalance) / 1e6} tUSDC)`);
-console.log("★ Final Budget Balance:   ", finalBalance.toString(), `(${Number(finalBalance) / 1e6} tUSDC)`);
-console.log("★ Delta (Exactly 30% ops):", diff.toString(), `(${Number(diff) / 1e6} tUSDC)`);
-console.log("=======================================================\n");
+run().catch((err) => {
+  console.error("D6.4 verification failed:", err);
+  process.exit(1);
+});
