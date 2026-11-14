@@ -16,6 +16,7 @@ const NAV_LINKS: NavLink[] = [
   { href: "/#storefront", label: "Storefront" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/dev/dashboard", label: "Developer" },
+  { href: "/verify", label: "Verify" },
 ];
 
 export function Navbar() {

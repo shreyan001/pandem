@@ -82,11 +82,31 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
 
         {/* Actions: Product Details, Bug Bounty, Upgrade, Renew, Cancel, Refund */}
         <div className="flex flex-wrap items-center gap-2">
+          {!item.escrow.refunded && (
+            <Link
+              href={`/access/${productSlug}`}
+              className="px-3.5 py-1.5 rounded-none bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink font-mono text-xs font-semibold transition-colors border border-spectr-primary flex items-center gap-1.5"
+              title="Open product enclave with NEP-413 verification"
+            >
+              <span>Open product</span>
+              <span>→</span>
+            </Link>
+          )}
+
           <Link
             href={`/products/${productSlug}`}
             className="px-3.5 py-1.5 rounded-none bg-spectr-surface-raised hover:bg-spectr-surface-raised/80 text-spectr-body hover:text-spectr-ink font-mono text-xs transition-colors border border-spectr-hairline"
           >
             Product Details →
+          </Link>
+
+          <Link
+            href={`/verify?agreement_id=${item.id}`}
+            className="px-3.5 py-1.5 rounded-none bg-spectr-surface-raised hover:bg-spectr-primary/20 text-spectr-primary hover:text-spectr-ink font-mono text-xs transition-colors border border-spectr-primary/40 flex items-center gap-1.5"
+            title="Verify on-chain contracts, code hashes, and refund SLA for this agreement"
+          >
+            <span>Verify</span>
+            <span>↗</span>
           </Link>
 
           <button

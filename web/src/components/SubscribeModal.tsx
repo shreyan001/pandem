@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useNearWallet } from "../context/NearWalletContext";
 import { PANDEM_ESCROW_ID, PANDEM_TOKEN_ID, SPLIT_BPS } from "@pandem/shared";
 import { ExternalLink, Check, Mail, Lock } from "lucide-react";
+import { CrossChainQuoteDrawer } from "./CrossChainQuoteDrawer";
 
 interface SubscribeModalProps {
   product: {
@@ -43,6 +44,7 @@ export function SubscribeModal({
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isCrossChainOpen, setIsCrossChainOpen] = useState<boolean>(false);
 
   // Off-chain email collection
   const [email, setEmail] = useState<string>("");
@@ -72,7 +74,7 @@ export function SubscribeModal({
   };
 
   const productSlug = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
-  const accessUrl = `https://${productSlug}.pandem.testnet/session?subscriber=${accountId || "wallet"}&tier=${tier}`;
+  const accessUrl = `/access/${productSlug}`;
 
   const handleRegisterStorage = async () => {
     try {
@@ -109,13 +111,26 @@ export function SubscribeModal({
     }
   };
 
-  const handleSaveEmail = (e: React.FormEvent) => {
+  const handleSaveEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     try {
-      // Store off-chain in localStorage for this agreement
+      // Store off-chain in localStorage as fallback
       const key = `pandem_email_${product.id}_${accountId || "anonymous"}`;
       localStorage.setItem(key, email.trim());
+
+      // Store in Upstash Redis via /api/access
+      fetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_email",
+          email: email.trim(),
+          accountId: accountId || "anonymous",
+          slug: productSlug,
+        }),
+      }).catch(() => {});
+
       setEmailSaved(true);
     } catch {
       setEmailSaved(true);
@@ -168,7 +183,7 @@ export function SubscribeModal({
             </div>
 
             {/* Direct Access Link Box */}
-            <div className="p-4 rounded-none bg-spectr-canvas border border-spectr-hairline space-y-2">
+            <div className="p-4 rounded-none bg-spectr-canvas border border-spectr-hairline space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-semibold uppercase text-spectr-ink flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-spectr-success" />
@@ -179,16 +194,14 @@ export function SubscribeModal({
                 </span>
               </div>
               <p className="text-xs text-spectr-body">
-                Your private enclave session is provisioned. Launch the client directly inside your verified browser sandbox:
+                Your private subscription agreement is recorded on-chain. Unlock access to the live product via cryptographic NEP-413 proof:
               </p>
               <div className="pt-1">
                 <a
                   href={accessUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-spectr-surface border border-spectr-hairline hover:border-spectr-primary flex items-center justify-between text-xs font-mono text-spectr-primary transition-colors block"
+                  className="p-3 bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink flex items-center justify-between text-xs font-mono font-semibold transition-colors block border border-spectr-primary"
                 >
-                  <span className="truncate">{accessUrl}</span>
+                  <span className="truncate">Open product ({accessUrl}) →</span>
                   <ExternalLink className="w-3.5 h-3.5 shrink-0 ml-2" />
                 </a>
               </div>
@@ -412,6 +425,24 @@ export function SubscribeModal({
               </div>
             )}
 
+            {/* Pay from Another Chain (NEAR Intents Edge On-Ramp) */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setIsCrossChainOpen(true)}
+                className="w-full py-2.5 px-3 rounded-none border border-spectr-hairline bg-spectr-canvas hover:bg-spectr-surface-raised text-spectr-ink flex items-center justify-between text-xs font-mono transition-colors group"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-none bg-spectr-primary" />
+                  <span>Pay from another chain (NEAR Intents)</span>
+                </span>
+                <span className="text-spectr-primary group-hover:text-spectr-primary-hover font-semibold flex items-center gap-1">
+                  <span>1Click Quote</span>
+                  <span>→</span>
+                </span>
+              </button>
+            </div>
+
             {/* Action Buttons */}
             <div className="pt-2 flex gap-3 font-mono">
               <button
@@ -439,6 +470,14 @@ export function SubscribeModal({
           </div>
         )}
       </div>
+
+      {/* Cross-Chain 1Click Quote Drawer */}
+      <CrossChainQuoteDrawer
+        isOpen={isCrossChainOpen}
+        onClose={() => setIsCrossChainOpen(false)}
+        productName={product.name}
+        targetAmountUsdc={Number(formatTUsdc(totalAmountBigInt)) || 5}
+      />
     </div>
   );
 }

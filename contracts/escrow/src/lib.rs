@@ -8,6 +8,13 @@ use near_sdk::{
 #[ext_contract(ext_ft)]
 pub trait FungibleToken {
     fn ft_transfer(&mut self, receiver_id: AccountId, amount: U128, memo: Option<String>);
+    fn ft_transfer_call(
+        &mut self,
+        receiver_id: AccountId,
+        amount: U128,
+        memo: Option<String>,
+        msg: String,
+    ) -> PromiseOrValue<U128>;
 }
 
 #[near(serializers = [borsh, json])]
@@ -93,7 +100,9 @@ pub struct HealthInfo {
 }
 
 const GAS_FOR_FT_TRANSFER: Gas = Gas::from_tgas(15);
+const GAS_FOR_FT_TRANSFER_CALL: Gas = Gas::from_tgas(35);
 const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas::from_tgas(10);
+const GAS_FOR_ON_RELEASE: Gas = Gas::from_tgas(60);
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
@@ -101,6 +110,7 @@ pub struct EscrowContract {
     pub owner: AccountId,
     pub token_id: AccountId,
     pub treasury: AccountId,
+    pub budget_contract: Option<AccountId>,
     pub protocol_fees: u128,
     pub next_product_id: u64,
     pub next_agreement_id: u64,
@@ -112,11 +122,17 @@ pub struct EscrowContract {
 #[near]
 impl EscrowContract {
     #[init]
-    pub fn new(owner: AccountId, token_id: AccountId, treasury: AccountId) -> Self {
+    pub fn new(
+        owner: AccountId,
+        token_id: AccountId,
+        treasury: AccountId,
+        budget_contract: Option<AccountId>,
+    ) -> Self {
         Self {
             owner,
             token_id,
             treasury,
+            budget_contract,
             protocol_fees: 0,
             next_product_id: 1,
             next_agreement_id: 1,
@@ -124,6 +140,30 @@ impl EscrowContract {
             agreements: IterableMap::new(b"a"),
             escrows: LookupMap::new(b"e"),
         }
+    }
+
+    /// Owner sets budget contract destination for ops share forwarding.
+    pub fn set_budget_contract(&mut self, budget_contract: AccountId) {
+        require!(
+            env::predecessor_account_id() == self.owner,
+            "Only owner can set budget contract"
+        );
+        self.budget_contract = Some(budget_contract);
+    }
+
+    /// View budget contract destination.
+    pub fn get_budget_contract(&self) -> Option<AccountId> {
+        self.budget_contract.clone()
+    }
+
+    /// Owner or steward sets heartbeat signer for a product.
+    pub fn set_product_heartbeat_signer(&mut self, product_id: u64, signer: AccountId) {
+        let product = self.products.get_mut(&product_id).expect("Product not found");
+        require!(
+            env::predecessor_account_id() == self.owner || env::predecessor_account_id() == product.steward,
+            "Only owner or steward can set heartbeat signer"
+        );
+        product.heartbeat_signer = signer;
     }
 
     /// Register a new product listing (owner only).
@@ -643,7 +683,7 @@ impl EscrowContract {
             )
             .then(
                 Self::ext(env::current_account_id())
-                    .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                    .with_static_gas(GAS_FOR_ON_RELEASE)
                     .on_release_period(agreement_id, fee, ops, contingency, steward_share),
             )
     }
@@ -657,7 +697,7 @@ impl EscrowContract {
         contingency: u128,
         steward_share: u128,
         #[callback_result] r: Result<(), PromiseError>,
-    ) -> bool {
+    ) -> PromiseOrValue<bool> {
         if r.is_err() {
             // Roll back state on failure
             if let Some(escrow) = self.escrows.get_mut(&agreement_id) {
@@ -676,11 +716,56 @@ impl EscrowContract {
                 }
             }
             env::log_str("release_period failed, rolled back state");
-            return false;
+            return PromiseOrValue::Value(false);
         }
 
         env::log_str(&format!(
             r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"released","data":[{{"agreement_id":{agreement_id},"steward_amount":"{steward_share}"}}]}}"#
+        ));
+
+        let product_id = self.agreements.get(&agreement_id).map(|a| a.product_id).unwrap_or(0);
+
+        // Automatically route 30% ops share to the budget contract
+        if let Some(budget_contract) = &self.budget_contract {
+            if ops > 0 && product_id > 0 {
+                let ops_msg = format!(r#"{{"action":"receive_ops_funds","product_id":{product_id}}}"#);
+                return PromiseOrValue::Promise(
+                    ext_ft::ext(self.token_id.clone())
+                        .with_attached_deposit(NearToken::from_yoctonear(1))
+                        .with_static_gas(GAS_FOR_FT_TRANSFER_CALL)
+                        .ft_transfer_call(
+                            budget_contract.clone(),
+                            U128(ops),
+                            Some(format!("pandem ops release agreement {agreement_id}")),
+                            ops_msg,
+                        )
+                        .then(
+                            Self::ext(env::current_account_id())
+                                .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                                .on_ops_transfer(agreement_id, product_id, ops),
+                        ),
+                );
+            }
+        }
+
+        PromiseOrValue::Value(true)
+    }
+
+    #[private]
+    pub fn on_ops_transfer(
+        &mut self,
+        agreement_id: u64,
+        product_id: u64,
+        ops: u128,
+        #[callback_result] r: Result<near_sdk::serde_json::Value, PromiseError>,
+    ) -> bool {
+        if r.is_err() {
+            env::log_str(&format!("ops transfer for agreement {agreement_id} failed"));
+            return false;
+        }
+
+        env::log_str(&format!(
+            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"ops_forwarded","data":[{{"agreement_id":{agreement_id},"product_id":{product_id},"ops_amount":"{ops}"}}]}}"#
         ));
         true
     }
@@ -943,7 +1028,12 @@ mod tests {
             .build();
         testing_env!(context);
 
-        let mut contract = EscrowContract::new(owner.clone(), token.clone(), treasury.clone());
+        let mut contract = EscrowContract::new(
+            owner.clone(),
+            token.clone(),
+            treasury.clone(),
+            Some("budget.testnet".parse().unwrap()),
+        );
 
         // Register product 1: price = 1000, period = 300s, grace = 120s
         let p_id = contract.register_product(
@@ -1147,7 +1237,7 @@ mod tests {
 
         // Simulate callback error
         let failed_result: Result<(), PromiseError> = Err(PromiseError::Failed);
-        contract.on_release_period(1, 25, 300, 200, 475, failed_result);
+        let _ = contract.on_release_period(1, 25, 300, 200, 475, failed_result);
 
         // Verify state was rolled back
         let escrow = contract.get_escrow(1).unwrap();
@@ -1313,5 +1403,51 @@ mod tests {
         let free_tier = product.tiers.iter().find(|t| t.tier_id == "free").expect("Free tier must exist");
         assert_eq!(free_tier.price_per_period.0, 0);
         assert_eq!(free_tier.name, "Free");
+    }
+
+    // 12. Ops share automatically forwards to budget on release
+    #[test]
+    fn test_ops_forward_to_budget() {
+        let (mut contract, _owner, token, _treasury, _steward, agent) = setup_contract();
+
+        assert_eq!(
+            contract.get_budget_contract().unwrap(),
+            "budget.testnet".parse::<AccountId>().unwrap()
+        );
+
+        // Alice subscribes for 1 period Pro (1_000)
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token).build());
+        let msg = r#"{"product_id":"1","periods":1}"#;
+        let _ = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(1_000), msg.to_string());
+
+        // Agent posts heartbeat 1
+        testing_env!(VMContextBuilder::new().predecessor_account_id(agent).build());
+        contract.heartbeat(1, 1, None);
+
+        // Release period 1
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("escrow.testnet".parse().unwrap())
+            .predecessor_account_id("anyone.testnet".parse().unwrap())
+            .build());
+        let _ = contract.release_period(1);
+
+        // Verify product reserves: 30% ops = 300, 20% contingency = 200, 2.5% fee = 25
+        let product = contract.get_product(1).unwrap();
+        assert_eq!(product.ops_reserve.0, 300);
+
+        // Simulate successful callback of steward share (475)
+        let success_result: Result<(), PromiseError> = Ok(());
+        let p_res = contract.on_release_period(1, 25, 300, 200, 475, success_result);
+
+        // Because budget_contract is set and ops = 300 > 0, on_release_period returns Promise forwarding to budget
+        match p_res {
+            PromiseOrValue::Promise(_) => {},
+            _ => panic!("Expected Promise for ops forward to budget contract"),
+        }
+
+        // Simulate successful ops transfer resolution
+        let ops_res: Result<near_sdk::serde_json::Value, PromiseError> = Ok(near_sdk::serde_json::json!("0"));
+        let finished = contract.on_ops_transfer(1, 1, 300, ops_res);
+        assert!(finished);
     }
 }

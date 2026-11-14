@@ -1,7 +1,8 @@
 import { PANDEM_ESCROW_ID, PANDEM_TOKEN_ID } from "@pandem/shared";
 
 const FALLBACK_RPCS = [
-  "/api/rpc",
+  "https://rpc.testnet.fastnear.com",
+  ...(typeof window !== "undefined" ? ["/api/rpc"] : []),
   "https://rpc.testnet.near.org",
   "https://testnet.neartransaction.com",
 ];

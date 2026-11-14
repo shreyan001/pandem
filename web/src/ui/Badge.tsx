@@ -7,7 +7,8 @@ export type BadgeVariant =
   | "warning"
   | "danger"
   | "score"
-  | "category";
+  | "category"
+  | "outline";
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
@@ -37,6 +38,7 @@ export const Badge: React.FC<BadgeProps> = ({
     score: "bg-spectr-surface border-spectr-primary text-spectr-ink font-bold tracking-tight px-2.5 py-1",
     category:
       "bg-spectr-surface border-spectr-hairline text-spectr-muted text-xs uppercase tracking-wider",
+    outline: "bg-transparent border-spectr-hairline text-spectr-body font-normal",
   };
 
   const dotColor: Record<BadgeVariant, string> = {
@@ -47,6 +49,7 @@ export const Badge: React.FC<BadgeProps> = ({
     danger: "bg-spectr-danger",
     score: "bg-spectr-primary",
     category: "bg-spectr-muted",
+    outline: "bg-spectr-muted",
   };
 
   return (

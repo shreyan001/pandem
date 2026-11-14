@@ -1,5 +1,5 @@
 export const PANDEM_ESCROW_ID =
-  process.env["PANDEM_ESCROW_ID"] ?? "escrow-d6-df23.test-pandem-alice-1.testnet";
+  process.env["PANDEM_ESCROW_ID"] ?? "escrow-d64-40ba.test-pandem-alice-1.testnet";
 
 export const PANDEM_TOKEN_ID =
   process.env["PANDEM_TOKEN_ID"] ?? "pandem-tusdc-46cee5ca.testnet";
@@ -37,3 +37,12 @@ export const GAS = {
 } as const;
 
 export const ONE_YOCTO = "1";
+
+export const REPO_BUILD_HASHES: Record<string, string> = {
+  [PANDEM_ESCROW_ID]: "9mkFpZeVZMegTUDU72vA7vPTvFNspsYahTNV4j8oGvuc",
+  "escrow-d6-df23.test-pandem-alice-1.testnet": "4FB9YmW5ydnBkfD7GGLcmHPugkzv42ZVK7ZDwr5HeBi5",
+  [PANDEM_BUDGET_ID]: "D9EoMHGT2G1zCTUe81cQowSeSfyYu9HvNHu5BCtLfWDM",
+  [PANDEM_REGISTRY_ID]: "GRyeipX9RCEKYcAUeKeqzFk8UrtR6ghTJcpA3658itpK",
+  [PANDEM_TOKEN_ID]: "4eHo2Zu22TXK34TZGKKe2zfMiCqkR8TqgVNdgH1RmCjX",
+};
+

@@ -23,6 +23,7 @@ interface NearWalletContextType {
   sendUpgrade: (agreementId: number, targetTier: string, amountUnits: string) => Promise<string | null>;
   sendRenew: (agreementId: number, periods: number, amountUnits: string) => Promise<string | null>;
   sendCancel: (agreementId: number) => Promise<string | null>;
+  signNep413Message: (params: { message: string; recipient: string; nonce: Uint8Array }) => Promise<{ accountId: string; publicKey: string; signature: string } | null>;
 }
 
 const NearWalletContext = createContext<NearWalletContextType | null>(null);
@@ -492,6 +493,46 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const signNep413Message = async (params: {
+    message: string;
+    recipient: string;
+    nonce: Uint8Array;
+  }): Promise<{ accountId: string; publicKey: string; signature: string } | null> => {
+    if (!connector || !accountId) return null;
+    try {
+      setWalletError(null);
+      const wallet = await connector.wallet();
+      if (typeof (wallet as any).signMessage === "function") {
+        const res: any = await (wallet as any).signMessage({
+          message: params.message,
+          recipient: params.recipient,
+          nonce: params.nonce,
+        });
+
+        const rawSig = res?.signature;
+        const sigBase64 =
+          typeof rawSig === "string"
+            ? rawSig
+            : rawSig instanceof Uint8Array || Array.isArray(rawSig)
+            ? Buffer.from(rawSig).toString("base64")
+            : "";
+
+        return {
+          accountId: res?.accountId || accountId,
+          publicKey: res?.publicKey || "",
+          signature: sigBase64,
+        };
+      } else {
+        throw new Error("Connected wallet does not support NEP-413 signMessage");
+      }
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      console.warn("Sign NEP-413 message notice:", msg);
+      setWalletError(`Message signing notice: ${msg}`);
+      return null;
+    }
+  };
+
   return (
     <NearWalletContext.Provider
       value={{
@@ -513,6 +554,7 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
         sendUpgrade,
         sendRenew,
         sendCancel,
+        signNep413Message,
       }}
     >
       {children}

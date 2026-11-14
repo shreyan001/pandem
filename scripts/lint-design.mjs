@@ -9,6 +9,7 @@ const TARGET_FILES = [
   "web/src/app/products/[slug]/page.tsx",
   "web/src/app/dashboard/page.tsx",
   "web/src/app/dev/dashboard/page.tsx",
+  "web/src/app/verify/page.tsx",
 ];
 
 // Also check any child component files created under these directories
