@@ -16,6 +16,9 @@ export const PANDEM_AGENT_ID =
 export const PANDEM_BUDGET_ID =
   process.env["PANDEM_BUDGET_ID"] ?? "pandem-budget-46cee5ca.testnet";
 
+export const PANDEM_REGISTRY_ID =
+  process.env["PANDEM_REGISTRY_ID"] ?? "pandem-registry-46cee5ca.testnet";
+
 export const CLOUD_COMPUTE_OPERATOR_ID =
   process.env["CLOUD_COMPUTE_OPERATOR_ID"] ?? "cloud-compute-operator.testnet";
 
