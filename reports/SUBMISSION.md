@@ -43,11 +43,15 @@ Pandem replaces centralized billing and blunt upfront payments with **Programmab
 
 | Action | Transaction Hash / Receipt | Outcome |
 |---|---|---|
-| **Contract Deploy & Init** | [`88Ms1iCuq3uC...`](https://explorer.testnet.near.org/transactions/88Ms1iCuq3uC7qbNfWm7wgQ4uQd5icUAb1eSac3KAtts) | Deployed Rust escrow to `pandem-escrow-46cee5ca.testnet` |
+| **Escrow Deploy & Init** | [`88Ms1iCuq3uC...`](https://explorer.testnet.near.org/transactions/88Ms1iCuq3uC7qbNfWm7wgQ4uQd5icUAb1eSac3KAtts) | Deployed Rust escrow to `pandem-escrow-46cee5ca.testnet` |
+| **Budget Deploy & Init** | [`59JVrLeFwsBC...`](https://explorer.testnet.near.org/transactions/59JVrLeFwsBCQoP8YYSyY7Z8bnWWb7JBq756n5fsF1ox) | Deployed Budget ops contract to `pandem-budget-46cee5ca.testnet` |
+| **Registry Deploy & Init** | [`Gi6qzGSg7tjc...`](https://explorer.testnet.near.org/transactions/Gi6qzGSg7tjchAmKRhNJAfSLKTQPMHUhhh9iUeMRUmqZ) | Deployed Listing & Voting registry to `pandem-registry-46cee5ca.testnet` |
 | **Product Approval** | [`DMv1jw1S9tpC...`](https://explorer.testnet.near.org/transactions/DMv1jw1S9tpCJcdRfoRJf3yZbjdph1ZbGenAwtHgsjdy) | Approved `prod-deepsearch-m4` for storefront listing |
 | **Subscription Deposit** | [`5XnsktfXTa6D...`](https://explorer.testnet.near.org/transactions/5XnsktfXTa6Df8NrghXAiEfUUeGjpy5Gy7KK7oF5J3Fc) | Alice deposited 0.3 wNEAR for 3 periods |
 | **Enclave Agent Heartbeat** | [`C9eRiuYdcjeG...`](https://explorer.testnet.near.org/transactions/C9eRiuYdcjeGwAonoNjt3JfYozAdC9ya7nVDwg2HLcBb) | Liveness verified for Period 1 |
 | **Period 1 Fund Release** | [`AyfiTDb2PVWL...`](https://explorer.testnet.near.org/transactions/AyfiTDb2PVWL3QeBypyDTbFGttvLRpS5cUs2R9R7m9fc) | 0.0475 wNEAR paid to steward |
+| **Contingency Proposal #1** | [`BqNZuy17iDo1...`](https://explorer.testnet.near.org/transactions/BqNZuy17iDo1PNcEvsVK21NoKuYWxXioDYKJc7Egt9Rc) | Created failover grant proposal for 0.05 wNEAR |
+| **Proposal #1 Vote** | [`FJvojngvT2Ed...`](https://explorer.testnet.near.org/transactions/FJvojngvT2Eddn9J74vG3qGPLBiT6HJkVNkkWToXnVaE) | Subscriber voted YES on Proposal #1 |
 | **Steward Killswitch** | [`CxgAEmPTJNSY...`](https://explorer.testnet.near.org/transactions/CxgAEmPTJNSYd5pGzaQr57dR2DVqJge32NmiJCuiBpLE) | Triggered `declare_abandoned` |
 | **Subscriber Refund** | [`5vL5sXN1eutg...`](https://explorer.testnet.near.org/transactions/5vL5sXN1eutgZcBaBbJFHMkayjRJdBSPNzU8E7QKYgRk) | Returned 0.22 wNEAR to Alice (2 periods + contingency) |
 
