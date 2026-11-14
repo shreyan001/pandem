@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNearWallet } from "../context/NearWalletContext";
 import { PANDEM_ESCROW_ID } from "@pandem/shared";
 
@@ -18,7 +18,6 @@ const NAV_LINKS: NavLink[] = [
   { href: "/me", label: "Dashboard" },
   { href: "/steward", label: "Steward" },
   { href: "/agent", label: "Agent Enclave" },
-  { href: "/onramp", label: "On-Ramp" },
   { href: "/components", label: "Testbed", badge: "UI" },
 ];
 
@@ -33,6 +32,11 @@ export function Navbar() {
   const { accountId, isConnected, connect, disconnect, tokenBalance, setManualAccount, walletError, clearWalletError } = useNearWallet();
   const [showAccountInput, setShowAccountInput] = useState(false);
   const [inputAcc, setInputAcc] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Format yocto wNEAR to human readable (24 decimals)
   const formatBalance = (yocto: string) => {
@@ -67,7 +71,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="border-b border-zinc-800 bg-black/90 backdrop-blur sticky top-0 z-50">
+    <nav className="border-b border-zinc-800 bg-black/90 backdrop-blur sticky top-0 z-50" suppressHydrationWarning>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand & Desktop Links */}
         <div className="flex items-center gap-6">
@@ -89,9 +93,9 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1" suppressHydrationWarning>
             {NAV_LINKS.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = mounted ? pathname === link.href : link.href === "/";
               return (
                 <Link
                   key={link.href}
@@ -115,7 +119,7 @@ export function Navbar() {
         </div>
 
         {/* Right side: Escrow contract link & Wallet */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0" suppressHydrationWarning>
           <a
             href={`https://explorer.testnet.near.org/accounts/${PANDEM_ESCROW_ID}`}
             target="_blank"
@@ -128,8 +132,8 @@ export function Navbar() {
             <span>{PANDEM_ESCROW_ID.slice(0, 14)}...</span>
           </a>
 
-          {isConnected ? (
-            <div className="flex items-center gap-2">
+          {mounted && isConnected ? (
+            <div className="flex items-center gap-2" suppressHydrationWarning>
               <div className="flex flex-col items-end px-3 py-1 rounded-xl bg-zinc-900 border border-zinc-800 text-xs">
                 <span className="font-mono text-white font-medium text-[11px] sm:text-xs">
                   {accountId?.slice(0, 16)}{accountId && accountId.length > 16 ? "..." : ""}
@@ -147,7 +151,7 @@ export function Navbar() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" suppressHydrationWarning>
               <button
                 onClick={connect}
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-black transition-colors flex items-center gap-1.5 shadow-sm shadow-emerald-500/20"
@@ -183,9 +187,9 @@ export function Navbar() {
       )}
 
       {/* Mobile & Tablet Nav Row with horizontal overflow scrolling */}
-      <div className="lg:hidden border-t border-zinc-850 bg-zinc-950/90 px-4 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+      <div className="lg:hidden border-t border-zinc-850 bg-zinc-950/90 px-4 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none" suppressHydrationWarning>
         {NAV_LINKS.map((link) => {
-          const isActive = pathname === link.href;
+          const isActive = mounted ? pathname === link.href : link.href === "/";
           return (
             <Link
               key={link.href}
@@ -209,7 +213,7 @@ export function Navbar() {
 
       {/* Dev Account Quick Switcher Tray */}
       {showAccountInput && !isConnected && (
-        <div className="bg-zinc-900/95 border-b border-zinc-800 px-4 py-3 text-xs space-y-2 backdrop-blur animate-fade-in">
+        <div className="bg-zinc-900/95 border-b border-zinc-800 px-4 py-3 text-xs space-y-2 backdrop-blur animate-fade-in" suppressHydrationWarning>
           <div className="flex flex-wrap items-center justify-between gap-2 max-w-7xl mx-auto">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-zinc-400 font-mono text-[11px]">Quick Personas:</span>

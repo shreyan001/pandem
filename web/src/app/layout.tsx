@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { NearWalletProvider } from "../context/NearWalletContext";
 import { Navbar } from "../components/Navbar";
@@ -54,11 +55,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-black text-zinc-100">
+    <html lang="en" className="dark bg-black text-zinc-100" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: EARLY_EXTENSION_FILTER }} />
+        <Script
+          id="early-extension-filter"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: EARLY_EXTENSION_FILTER }}
+        />
       </head>
-      <body className="antialiased min-h-screen flex flex-col bg-black text-zinc-100 selection:bg-emerald-500 selection:text-black">
+      <body
+        className="antialiased min-h-screen flex flex-col bg-black text-zinc-100 selection:bg-emerald-500 selection:text-black"
+        suppressHydrationWarning
+      >
         <ExtensionErrorGuard>
           <NearWalletProvider>
             <Navbar />
