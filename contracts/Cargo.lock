@@ -1613,7 +1613,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pandem-budget"
+version = "0.1.0"
+dependencies = [
+ "near-sdk",
+]
+
+[[package]]
 name = "pandem-escrow"
+version = "0.1.0"
+dependencies = [
+ "near-sdk",
+]
+
+[[package]]
+name = "pandem-registry"
 version = "0.1.0"
 dependencies = [
  "near-sdk",

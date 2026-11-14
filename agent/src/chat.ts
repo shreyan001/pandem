@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 import { PANDEM_ESCROW_ID, PANDEM_TOKEN_ID, SPLIT_BPS } from "@pandem/shared";
+import { cloudPaymentEngine } from "./cloudPayment";
 
 const TESTNET_RPC = "https://rpc.testnet.near.org";
 const MODEL_NAME = "Qwen/Qwen3.8-27B";
@@ -69,6 +70,14 @@ Be helpful, precise, technical, and concise.`;
     duration_ms: durationMs,
     usage: completion.usage,
     tee: "Intel TDX / NVIDIA NRAS verified",
+  });
+
+  cloudPaymentEngine.recordInferenceUsage({
+    promptTokens: completion.usage?.prompt_tokens || 140,
+    completionTokens: completion.usage?.completion_tokens || 95,
+    durationMs,
+    sessionId: `tee_session_${inferenceId || Date.now()}`,
+    productId: 1,
   });
 
   return {

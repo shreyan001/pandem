@@ -13,6 +13,12 @@ export const PANDEM_STEWARD_ID =
 export const PANDEM_AGENT_ID =
   process.env["PANDEM_AGENT_ID"] ?? "pandem-agent-46cee5ca.testnet";
 
+export const PANDEM_BUDGET_ID =
+  process.env["PANDEM_BUDGET_ID"] ?? "pandem-budget-46cee5ca.testnet";
+
+export const CLOUD_COMPUTE_OPERATOR_ID =
+  process.env["CLOUD_COMPUTE_OPERATOR_ID"] ?? "cloud-compute-operator.testnet";
+
 export const SPLIT_BPS = {
   PROTOCOL_FEE: 250,      // 2.5%
   OPS_RESERVE: 3000,      // 30.0%

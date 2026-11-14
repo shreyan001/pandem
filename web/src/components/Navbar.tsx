@@ -14,9 +14,11 @@ interface NavLink {
 
 const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Leaderboard" },
+  { href: "/governance", label: "Governance", badge: "Vote" },
   { href: "/me", label: "Dashboard" },
   { href: "/steward", label: "Steward" },
   { href: "/agent", label: "Agent Enclave" },
+  { href: "/onramp", label: "On-Ramp" },
   { href: "/components", label: "Testbed", badge: "UI" },
 ];
 

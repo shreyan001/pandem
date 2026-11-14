@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CatalogItem } from "@pandem/shared";
+import { ScoreBadge, ScoringExplainer } from "./ScoringExplainer";
 
 interface ProductHuntLeaderboardProps {
   products: CatalogItem[];
@@ -14,6 +15,7 @@ export function ProductHuntLeaderboard({
 }: ProductHuntLeaderboardProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [timeFilter, setTimeFilter] = useState<string>("Today");
+  const [showScoringExplainer, setShowScoringExplainer] = useState<boolean>(false);
   const [upvotesState, setUpvotesState] = useState<Record<string, { count: number; voted: boolean }>>(() => {
     const init: Record<string, { count: number; voted: boolean }> = {};
     products.forEach((p) => {
@@ -41,6 +43,16 @@ export function ProductHuntLeaderboard({
     });
   };
 
+  // Simulated streak and TVL per product id for scoring engine demonstration
+  const getProductMetrics = (id: string, index: number) => {
+    const streaks: Record<string, number> = { "1": 12, "2": 9, "3": 6, "4": 4 };
+    const tvls: Record<string, number> = { "1": 15, "2": 12, "3": 8, "4": 6 };
+    return {
+      streak: streaks[id] ?? (10 - index * 2),
+      tvl: tvls[id] ?? (14 - index * 3),
+    };
+  };
+
   return (
     <div className="space-y-8">
       {/* Featured #1 Product of the Day Spotlight Card */}
@@ -59,6 +71,15 @@ export function ProductHuntLeaderboard({
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                     🏆 #1 Product of the Day
                   </span>
+
+                  {/* Algorithmic Score Badge */}
+                  <ScoreBadge
+                    upvotes={upvotesState[productOfTheDay.id]?.count ?? productOfTheDay.upvotes ?? 348}
+                    isTeeVerified={Boolean(productOfTheDay.teeHardware)}
+                    streak={12}
+                    tvl={15}
+                  />
+
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
                     {productOfTheDay.teeHardware || "Intel TDX + NVIDIA H100"}
                   </span>
@@ -116,7 +137,7 @@ export function ProductHuntLeaderboard({
         </div>
       )}
 
-      {/* Filter and Time Controls */}
+      {/* Filter, Time Controls and Scoring Engine Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-zinc-800">
         {/* Category Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
@@ -135,29 +156,53 @@ export function ProductHuntLeaderboard({
           ))}
         </div>
 
-        {/* Time Tabs */}
-        <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 self-start sm:self-auto">
-          {["Today", "This Week", "All Time"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setTimeFilter(tab)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
-                timeFilter === tab
-                  ? "bg-zinc-800 text-white font-semibold"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        {/* Time Tabs & Scoring Explainer Trigger */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setShowScoringExplainer(!showScoringExplainer)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono border transition-all flex items-center gap-1.5 ${
+              showScoringExplainer
+                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 font-bold"
+                : "bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 border-zinc-800"
+            }`}
+          >
+            <span>⚡ Scoring Engine</span>
+            <span className="text-[10px] opacity-70">
+              {showScoringExplainer ? "▲" : "▼"}
+            </span>
+          </button>
+
+          <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+            {["Today", "This Week", "All Time"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setTimeFilter(tab)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
+                  timeFilter === tab
+                    ? "bg-zinc-800 text-white font-semibold"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* Collapsible Algorithmic Scoring Explainer */}
+      {showScoringExplainer && (
+        <div className="animate-fade-in">
+          <ScoringExplainer />
+        </div>
+      )}
 
       {/* Leaderboard Feed */}
       <div className="space-y-3">
         {filteredProducts.map((p, idx) => {
           const rank = p.rank || idx + 1;
           const upvoteData = upvotesState[p.id] || { count: p.upvotes || 100, voted: false };
+          const { streak, tvl } = getProductMetrics(p.id, idx);
 
           return (
             <div
@@ -168,9 +213,13 @@ export function ProductHuntLeaderboard({
               {/* Left side: Rank + Avatar + Details */}
               <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                 {/* Rank Badge */}
-                <span className="font-mono text-xs sm:text-sm font-bold text-zinc-500 group-hover:text-emerald-400 w-6 text-center shrink-0">
-                  #{rank}
-                </span>
+                <div className="flex flex-col items-center justify-center w-7 shrink-0">
+                  <span className={`font-mono text-sm sm:text-base font-extrabold ${
+                    rank === 1 ? "text-amber-400" : rank === 2 ? "text-zinc-300" : rank === 3 ? "text-amber-600" : "text-zinc-500 group-hover:text-emerald-400"
+                  }`}>
+                    #{rank}
+                  </span>
+                </div>
 
                 {/* Monogram / Icon */}
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center font-mono font-bold text-lg text-white group-hover:border-emerald-500/40 transition-colors shrink-0">
@@ -183,6 +232,15 @@ export function ProductHuntLeaderboard({
                     <h4 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors truncate">
                       {p.name}
                     </h4>
+
+                    {/* Algorithmic Composite Score Badge */}
+                    <ScoreBadge
+                      upvotes={upvoteData.count}
+                      isTeeVerified={Boolean(p.teeHardware)}
+                      streak={streak}
+                      tvl={tvl}
+                    />
+
                     {p.isProductOfTheDay && (
                       <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         Product of the Day
@@ -197,13 +255,15 @@ export function ProductHuntLeaderboard({
                     {p.tagline}
                   </p>
 
-                  <div className="flex items-center gap-2 mt-1 text-[11px] font-mono text-zinc-500">
+                  <div className="flex items-center gap-2 mt-1 text-[11px] font-mono text-zinc-500 flex-wrap">
                     <span className="text-emerald-400 font-semibold">{p.price_display}</span>
                     <span>/ {p.period_display}</span>
                     <span className="hidden sm:inline">•</span>
                     <span className="hidden sm:inline text-zinc-400">{p.category}</span>
                     <span className="hidden md:inline">•</span>
-                    <span className="hidden md:inline text-zinc-500">4-Way Escrow Split</span>
+                    <span className="hidden md:inline text-zinc-500">
+                      Streak: <strong className="text-zinc-300">{streak}</strong> · TVL: <strong className="text-zinc-300">{tvl} wN</strong>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -220,6 +280,9 @@ export function ProductHuntLeaderboard({
                 <span className="text-xs leading-none">▲</span>
                 <span className="font-mono text-xs font-bold mt-1">
                   {upvoteData.count}
+                </span>
+                <span className="text-[9px] uppercase tracking-wider font-mono opacity-80">
+                  {upvoteData.voted ? "Voted" : "Upvote"}
                 </span>
               </button>
             </div>

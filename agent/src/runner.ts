@@ -2,7 +2,13 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { PANDEM_ESCROW_ID, PANDEM_AGENT_ID } from "@pandem/shared";
+import {
+  PANDEM_ESCROW_ID,
+  PANDEM_AGENT_ID,
+  InferencePaymentReceipt,
+  BudgetAllocation,
+} from "@pandem/shared";
+import { cloudPaymentEngine } from "./cloudPayment";
 
 const execAsync = promisify(exec);
 const TESTNET_RPC = "https://rpc.testnet.near.org";
@@ -14,8 +20,17 @@ export interface RunnerState {
   heartbeatsSent: number;
   releasesTriggered: number;
   refundsTriggered: number;
+  cloudPaymentsTriggered: number;
   isKillswitchActive: boolean;
   recentLogs: string[];
+  cloudPayments: InferencePaymentReceipt[];
+  pendingInference?: {
+    queryCount: number;
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    estimatedWNear: string;
+  };
 }
 
 export class AgentRunner {
@@ -25,6 +40,7 @@ export class AgentRunner {
   private heartbeatsSent: number = 0;
   private releasesTriggered: number = 0;
   private refundsTriggered: number = 0;
+  private cloudPaymentsTriggered: number = 0;
 
   private log(msg: string) {
     const timestamp = new Date().toISOString();
@@ -39,14 +55,24 @@ export class AgentRunner {
   public getState(): RunnerState {
     const isKillswitchActive =
       fs.existsSync(KILLSWITCH_FILE) || fs.existsSync(LOCAL_KILLSWITCH_FILE);
+    const pending = cloudPaymentEngine.getPendingUsage(1);
 
     return {
       lastRunTimestamp: new Date().toISOString(),
       heartbeatsSent: this.heartbeatsSent,
       releasesTriggered: this.releasesTriggered,
       refundsTriggered: this.refundsTriggered,
+      cloudPaymentsTriggered: this.cloudPaymentsTriggered,
       isKillswitchActive,
       recentLogs: [...this.logs],
+      cloudPayments: cloudPaymentEngine.getReceipts(),
+      pendingInference: {
+        queryCount: pending.queryCount,
+        promptTokens: pending.promptTokens,
+        completionTokens: pending.completionTokens,
+        totalTokens: pending.totalTokens,
+        estimatedWNear: pending.estimatedWNear,
+      },
     };
   }
 
@@ -177,6 +203,25 @@ export class AgentRunner {
             }
           }
         }
+      }
+
+      // Autonomous Cloud Inference Payment Settlement
+      try {
+        const pending = cloudPaymentEngine.getPendingUsage(1);
+        if (pending.queryCount > 0) {
+          this.log(
+            `Pending inference detected: ${pending.queryCount} queries (${pending.totalTokens} tokens, ~${pending.estimatedWNear} wNEAR). Checking budget draw cap...`
+          );
+          const receipt = await cloudPaymentEngine.settlePendingInference({ productId: 1 });
+          if (receipt) {
+            this.cloudPaymentsTriggered++;
+            this.log(
+              `✓ Cloud inference payment draw settled! Batch #${receipt.batch_id}, Amount: ${receipt.amount_wnear} wNEAR (${receipt.status}). SHA-256 Proof: ${receipt.sha256_cost_proof.slice(0, 16)}...`
+            );
+          }
+        }
+      } catch (cloudErr: any) {
+        this.log(`Cloud inference settlement error: ${cloudErr.message || String(cloudErr)}`);
       }
     } catch (err: any) {
       this.log(`Cycle error: ${err.message || String(err)}`);
