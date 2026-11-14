@@ -9,7 +9,6 @@ import {
   Cpu,
   Database,
   Shield,
-  ShieldCheck,
   Globe,
   Key,
   ArrowRight,
@@ -17,17 +16,11 @@ import {
   Copy,
   Terminal,
   ExternalLink,
-  Lock,
   Activity,
   Coins,
   Scale,
-  Server,
-  Layers,
   Sparkles,
-  Sliders,
-  Code2,
   FileCode,
-  HardDrive,
 } from "lucide-react";
 import { useNearWallet } from "../../../context/NearWalletContext";
 
@@ -133,7 +126,7 @@ const NEAR_AI_MODELS = [
     tag: "Reasoning & Code",
     hardware: "NVIDIA H100 NRAS Attested",
     rate: "$0.0018 / 1k tokens",
-    description: "State-of-the-art reasoning, code synthesis, and verification inside hardware enclaves.",
+    description: "Reasoning, code synthesis, and verification inside hardware enclaves.",
   },
   {
     id: "Qwen/Qwen2.5-72B-Instruct",
@@ -141,7 +134,7 @@ const NEAR_AI_MODELS = [
     tag: "Multilingual Intelligence",
     hardware: "NVIDIA H100 NRAS Attested",
     rate: "$0.0012 / 1k tokens",
-    description: "High-throughput general intelligence, legal extraction, and structured classification.",
+    description: "General intelligence, legal extraction, and structured classification.",
   },
   {
     id: "meta-llama/Llama-3.3-70B-Instruct",
@@ -447,11 +440,17 @@ secrets:
       <header className="border-b border-[#2E2E2E] bg-[#121212]/70 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-xs font-mono text-[#737373] hover:text-[#FAFAFA] transition-colors">
+            <Link
+              href="/"
+              className="text-xs font-mono text-[#737373] hover:text-[#FAFAFA] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+            >
               Leaderboard
             </Link>
             <span className="text-xs text-[#2E2E2E]">/</span>
-            <Link href="/dev/dashboard" className="text-xs font-mono text-[#737373] hover:text-[#FAFAFA] transition-colors">
+            <Link
+              href="/dev/dashboard"
+              className="text-xs font-mono text-[#737373] hover:text-[#FAFAFA] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+            >
               Developer
             </Link>
             <span className="text-xs text-[#2E2E2E]">/</span>
@@ -465,7 +464,7 @@ secrets:
             </span>
             <Link
               href="/dev/dashboard"
-              className="text-xs font-mono text-[#B8B8B8] hover:text-white px-3 py-1 border border-[#2E2E2E] hover:border-[#737373] transition-colors"
+              className="text-xs font-mono text-[#B8B8B8] hover:text-white px-3 py-1 border border-[#2E2E2E] hover:border-[#737373] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
             >
               Developer Portal
             </Link>
@@ -482,12 +481,12 @@ secrets:
               Sovereign Launchpad Studio
             </h1>
             <p className="text-sm text-[#B8B8B8] max-w-2xl">
-              Configure your confidential application stack. Smart contracts autonomously settle infrastructure cashflows to NEAR AI, Phala, and Filecoin without personal credit cards.
+              Configure your confidential application stack. Smart contracts settle infrastructure cashflows to NEAR AI, Phala, and Filecoin without personal credit cards.
             </p>
           </div>
 
           {/* Stepper Indicator */}
-          <div className="flex items-center gap-2 font-mono text-xs">
+          <div className="flex items-center gap-2 font-mono text-xs" role="navigation" aria-label="Onboarding Progress">
             {[
               { num: 1, label: "Profile" },
               { num: 2, label: "Architecture" },
@@ -499,9 +498,11 @@ secrets:
               return (
                 <button
                   key={s.num}
+                  type="button"
                   onClick={() => s.num < step && setStep(s.num)}
                   disabled={s.num > step}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 border transition-colors ${
+                  aria-current={isActive ? "step" : undefined}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                     isActive
                       ? "border-[#894DEF] bg-[#894DEF]/10 text-white font-medium"
                       : isPast
@@ -512,7 +513,7 @@ secrets:
                   {isPast ? (
                     <Check className="w-3.5 h-3.5 text-[#4ADE80]" />
                   ) : (
-                    <span className="text-[10px] text-[#737373]">0{s.num}</span>
+                    <span className="text-[10px] text-[#737373] tabular-nums">0{s.num}</span>
                   )}
                   <span>{s.label}</span>
                 </button>
@@ -523,7 +524,7 @@ secrets:
 
         {/* STEP 4 COMPLETE VIEW (FULL WIDTH) */}
         {step === 4 && deploymentResult ? (
-          <section className="bg-[#171717] border border-[#2E2E2E] p-8 space-y-8">
+          <section className="bg-[#171717] border border-[#2E2E2E] p-8 space-y-8" aria-label="Deployment Summary">
             <div className="flex items-start justify-between border-b border-[#2E2E2E] pb-6">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono text-[#4ADE80] bg-[#4ADE80]/10 border border-[#4ADE80]/20">
@@ -541,7 +542,7 @@ secrets:
               <div className="flex gap-2">
                 <Link
                   href={deploymentResult.liveUrl}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                 >
                   <span>Test Product Storefront</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -559,7 +560,7 @@ secrets:
                 <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5">
                   <span className="text-[10px] text-[#737373] block uppercase">Escrow Subscription Contract</span>
                   <div className="text-white font-medium break-all">{deploymentResult.escrowContract}</div>
-                  <span className="text-[10px] text-[#4ADE80] block">47.5% Dev / 15% Bug Warranty</span>
+                  <span className="text-[10px] text-[#4ADE80] block tabular-nums">47.5% Dev / 15% Bug Warranty</span>
                 </div>
 
                 <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5">
@@ -571,7 +572,7 @@ secrets:
                 <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5">
                   <span className="text-[10px] text-[#737373] block uppercase">Governance Strategy Contract</span>
                   <div className="text-white font-medium break-all">{deploymentResult.votingContract}</div>
-                  <span className="text-[10px] text-[#B8B8B8] block">3 Request Tokens / Month</span>
+                  <span className="text-[10px] text-[#B8B8B8] block tabular-nums">3 Request Tokens / Month</span>
                 </div>
               </div>
             </div>
@@ -584,8 +585,9 @@ secrets:
                   <span className="text-white font-medium">Scoped Virtual NEAR AI Cloud Key</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleCopy(deploymentResult.apiKey, "apiKey")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#171717] hover:bg-[#262626] border border-[#2E2E2E] text-white text-[11px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#171717] hover:bg-[#262626] border border-[#2E2E2E] text-white text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                 >
                   <Copy className="w-3 h-3" />
                   <span>{copiedId === "apiKey" ? "Copied" : "Copy Key"}</span>
@@ -610,8 +612,9 @@ secrets:
                   </span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleCopy(deploymentResult.composeManifest, "manifest")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#894DEF] hover:bg-[#A273F2] text-white text-[11px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#894DEF] hover:bg-[#A273F2] text-white text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                 >
                   <Copy className="w-3 h-3" />
                   <span>{copiedId === "manifest" ? "Copied Manifest" : "Copy Manifest"}</span>
@@ -627,20 +630,20 @@ secrets:
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
               >
                 <span>View on Storefront Leaderboard</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </Link>
               <Link
                 href={deploymentResult.liveUrl}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#171717] hover:bg-[#262626] border border-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#171717] hover:bg-[#262626] border border-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
               >
                 <span>Product Overview Page</span>
               </Link>
               <Link
                 href={`${deploymentResult.liveUrl}/voting`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#171717] hover:bg-[#262626] border border-[#894DEF]/40 text-[#894DEF] text-xs font-mono font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#171717] hover:bg-[#262626] border border-[#894DEF]/40 text-[#894DEF] text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
               >
                 <span>Open Voting Session</span>
               </Link>
@@ -666,19 +669,21 @@ secrets:
                   <div className="space-y-4 text-xs font-mono">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="block text-[#B8B8B8]">Product Name</label>
+                        <label htmlFor="product-name" className="block text-[#B8B8B8]">Product Name</label>
                         <input
+                          id="product-name"
                           type="text"
                           value={form.name}
                           onChange={(e) => handleNameChange(e.target.value)}
-                          placeholder="e.g. Aegis Privacy Suite"
-                          className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                          placeholder="Aegis Privacy Suite"
+                          className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[#B8B8B8]">Storefront Slug</label>
+                        <label htmlFor="product-slug" className="block text-[#B8B8B8]">Storefront Slug</label>
                         <input
+                          id="product-slug"
                           type="text"
                           value={form.slug}
                           onChange={(e) =>
@@ -688,38 +693,40 @@ secrets:
                               primaryFrontendUrl: `https://${e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "-")}.pandem.app`,
                             })
                           }
-                          placeholder="e.g. aegis-privacy"
-                          className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                          placeholder="aegis-privacy"
+                          className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-[#B8B8B8]">Tagline</label>
+                      <label htmlFor="product-tagline" className="block text-[#B8B8B8]">Tagline</label>
                       <input
+                        id="product-tagline"
                         type="text"
                         value={form.tagline}
                         onChange={(e) => setForm({ ...form, tagline: e.target.value })}
-                        placeholder="Concise value proposition for your privacy enclave..."
-                        className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                        placeholder="Autonomous confidential litigation drafting and compliance engine in Intel TDX."
+                        className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-[#B8B8B8]">Detailed Description</label>
+                      <label htmlFor="product-description" className="block text-[#B8B8B8]">Detailed Description</label>
                       <textarea
+                        id="product-description"
                         rows={3}
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        placeholder="Explain what user data is processed, how zero persistent telemetry is guaranteed, and how funds stream via NEAR escrow..."
-                        className="w-full bg-[#0D0D0D] border border-[#2E2E2E] p-3 text-white text-xs focus:outline-none focus:border-[#894DEF] resize-none"
+                        placeholder="Enterprise legal workspace isolating attorney work product inside hardware-attested CVMs with verifiable remote attestation and automated escrow settlement."
+                        className="w-full bg-[#0D0D0D] border border-[#2E2E2E] p-3 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF] resize-none"
                       />
                     </div>
 
                     {/* Category Selection Grid */}
-                    <div className="space-y-2 pt-2">
-                      <label className="block text-[#B8B8B8]">Product Category</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <fieldset className="space-y-2 pt-2 border-none p-0 m-0">
+                      <legend className="block text-[#B8B8B8] mb-1">Product Category</legend>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="radiogroup" aria-label="Product Category">
                         {CATEGORIES.map((cat) => {
                           const isSelected = form.category === cat.id;
                           const IconComponent = cat.icon;
@@ -727,8 +734,10 @@ secrets:
                             <button
                               key={cat.id}
                               type="button"
+                              role="radio"
+                              aria-checked={isSelected}
                               onClick={() => setForm({ ...form, category: cat.id as any })}
-                              className={`p-3 border text-left transition-colors flex items-start gap-3 ${
+                              className={`p-3 border text-left transition-colors flex items-start gap-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                                 isSelected
                                   ? "bg-[#894DEF]/10 border-[#894DEF] text-white"
                                   : "bg-[#0D0D0D] border-[#2E2E2E] text-[#B8B8B8] hover:border-[#737373]"
@@ -743,13 +752,13 @@ secrets:
                           );
                         })}
                       </div>
-                    </div>
+                    </fieldset>
 
                     {/* Pricing Grid */}
                     <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3 mt-2">
                       <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2 text-[11px]">
                         <span className="text-white font-medium">Subscription Tiers</span>
-                        <span className="text-[#737373]">Oracle: 1 NEAR ≈ {NEAR_USDC_ORACLE_RATE} USDC</span>
+                        <span className="text-[#737373] tabular-nums">Oracle: 1 NEAR ≈ {NEAR_USDC_ORACLE_RATE.toFixed(2)} USDC</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -757,23 +766,25 @@ secrets:
                           <span className="text-xs text-white font-medium block">Monthly Plan</span>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="block text-[10px] text-[#737373]">USDC / mo</label>
+                              <label htmlFor="pricing-monthly-usdc" className="block text-[10px] text-[#737373]">USDC / mo</label>
                               <input
+                                id="pricing-monthly-usdc"
                                 type="number"
                                 min="1"
                                 value={form.monthlyUsdc}
                                 onChange={(e) => handleUsdcMonthlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                               />
                             </div>
                             <div>
-                              <label className="block text-[10px] text-[#737373]">NEAR / mo</label>
+                              <label htmlFor="pricing-monthly-near" className="block text-[10px] text-[#737373]">NEAR / mo</label>
                               <input
+                                id="pricing-monthly-near"
                                 type="number"
                                 step="0.01"
                                 value={form.monthlyNear}
                                 onChange={(e) => handleNearMonthlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                               />
                             </div>
                           </div>
@@ -783,23 +794,25 @@ secrets:
                           <span className="text-xs text-white font-medium block">Yearly Plan (Discounted)</span>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="block text-[10px] text-[#737373]">USDC / yr</label>
+                              <label htmlFor="pricing-yearly-usdc" className="block text-[10px] text-[#737373]">USDC / yr</label>
                               <input
+                                id="pricing-yearly-usdc"
                                 type="number"
                                 min="10"
                                 value={form.yearlyUsdc}
                                 onChange={(e) => handleUsdcYearlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                               />
                             </div>
                             <div>
-                              <label className="block text-[10px] text-[#737373]">NEAR / yr</label>
+                              <label htmlFor="pricing-yearly-near" className="block text-[10px] text-[#737373]">NEAR / yr</label>
                               <input
+                                id="pricing-yearly-near"
                                 type="number"
                                 step="0.1"
                                 value={form.yearlyNear}
                                 onChange={(e) => handleNearYearlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                               />
                             </div>
                           </div>
@@ -812,7 +825,7 @@ secrets:
                     <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
                       <span>Continue to Architecture</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -846,15 +859,17 @@ secrets:
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Confidential CVM Runtime">
                         {ENCLAVE_RUNTIMES.map((rt) => {
                           const isSelected = form.enclaveRuntime === rt.id;
                           return (
                             <button
                               key={rt.id}
                               type="button"
+                              role="radio"
+                              aria-checked={isSelected}
                               onClick={() => setForm({ ...form, enclaveRuntime: rt.id as any })}
-                              className={`p-3.5 border text-left transition-colors space-y-1.5 ${
+                              className={`p-3.5 border text-left transition-colors space-y-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                                 isSelected
                                   ? "bg-[#171717] border-[#894DEF] text-white"
                                   : "bg-[#171717] border-[#2E2E2E] text-[#B8B8B8] hover:border-[#737373]"
@@ -865,7 +880,7 @@ secrets:
                                 <span className="text-[10px] text-[#894DEF]">{rt.provider}</span>
                               </div>
                               <p className="text-[11px] text-[#737373] leading-snug">{rt.description}</p>
-                              <div className="flex justify-between text-[10px] text-[#737373] pt-1 border-t border-[#2E2E2E]">
+                              <div className="flex justify-between text-[10px] text-[#737373] pt-1 border-t border-[#2E2E2E] tabular-nums">
                                 <span>{rt.attestation}</span>
                                 <span>{rt.overhead}</span>
                               </div>
@@ -875,12 +890,13 @@ secrets:
                       </div>
 
                       <div className="space-y-1.5 pt-1">
-                        <label className="block text-[11px] text-[#B8B8B8]">Container Image URI</label>
+                        <label htmlFor="container-image" className="block text-[11px] text-[#B8B8B8]">Container Image URI</label>
                         <input
+                          id="container-image"
                           type="text"
                           value={form.containerImage}
                           onChange={(e) => setForm({ ...form, containerImage: e.target.value })}
-                          className="w-full bg-[#171717] border border-[#2E2E2E] p-2.5 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                          className="w-full bg-[#171717] border border-[#2E2E2E] p-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                         />
                       </div>
 
@@ -892,7 +908,7 @@ secrets:
                         <button
                           type="button"
                           onClick={() => handleCopy(composeHash, "hash")}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#262626] border border-[#2E2E2E] text-white text-[10px] hover:border-[#737373] transition-colors shrink-0"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#262626] border border-[#2E2E2E] text-white text-[10px] hover:border-[#737373] transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                         >
                           <Copy className="w-3 h-3" />
                           <span>{copiedId === "hash" ? "Copied" : "Copy"}</span>
@@ -938,15 +954,17 @@ secrets:
                         <span className="text-[10px] text-[#894DEF] font-mono">cloud-api.near.ai/v1</span>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2" role="radiogroup" aria-label="NEAR AI Cloud Inference Provider Model">
                         {NEAR_AI_MODELS.map((m) => {
                           const isSelected = form.aiModel === m.id;
                           return (
                             <button
                               key={m.id}
                               type="button"
+                              role="radio"
+                              aria-checked={isSelected}
                               onClick={() => setForm({ ...form, aiModel: m.id as any })}
-                              className={`w-full p-3 border text-left transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                              className={`w-full p-3 border text-left transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                                 isSelected
                                   ? "bg-[#171717] border-[#894DEF] text-white"
                                   : "bg-[#171717] border-[#2E2E2E] text-[#B8B8B8] hover:border-[#737373]"
@@ -962,7 +980,7 @@ secrets:
                                 <div className="text-[11px] text-[#737373]">{m.description}</div>
                               </div>
                               <div className="text-left sm:text-right shrink-0">
-                                <span className="text-xs font-mono font-medium text-[#894DEF] block">{m.rate}</span>
+                                <span className="text-xs font-mono font-medium text-[#894DEF] block tabular-nums">{m.rate}</span>
                                 <span className="text-[10px] text-[#737373]">{m.hardware}</span>
                               </div>
                             </button>
@@ -983,34 +1001,37 @@ secrets:
 
                       <div className="space-y-3">
                         <div className="space-y-1">
-                          <label className="block text-[11px] text-[#B8B8B8]">Primary Web URL</label>
+                          <label htmlFor="primary-frontend-url" className="block text-[11px] text-[#B8B8B8]">Primary Web URL</label>
                           <input
+                            id="primary-frontend-url"
                             type="text"
                             value={form.primaryFrontendUrl}
                             onChange={(e) => setForm({ ...form, primaryFrontendUrl: e.target.value })}
-                            className="w-full bg-[#171717] border border-[#2E2E2E] p-2.5 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                            className="w-full bg-[#171717] border border-[#2E2E2E] p-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                           />
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="block text-[11px] text-[#B8B8B8]">Filecoin / Lighthouse IPFS CID</label>
+                            <label htmlFor="filecoin-cid" className="block text-[11px] text-[#B8B8B8]">Filecoin / Lighthouse IPFS CID</label>
                             <input
+                              id="filecoin-cid"
                               type="text"
                               value={form.filecoinCid}
                               onChange={(e) => setForm({ ...form, filecoinCid: e.target.value })}
-                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                             />
                             <span className="text-[10px] text-[#737373] block">Lighthouse x402 recurring renewals</span>
                           </div>
 
                           <div className="space-y-1">
-                            <label className="block text-[11px] text-[#B8B8B8]">NEAR FastFS Mirror CID</label>
+                            <label htmlFor="fastfs-cid" className="block text-[11px] text-[#B8B8B8]">NEAR FastFS Mirror CID</label>
                             <input
+                              id="fastfs-cid"
                               type="text"
                               value={form.fastFsCid}
                               onChange={(e) => setForm({ ...form, fastFsCid: e.target.value })}
-                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus:outline-none focus:border-[#894DEF]"
+                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
                             />
                             <span className="text-[10px] text-[#737373] block">Decentralized WebAssembly frontend</span>
                           </div>
@@ -1023,7 +1044,7 @@ secrets:
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
                       <span>Back to Profile</span>
@@ -1031,7 +1052,7 @@ secrets:
                     <button
                       type="button"
                       onClick={() => setStep(3)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
                       <span>Continue to Economics</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1057,27 +1078,30 @@ secrets:
                     <div className="p-5 bg-[#0D0D0D] border border-[#2E2E2E] space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-xs text-white font-medium block">Simulated Subscriber Base</span>
-                          <span className="text-[11px] text-[#737373]">${form.monthlyUsdc} USDC / subscriber / month</span>
+                          <label htmlFor="subscriber-slider" className="text-xs text-white font-medium block cursor-pointer">
+                            Simulated Subscriber Base
+                          </label>
+                          <span className="text-[11px] text-[#737373] tabular-nums">${form.monthlyUsdc} USDC / subscriber / month</span>
                         </div>
                         <div className="text-right">
-                          <span className="text-lg font-mono font-semibold text-[#894DEF]">
+                          <span className="text-lg font-mono font-semibold text-[#894DEF] tabular-nums">
                             {form.simulatedSubscribers.toLocaleString()} Subscribers
                           </span>
-                          <span className="text-[11px] text-[#B8B8B8] block">
+                          <span className="text-[11px] text-[#B8B8B8] block tabular-nums">
                             ${economics.grossMrr.toLocaleString()} / mo Gross MRR
                           </span>
                         </div>
                       </div>
 
                       <input
+                        id="subscriber-slider"
                         type="range"
                         min="25"
                         max="5000"
                         step="25"
                         value={form.simulatedSubscribers}
                         onChange={(e) => setForm({ ...form, simulatedSubscribers: parseInt(e.target.value) || 25 })}
-                        className="w-full accent-[#894DEF] bg-[#262626] h-1.5 cursor-pointer"
+                        className="w-full accent-[#894DEF] bg-[#262626] h-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                       />
 
                       <div className="flex items-center gap-2">
@@ -1087,7 +1111,7 @@ secrets:
                             key={preset}
                             type="button"
                             onClick={() => setForm({ ...form, simulatedSubscribers: preset })}
-                            className={`px-2.5 py-1 text-[10px] border transition-colors ${
+                            className={`px-2.5 py-1 text-[10px] border transition-colors tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                               form.simulatedSubscribers === preset
                                 ? "bg-[#894DEF] border-[#894DEF] text-white"
                                 : "bg-[#171717] border-[#2E2E2E] text-[#B8B8B8] hover:border-[#737373]"
@@ -1101,7 +1125,7 @@ secrets:
 
                     {/* Segmented Waterfall Bar */}
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] text-[#B8B8B8]">
+                      <div className="flex justify-between text-[11px] text-[#B8B8B8] tabular-nums">
                         <span>Escrow Cashflow Distribution</span>
                         <span>100% of Subscription Funds</span>
                       </div>
@@ -1116,24 +1140,24 @@ secrets:
 
                       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 text-[11px]">
                         <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block">47.5% Dev Net</span>
-                          <span className="font-semibold text-[#4ADE80]">${economics.devNet.toLocaleString()}</span>
+                          <span className="text-[#737373] text-[10px] block tabular-nums">47.5% Dev Net</span>
+                          <span className="font-semibold text-[#4ADE80] tabular-nums">${economics.devNet.toLocaleString()}</span>
                         </div>
                         <div className="p-2.5 bg-[#0D0D0D] border border-[#894DEF]/40">
-                          <span className="text-[#894DEF] text-[10px] block">30% Market OpEx</span>
-                          <span className="font-semibold text-white">${economics.opex.toLocaleString()}</span>
+                          <span className="text-[#894DEF] text-[10px] block tabular-nums">30% Market OpEx</span>
+                          <span className="font-semibold text-white tabular-nums">${economics.opex.toLocaleString()}</span>
                         </div>
                         <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block">15% Warranty</span>
-                          <span className="font-semibold text-[#FBBF24]">${economics.bugWarranty.toLocaleString()}</span>
+                          <span className="text-[#737373] text-[10px] block tabular-nums">15% Warranty</span>
+                          <span className="font-semibold text-[#FBBF24] tabular-nums">${economics.bugWarranty.toLocaleString()}</span>
                         </div>
                         <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block">5% Contingency</span>
-                          <span className="font-semibold text-white">${economics.contingency.toLocaleString()}</span>
+                          <span className="text-[#737373] text-[10px] block tabular-nums">5% Contingency</span>
+                          <span className="font-semibold text-white tabular-nums">${economics.contingency.toLocaleString()}</span>
                         </div>
                         <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block">2.5% Protocol</span>
-                          <span className="font-semibold text-white">${economics.protocolFee.toLocaleString()}</span>
+                          <span className="text-[#737373] text-[10px] block tabular-nums">2.5% Protocol</span>
+                          <span className="font-semibold text-white tabular-nums">${economics.protocolFee.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -1141,7 +1165,7 @@ secrets:
                     {/* 30% Market Provider OpEx Breakdown */}
                     <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
                       <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2 text-[11px]">
-                        <span className="text-white font-medium">Market Provider Payments (${economics.opex.toLocaleString()} / mo)</span>
+                        <span className="text-white font-medium tabular-nums">Market Provider Payments (${economics.opex.toLocaleString()} / mo)</span>
                         <span className="text-[#894DEF]">Settle via budget.{form.slug}.testnet</span>
                       </div>
 
@@ -1149,10 +1173,10 @@ secrets:
                         <div className="p-3 bg-[#171717] border border-[#2E2E2E] space-y-1">
                           <div className="flex justify-between">
                             <span className="text-white font-medium">NEAR AI Cloud</span>
-                            <span className="text-[#894DEF]">50%</span>
+                            <span className="text-[#894DEF] tabular-nums">50%</span>
                           </div>
-                          <div className="text-sm font-semibold text-white">${economics.opexNearAi.toLocaleString()}</div>
-                          <span className="text-[10px] text-[#737373] block">
+                          <div className="text-sm font-semibold text-white tabular-nums">${economics.opexNearAi.toLocaleString()}</div>
+                          <span className="text-[10px] text-[#737373] block tabular-nums">
                             ~{(economics.tokenTokensMonthly / 1000).toFixed(0)}k private tokens/mo
                           </span>
                         </div>
@@ -1162,9 +1186,9 @@ secrets:
                             <span className="text-white font-medium">
                               {form.enclaveRuntime === "phala_dstack" ? "Phala Cloud" : "Akash Network"}
                             </span>
-                            <span className="text-[#894DEF]">33.3%</span>
+                            <span className="text-[#894DEF] tabular-nums">33.3%</span>
                           </div>
-                          <div className="text-sm font-semibold text-white">
+                          <div className="text-sm font-semibold text-white tabular-nums">
                             ${economics.opexCvm.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                           </div>
                           <span className="text-[10px] text-[#737373] block">Hardware Enclave CVM upkeep</span>
@@ -1173,9 +1197,9 @@ secrets:
                         <div className="p-3 bg-[#171717] border border-[#2E2E2E] space-y-1">
                           <div className="flex justify-between">
                             <span className="text-white font-medium">Filecoin Lighthouse</span>
-                            <span className="text-[#894DEF]">16.7%</span>
+                            <span className="text-[#894DEF] tabular-nums">16.7%</span>
                           </div>
-                          <div className="text-sm font-semibold text-white">
+                          <div className="text-sm font-semibold text-white tabular-nums">
                             ${economics.opexStorage.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                           </div>
                           <span className="text-[10px] text-[#737373] block">IPFS and FastFS CID renewals</span>
@@ -1192,7 +1216,7 @@ secrets:
                     <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
                       <span>Back to Architecture</span>
@@ -1201,7 +1225,7 @@ secrets:
                       type="button"
                       onClick={handleLaunch}
                       disabled={isDeploying}
-                      className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] disabled:opacity-50 text-white text-xs font-mono font-semibold transition-colors"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] disabled:opacity-50 text-white text-xs font-mono font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
                       {isDeploying ? (
                         <span>Deploying Contracts & Registering...</span>
@@ -1218,10 +1242,10 @@ secrets:
             </div>
 
             {/* RIGHT COLUMN: STICKY REAL-TIME CONFIGURATOR PREVIEW */}
-            <div className="lg:col-span-5 sticky top-24 space-y-4">
+            <div className="lg:col-span-5 sticky top-24 space-y-4" aria-label="Live Configuration Preview">
               <div className="bg-[#171717] border border-[#2E2E2E] p-5 space-y-4 font-mono text-xs">
                 {/* Preview Navigation Tabs */}
-                <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-3">
+                <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-3" role="tablist" aria-label="Configuration Inspector Tabs">
                   <div className="flex items-center gap-1.5">
                     <Terminal className="w-4 h-4 text-[#894DEF]" />
                     <span className="text-xs font-medium text-white">Live Configurator</span>
@@ -1236,8 +1260,10 @@ secrets:
                       <button
                         key={tab.id}
                         type="button"
+                        role="tab"
+                        aria-selected={previewTab === tab.id}
                         onClick={() => setPreviewTab(tab.id as any)}
-                        className={`px-2.5 py-1 text-[11px] border transition-colors ${
+                        className={`px-2.5 py-1 text-[11px] border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                           previewTab === tab.id
                             ? "bg-[#262626] border-[#894DEF] text-white"
                             : "bg-[#0D0D0D] border-[#2E2E2E] text-[#737373] hover:text-[#FAFAFA]"
@@ -1251,13 +1277,13 @@ secrets:
 
                 {/* TAB 1: COMPOSE MANIFEST */}
                 {previewTab === "compose" && (
-                  <div className="space-y-3">
+                  <div className="space-y-3" role="tabpanel" aria-label="Compose Manifest Preview">
                     <div className="flex items-center justify-between text-[11px] text-[#737373]">
                       <span>docker-compose.yml (Live Generated)</span>
                       <button
                         type="button"
                         onClick={() => handleCopy(generatedComposeManifest, "liveCompose")}
-                        className="inline-flex items-center gap-1 text-[#894DEF] hover:text-[#A273F2] transition-colors"
+                        className="inline-flex items-center gap-1 text-[#894DEF] hover:text-[#A273F2] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                       >
                         <Copy className="w-3 h-3" />
                         <span>{copiedId === "liveCompose" ? "Copied" : "Copy"}</span>
@@ -1272,7 +1298,7 @@ secrets:
 
                 {/* TAB 2: ATTESTATION MEASUREMENT */}
                 {previewTab === "attestation" && (
-                  <div className="space-y-3">
+                  <div className="space-y-3" role="tabpanel" aria-label="Attestation Measurement Preview">
                     <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
                       <span className="text-[10px] text-[#737373] block uppercase">Silicon Measurement Hash</span>
                       <code className="text-[#894DEF] text-[11px] break-all block">{composeHash}</code>
@@ -1304,32 +1330,32 @@ secrets:
 
                 {/* TAB 3: LIVE ECONOMICS */}
                 {previewTab === "economics" && (
-                  <div className="space-y-3 text-[11px]">
+                  <div className="space-y-3 text-[11px]" role="tabpanel" aria-label="Live Economics Breakdown">
                     <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
                       <div className="flex justify-between text-[#737373]">
                         <span>Projected Gross Revenue:</span>
-                        <span className="text-white font-semibold">${economics.grossMrr.toLocaleString()} / mo</span>
+                        <span className="text-white font-semibold tabular-nums">${economics.grossMrr.toLocaleString()} / mo</span>
                       </div>
-                      <div className="flex justify-between text-[#4ADE80] font-medium">
+                      <div className="flex justify-between text-[#4ADE80] font-medium tabular-nums">
                         <span>Developer Net (47.5%):</span>
                         <span>${economics.devNet.toLocaleString()} / mo</span>
                       </div>
-                      <div className="flex justify-between text-[#894DEF] font-medium">
+                      <div className="flex justify-between text-[#894DEF] font-medium tabular-nums">
                         <span>Autonomous OpEx (30%):</span>
                         <span>${economics.opex.toLocaleString()} / mo</span>
                       </div>
                     </div>
 
                     <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5 text-[10px] text-[#737373]">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between tabular-nums">
                         <span>NEAR AI Cloud Token Allocation:</span>
                         <span className="text-white">${economics.opexNearAi.toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between tabular-nums">
                         <span>Enclave CVM Upkeep:</span>
                         <span className="text-white">${economics.opexCvm.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between tabular-nums">
                         <span>Lighthouse Decentralized Pinning:</span>
                         <span className="text-white">${economics.opexStorage.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                       </div>
@@ -1349,7 +1375,7 @@ secrets:
                   </div>
                   <div className="flex justify-between">
                     <span>Active Plan:</span>
-                    <span className="text-[#894DEF] font-mono">${form.monthlyUsdc} USDC / mo</span>
+                    <span className="text-[#894DEF] font-mono tabular-nums">${form.monthlyUsdc} USDC / mo</span>
                   </div>
                 </div>
               </div>

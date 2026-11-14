@@ -93,7 +93,7 @@ export function ProductHuntLeaderboard({
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium bg-[#1F172B] text-[#C084FC] border border-[#894DEF]/30">
-                      <Trophy className="w-3 h-3 text-[#C084FC]" />
+                      <Trophy className="w-3 h-3 text-[#C084FC]" aria-hidden="true" />
                       <span>Product of the Day</span>
                     </span>
 
@@ -105,17 +105,17 @@ export function ProductHuntLeaderboard({
                     />
 
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#22C55E] bg-[#141F18] border border-[#22C55E]/30">
-                      <Cpu className="w-3 h-3" />
+                      <Cpu className="w-3 h-3" aria-hidden="true" />
                       <span>{podMeta.hardware}</span>
                     </span>
 
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#A1A1A1] bg-[#181818] border border-[#2A2A2A]">
-                      <Zap className="w-3 h-3 text-[#EAB308]" />
+                      <Zap className="w-3 h-3 text-[#EAB308]" aria-hidden="true" />
                       <span>{podMeta.model}</span>
                     </span>
 
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#737373] bg-[#181818] border border-[#2A2A2A] hidden sm:inline-flex">
-                      <Database className="w-3 h-3" />
+                      <Database className="w-3 h-3" aria-hidden="true" />
                       <span>{podMeta.storage}</span>
                     </span>
                   </div>
@@ -129,7 +129,7 @@ export function ProductHuntLeaderboard({
                   </p>
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-[#737373] pt-1">
-                    <span>Price: <span className="font-mono text-[#FAFAFA]">{productOfTheDay.price_display}</span></span>
+                    <span>Price: <span className="font-mono text-[#FAFAFA] tabular-nums">{productOfTheDay.price_display}</span></span>
                     <span>·</span>
                     <span>Billing: <span className="font-mono text-[#FAFAFA]">{productOfTheDay.period_display}</span></span>
                     <span>·</span>
@@ -143,16 +143,18 @@ export function ProductHuntLeaderboard({
               {/* Action Buttons */}
               <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
                 <button
+                  type="button"
                   onClick={(e) => handleUpvote(e, productOfTheDay.id)}
-                  className={`flex flex-col items-center justify-center w-14 h-16 border transition-colors ${
+                  className={`flex flex-col items-center justify-center w-14 h-16 border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                     upvoteData.voted
                       ? "bg-[#894DEF] text-white border-[#894DEF]"
                       : "bg-[#181818] border-[#2A2A2A] hover:border-[#894DEF] text-[#A1A1A1] hover:text-[#FAFAFA]"
                   }`}
+                  aria-label={`Upvote ${productOfTheDay.name}`}
                   title="Upvote product"
                 >
-                  <ChevronUp className="w-4 h-4" />
-                  <span className="font-mono text-xs font-semibold mt-0.5">
+                  <ChevronUp className="w-4 h-4" aria-hidden="true" />
+                  <span className="font-mono text-xs font-semibold mt-0.5 tabular-nums">
                     {upvoteData.count}
                   </span>
                   <span className="text-[10px] uppercase tracking-wider font-sans opacity-70">
@@ -161,11 +163,12 @@ export function ProductHuntLeaderboard({
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelectProduct(productOfTheDay);
                   }}
-                  className="px-5 py-3.5 bg-[#894DEF] hover:bg-[#7839DF] text-white text-xs sm:text-sm font-medium transition-colors"
+                  className="px-5 py-3.5 bg-[#894DEF] hover:bg-[#7839DF] text-white text-xs sm:text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                 >
                   Inspect Enclave & Subscribe
                 </button>
@@ -177,12 +180,13 @@ export function ProductHuntLeaderboard({
 
       {/* Filter and Controls Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Category Filters">
           {categories.map((cat) => (
             <button
+              type="button"
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors border ${
+              className={`px-3 py-1.5 text-xs font-medium transition-colors border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                 selectedCategory === cat
                   ? "bg-[#1A1A1A] text-[#FAFAFA] border-[#894DEF]"
                   : "bg-[#141414] text-[#737373] hover:text-[#FAFAFA] border-[#222222] hover:border-[#2A2A2A]"
@@ -195,28 +199,31 @@ export function ProductHuntLeaderboard({
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => setShowScoringExplainer(!showScoringExplainer)}
-            className={`px-3 py-1.5 text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs font-medium border transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
               showScoringExplainer
                 ? "bg-[#1A1A1A] text-[#FAFAFA] border-[#894DEF]"
                 : "bg-[#141414] text-[#A1A1A1] hover:text-[#FAFAFA] border-[#222222] hover:border-[#2A2A2A]"
             }`}
+            aria-expanded={showScoringExplainer}
           >
-            <Layers className="w-3.5 h-3.5 text-[#894DEF]" />
+            <Layers className="w-3.5 h-3.5 text-[#894DEF]" aria-hidden="true" />
             <span>Scoring Engine</span>
             {showScoringExplainer ? (
-              <ChevronUp className="w-3.5 h-3.5" />
+              <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
             ) : (
-              <ChevronDown className="w-3.5 h-3.5" />
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
             )}
           </button>
 
           <div className="flex items-center gap-1 bg-[#141414] p-1 border border-[#222222]">
             {["Today", "This Week", "All Time"].map((tab) => (
               <button
+                type="button"
                 key={tab}
                 onClick={() => setTimeFilter(tab)}
-                className={`px-2.5 py-1 text-xs transition-colors ${
+                className={`px-2.5 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                   timeFilter === tab
                     ? "bg-[#1E1E1E] text-[#FAFAFA] font-medium"
                     : "text-[#737373] hover:text-[#FAFAFA]"
@@ -253,7 +260,7 @@ export function ProductHuntLeaderboard({
               <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
                 <div className="flex flex-col items-center justify-center w-6 shrink-0 pt-1 sm:pt-0">
                   <span
-                    className={`font-mono text-sm font-semibold ${
+                    className={`font-mono text-sm font-semibold tabular-nums ${
                       rank === 1
                         ? "text-[#C084FC]"
                         : rank === 2
@@ -285,17 +292,17 @@ export function ProductHuntLeaderboard({
                     />
 
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#22C55E] bg-[#141F18] border border-[#22C55E]/30">
-                      <Cpu className="w-3 h-3" />
+                      <Cpu className="w-3 h-3" aria-hidden="true" />
                       <span>{meta.hardware}</span>
                     </span>
 
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A1A1A1] bg-[#181818] border border-[#2A2A2A] hidden md:inline-flex">
-                      <Zap className="w-3 h-3 text-[#EAB308]" />
+                      <Zap className="w-3 h-3 text-[#EAB308]" aria-hidden="true" />
                       <span>{meta.model}</span>
                     </span>
 
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#737373] bg-[#181818] border border-[#2A2A2A] hidden lg:inline-flex">
-                      <Database className="w-3 h-3" />
+                      <Database className="w-3 h-3" aria-hidden="true" />
                       <span>{meta.storage}</span>
                     </span>
                   </div>
@@ -305,14 +312,14 @@ export function ProductHuntLeaderboard({
                   </p>
 
                   <div className="flex items-center gap-2 text-xs text-[#737373] flex-wrap pt-0.5">
-                    <span className="font-mono text-[#FAFAFA] font-medium">{p.price_display}</span>
+                    <span className="font-mono text-[#FAFAFA] font-medium tabular-nums">{p.price_display}</span>
                     <span>/ {p.period_display}</span>
                     <span>·</span>
                     <span className="text-[#A1A1A1]">{p.category}</span>
                     <span>·</span>
-                    <span>Streak: <span className="font-mono text-[#FAFAFA]">{streak}</span></span>
+                    <span>Streak: <span className="font-mono text-[#FAFAFA] tabular-nums">{streak}</span></span>
                     <span>·</span>
-                    <span>Escrow TVL: <span className="font-mono text-[#FAFAFA]">{tvl} wNEAR</span></span>
+                    <span>Escrow TVL: <span className="font-mono text-[#FAFAFA] tabular-nums">{tvl} wNEAR</span></span>
                   </div>
                 </div>
               </div>
@@ -320,16 +327,18 @@ export function ProductHuntLeaderboard({
               {/* Upvote Button */}
               <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
                 <button
+                  type="button"
                   onClick={(e) => handleUpvote(e, p.id)}
-                  className={`flex flex-col items-center justify-center w-12 h-14 border transition-colors shrink-0 ${
+                  className={`flex flex-col items-center justify-center w-12 h-14 border transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                     upvoteData.voted
                       ? "bg-[#894DEF] text-white border-[#894DEF]"
                       : "bg-[#181818] border-[#2A2A2A] hover:border-[#894DEF] text-[#A1A1A1] hover:text-[#FAFAFA]"
                   }`}
+                  aria-label={`Upvote ${p.name}`}
                   title="Upvote product"
                 >
-                  <ChevronUp className="w-3.5 h-3.5" />
-                  <span className="font-mono text-xs font-semibold mt-0.5">
+                  <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="font-mono text-xs font-semibold mt-0.5 tabular-nums">
                     {upvoteData.count}
                   </span>
                 </button>
