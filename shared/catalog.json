@@ -1,0 +1,43 @@
+[
+  {
+    "id": "1",
+    "name": "PrivateGPT Enclave Edition",
+    "tagline": "TEE-isolated LLM assistant with encrypted chat memory and verifiable hardware attestation.",
+    "description": "High-assurance private LLM inference running inside NVIDIA NRAS / Intel TDX confidential hardware enclaves. Periodic on-chain heartbeats guarantee hardware attestation and liveness, with automatic pro-rata refunds if service degrades.",
+    "price_per_period": "100000000000000000000000",
+    "price_display": "0.1 wNEAR",
+    "period_seconds": 300,
+    "period_display": "5 minutes (demo)",
+    "grace_seconds": 120,
+    "grace_display": "2 minutes",
+    "category": "Private AI",
+    "status": "Active",
+    "features": [
+      "Hardware TEE Attestation (NVIDIA NRAS / Intel TDX)",
+      "Verifiable on-chain heartbeats",
+      "2.5% protocol / 30% ops / 20% contingency / 47.5% steward split",
+      "Non-custodial subscriber killswitch protection",
+      "Permissionless automated pro-rata refund claims"
+    ]
+  },
+  {
+    "id": "2",
+    "name": "SafeSync Zero-Knowledge Vault",
+    "tagline": "Client-side encrypted verifiable storage with periodic cryptographic integrity heartbeats.",
+    "description": "Decentralized automated storage with zero-knowledge encryption proofs. Heartbeats prove continuous data availability and backup freshness on NEAR testnet.",
+    "price_per_period": "200000000000000000000000",
+    "price_display": "0.2 wNEAR",
+    "period_seconds": 300,
+    "period_display": "5 minutes (demo)",
+    "grace_seconds": 120,
+    "grace_display": "2 minutes",
+    "category": "Private Storage",
+    "status": "Pending",
+    "features": [
+      "Client-side zero-knowledge encryption",
+      "Cryptographic proof of retrievability",
+      "Staged reserve contingency fund",
+      "Permissionless refund upon missed heartbeats"
+    ]
+  }
+]

@@ -47,3 +47,19 @@ export interface SubscribeMsg {
   subscriber?: string;
   refund_to?: string;
 }
+
+export interface CatalogItem {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  price_per_period: string;
+  price_display: string;
+  period_seconds: number;
+  period_display: string;
+  grace_seconds: number;
+  grace_display: string;
+  category: string;
+  status: ProductStatus;
+  features: string[];
+}

@@ -1,14 +1,17 @@
 export const PANDEM_ESCROW_ID =
-  process.env["PANDEM_ESCROW_ID"] ?? "pandem-escrow.testnet";
+  process.env["PANDEM_ESCROW_ID"] ?? "pandem-escrow-46cee5ca.testnet";
 
 export const PANDEM_TOKEN_ID =
-  process.env["PANDEM_TOKEN_ID"] ?? "usdc.fakes.testnet";
+  process.env["PANDEM_TOKEN_ID"] ?? "wrap.testnet";
 
 export const PANDEM_TREASURY_ID =
-  process.env["PANDEM_TREASURY_ID"] ?? "pandem-treasury.testnet";
+  process.env["PANDEM_TREASURY_ID"] ?? "pandem-treasury-46cee5ca.testnet";
+
+export const PANDEM_STEWARD_ID =
+  process.env["PANDEM_STEWARD_ID"] ?? "pandem-steward-46cee5ca.testnet";
 
 export const PANDEM_AGENT_ID =
-  process.env["PANDEM_AGENT_ID"] ?? "pandem-agent.testnet";
+  process.env["PANDEM_AGENT_ID"] ?? "pandem-agent-46cee5ca.testnet";
 
 export const SPLIT_BPS = {
   PROTOCOL_FEE: 250,      // 2.5%
