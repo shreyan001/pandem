@@ -194,3 +194,59 @@ export interface CloudPaymentTelemetry {
   active_allocation: BudgetAllocation;
   recent_receipts: InferencePaymentReceipt[];
 }
+
+export interface DeveloperMetrics {
+  steward_address: string;
+  reputation_score: number; // 0-100
+  wallet_score: number; // 0-100
+  requests_closed: number;
+  upgrades_made: number;
+  last_active_at: string;
+  verified_contract_address?: string;
+  stargazers_count?: number;
+}
+
+export interface TreasuryBreakdown {
+  total_locked_usd: string;
+  streamed_to_provider_usd: string;
+  bug_warranty_reserve_usd: string; // 7% reserved for bug fixes and updates
+  contingency_reserve_usd: string;
+  average_budget_per_sub_usd: string;
+  mrr_growth_pct: number;
+  escrow_warranty_days: number; // 70-day wait / dispute window
+  dynamic_allocation_status: "Streaming" | "Paused_Killswitch" | "Settled";
+}
+
+export interface SubscriberProposal {
+  id: string;
+  product_id: number;
+  title: string;
+  description: string;
+  tokens_allocated: number;
+  author: string;
+  created_at: string;
+  status: "Open" | "In_Review" | "Accepted" | "Closed";
+}
+
+export interface BugReport {
+  id: string;
+  product_id: number;
+  title: string;
+  severity: "Low" | "Medium" | "High" | "Critical";
+  description: string;
+  status: "Investigating" | "Fix_In_Progress" | "Resolved" | "Warranty_Claim";
+  warranty_reserve_hold_usd: string;
+  submitted_by: string;
+  submitted_at: string;
+  sla_hours_remaining: number;
+}
+
+export interface PrivateInferenceProblem {
+  id: string;
+  sector: "Legal & IP" | "Medical & Health" | "Executive & Ops" | "Finance & Tax" | "Whistleblower & Intel";
+  problem_title: string;
+  why_public_ai_violates_privacy: string;
+  pandem_tee_solution: string;
+  recommended_product_slug: string;
+}
+

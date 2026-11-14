@@ -84,6 +84,126 @@ export default function Home() {
         />
       </section>
 
+      {/* Real-World Crisis Solved: Private Inference Problem Domains */}
+      <section className="mt-16 pt-12 border-t border-zinc-800/80">
+        <div className="text-center max-w-3xl mx-auto mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-mono text-xs mb-3">
+            <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+            Why Public AI & Centralized Web2 Violate Privacy
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Problems Requiring Hardware-Attested Private Inference
+          </h2>
+          <p className="mt-2 text-xs sm:text-sm text-zinc-400">
+            Current Web2 applications log proprietary prompts, sell medical records, and leak executive calendar metadata. Pandem enforces mathematical zero-knowledge privacy backed by smart contract escrow.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 hover:border-zinc-700 transition-all flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block">Legal & Intellectual Property</span>
+              <h3 className="text-base font-bold text-white">Attorney-Client Privilege Waiver</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Submitting confidential contracts, M&A term sheets, or litigation briefs to OpenAI waives legal privilege. Third-party providers cache prompts and train models on user data.
+              </p>
+            </div>
+            <Link
+              href="/products/aegis-legal"
+              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 pt-2"
+            >
+              <span>Explore Aegis Legal AI (Intel TDX)</span>
+              <span>→</span>
+            </Link>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 hover:border-zinc-700 transition-all flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono text-red-400 uppercase tracking-wider block">Medical & Diagnostics</span>
+              <h3 className="text-base font-bold text-white">HIPAA Breaches & Health Profiling</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Entering rare pathology symptoms or psychotherapy session transcripts into public LLMs exposes patients to insurance blacklisting and unencrypted cloud storage breaches.
+              </p>
+            </div>
+            <Link
+              href="/products/pulsemed-tee"
+              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 pt-2"
+            >
+              <span>Explore PulseMed AI (NVIDIA TEE)</span>
+              <span>→</span>
+            </Link>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 hover:border-zinc-700 transition-all flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider block">Executive Operations</span>
+              <h3 className="text-base font-bold text-white">Calendar Metadata & Espionage</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Automated executive scheduling bots that connect to Google or Outlook leak board meetings, travel itineraries, and acquisition talks to central crawlers.
+              </p>
+            </div>
+            <Link
+              href="/products/chrono-executive"
+              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 pt-2"
+            >
+              <span>Explore ChronoSchedule AI</span>
+              <span>→</span>
+            </Link>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 hover:border-zinc-700 transition-all flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block">Finance & Tax</span>
+              <h3 className="text-base font-bold text-white">Ledger De-Anonymization</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Connecting multi-chain wallets to SaaS accounting platforms exposes full trading history, off-ramps, and proprietary strategies to centralized telemetry databases.
+              </p>
+            </div>
+            <Link
+              href="/products/ciphertax-ai"
+              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 pt-2"
+            >
+              <span>Explore CipherTax AI (ZK Enclave)</span>
+              <span>→</span>
+            </Link>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 hover:border-zinc-700 transition-all flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono text-purple-400 uppercase tracking-wider block">Whistleblower & Press</span>
+              <h3 className="text-base font-bold text-white">Subpoena-Vulnerable Drop-Boxes</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Whistleblower disclosures submitted through standard cloud SaaS leave IP logs, browser fingerprints, and unencrypted database copies vulnerable to government subpoenas.
+              </p>
+            </div>
+            <Link
+              href="/products/krypton-enclave"
+              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 pt-2"
+            >
+              <span>Explore Krypton Enclave</span>
+              <span>→</span>
+            </Link>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3 hover:border-zinc-700 transition-all flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono text-blue-400 uppercase tracking-wider block">Decentralized Intelligence</span>
+              <h3 className="text-base font-bold text-white">Corporate Espionage via Search</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Search engines build persistent dossiers tracking every corporate research inquiry, patent exploration, and competitor inquiry.
+              </p>
+            </div>
+            <Link
+              href="/products/searxng-tee"
+              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 pt-2"
+            >
+              <span>Explore SearXNG TEE Proxy</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Protocol Architecture Cards */}
       <section className="mt-16 pt-12 border-t border-zinc-800/80">
         <div className="text-center max-w-3xl mx-auto mb-10">

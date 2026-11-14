@@ -13,12 +13,13 @@ interface NavLink {
 }
 
 const NAV_LINKS: NavLink[] = [
-  { href: "/", label: "Leaderboard" },
-  { href: "/governance", label: "Governance", badge: "Vote" },
-  { href: "/me", label: "Dashboard" },
-  { href: "/steward", label: "Steward" },
+  { href: "/", label: "Catalog" },
+  { href: "/dashboard", label: "Dashboard", badge: "Sub" },
+  { href: "/dev/dashboard", label: "Developer", badge: "Dev" },
+  { href: "/me", label: "Session" },
+  { href: "/governance", label: "Governance" },
   { href: "/agent", label: "Agent Enclave" },
-  { href: "/components", label: "Testbed", badge: "UI" },
+  { href: "/components", label: "UI Kit" },
 ];
 
 const DEV_PERSONAS = [
