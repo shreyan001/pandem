@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useNearWallet } from "../context/NearWalletContext";
-import { Wallet, Plus, LogOut, ShieldCheck, X, Sparkles } from "lucide-react";
+import { Wallet, Plus, LogOut, ShieldCheck, X, Sparkles, Send } from "lucide-react";
 import { OnboardingDrawer } from "./OnboardingDrawer";
+import { SendUsdcModal } from "./SendUsdcModal";
 
 interface NavLink {
   href: string;
@@ -34,6 +35,7 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isClaimingFaucet, setIsClaimingFaucet] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isSendOpen, setIsSendOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -157,6 +159,18 @@ export function Navbar() {
                 <span>{isClaimingFaucet ? "Claiming..." : "Get test USDC"}</span>
               </button>
 
+              {/* Send tUSDC */}
+              <button
+                type="button"
+                onClick={() => setIsSendOpen(true)}
+                className="px-2 sm:px-2.5 py-1.5 text-xs font-mono font-medium bg-spectr-surface hover:bg-spectr-surface-raised text-spectr-ink hover:text-spectr-primary border border-spectr-hairline transition-colors inline-flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
+                title="Send test USDC to any NEAR account"
+                aria-label="Send test USDC"
+              >
+                <Send className="w-3.5 h-3.5 text-spectr-primary" aria-hidden="true" />
+                <span className="hidden sm:inline">Send</span>
+              </button>
+
               {/* Account identity badge: truncated on mobile */}
               <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-spectr-surface border border-spectr-hairline text-xs">
                 <span className="w-1.5 h-1.5 bg-spectr-success shrink-0" aria-hidden="true" />
@@ -222,6 +236,11 @@ export function Navbar() {
       <OnboardingDrawer
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
+      />
+
+      <SendUsdcModal
+        isOpen={isSendOpen}
+        onClose={() => setIsSendOpen(false)}
       />
 
       {walletError && (
