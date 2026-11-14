@@ -2,12 +2,51 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { NearWalletProvider } from "../context/NearWalletContext";
 import { Navbar } from "../components/Navbar";
+import { ExtensionErrorGuard } from "../components/ExtensionErrorGuard";
 
 export const metadata: Metadata = {
   title: "Pandem | Decentralized SaaS Subscription Escrow on NEAR",
   description:
     "Native NEAR subscription escrow with periodic heartbeat liveness verification, split payouts, and automated non-custodial refunds.",
 };
+
+const EARLY_EXTENSION_FILTER = `
+(function() {
+  if (typeof window === 'undefined') return;
+  var noise = [
+    'Could not establish connection. Receiving end does not exist.',
+    'The message port closed before a response was received.',
+    'Extension context invalidated.',
+    'Failed to connect to MetaMask',
+    'User closed the window before completing the action',
+    'Wallet request timed out',
+    'chrome-extension://',
+    'moz-extension://'
+  ];
+  function isNoise(msg) {
+    if (!msg) return false;
+    var str = String(msg);
+    for (var i = 0; i < noise.length; i++) {
+      if (str.indexOf(noise[i]) !== -1) return true;
+    }
+    return false;
+  }
+  window.addEventListener('unhandledrejection', function(e) {
+    var reason = (e && e.reason && (e.reason.message || e.reason.stack)) || String(e && e.reason || '');
+    if (isNoise(reason)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }, true);
+  window.addEventListener('error', function(e) {
+    var msg = (e && (e.message || (e.error && e.error.message))) || '';
+    if (isNoise(msg)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }, true);
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -16,37 +55,42 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark bg-black text-zinc-100">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: EARLY_EXTENSION_FILTER }} />
+      </head>
       <body className="antialiased min-h-screen flex flex-col bg-black text-zinc-100 selection:bg-emerald-500 selection:text-black">
-        <NearWalletProvider>
-          <Navbar />
-          <div className="flex-1">{children}</div>
-          <footer className="border-t border-zinc-800/80 py-8 text-center text-xs text-zinc-500 font-mono">
-            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                Pandem Protocol · Built for NEAR Hackathon (Real-World Money & Privacy Tracks)
+        <ExtensionErrorGuard>
+          <NearWalletProvider>
+            <Navbar />
+            <div className="flex-1">{children}</div>
+            <footer className="border-t border-zinc-800/80 py-8 text-center text-xs text-zinc-500 font-mono">
+              <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  Pandem Protocol · Built for NEAR Hackathon (Real-World Money & Privacy Tracks)
+                </div>
+                <div className="flex items-center gap-4 text-zinc-400">
+                  <a
+                    href="https://explorer.testnet.near.org"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-emerald-400 transition-colors"
+                  >
+                    NEAR Testnet Explorer
+                  </a>
+                  <span>·</span>
+                  <a
+                    href="https://cloud.near.ai"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-emerald-400 transition-colors"
+                  >
+                    NEAR AI Cloud TEE
+                  </a>
+                </div>
               </div>
-              <div className="flex items-center gap-4 text-zinc-400">
-                <a
-                  href="https://explorer.testnet.near.org"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-emerald-400 transition-colors"
-                >
-                  NEAR Testnet Explorer
-                </a>
-                <span>·</span>
-                <a
-                  href="https://cloud.near.ai"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-emerald-400 transition-colors"
-                >
-                  NEAR AI Cloud TEE
-                </a>
-              </div>
-            </div>
-          </footer>
-        </NearWalletProvider>
+            </footer>
+          </NearWalletProvider>
+        </ExtensionErrorGuard>
       </body>
     </html>
   );
