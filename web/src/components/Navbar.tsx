@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useNearWallet } from "../context/NearWalletContext";
-import { Wallet, Plus, LogOut, ShieldCheck, X } from "lucide-react";
+import { Wallet, Plus, LogOut, ShieldCheck, X, Sparkles } from "lucide-react";
+import { OnboardingDrawer } from "./OnboardingDrawer";
 
 interface NavLink {
   href: string;
@@ -31,9 +32,16 @@ export function Navbar() {
   } = useNearWallet();
   const [mounted, setMounted] = useState(false);
   const [isClaimingFaucet, setIsClaimingFaucet] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("onboard") === "1" || params.get("onboard") === "true") {
+        setIsOnboardingOpen(true);
+      }
+    }
   }, []);
 
   const handleClaimFaucet = async () => {
@@ -145,6 +153,15 @@ export function Navbar() {
               </div>
               <button
                 type="button"
+                onClick={() => setIsOnboardingOpen(true)}
+                className="px-2.5 py-1.5 text-xs font-mono font-medium bg-[#141414] hover:bg-[#181818] text-[#8A8A8A] hover:text-[#FAFAFA] border border-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                title="Open 3-step payments onboarding"
+              >
+                <span>Onboarding</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={disconnect}
                 className="p-1.5 bg-[#141414] hover:bg-[#181818] border border-[#222222] text-[#8A8A8A] hover:text-[#FAFAFA] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                 aria-label="Disconnect wallet"
@@ -154,18 +171,35 @@ export function Navbar() {
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={connect}
-              className="px-3.5 py-1.5 text-xs font-medium bg-[#141414] hover:bg-[#181818] text-[#FAFAFA] border border-[#222222] hover:border-[#333333] transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-              aria-label="Connect NEAR Wallet"
-            >
-              <Wallet className="w-3.5 h-3.5 text-[#8A8A8A]" aria-hidden="true" />
-              <span>Connect Wallet</span>
-            </button>
+            <div className="flex items-center gap-2" suppressHydrationWarning>
+              <button
+                type="button"
+                onClick={() => setIsOnboardingOpen(true)}
+                className="px-3.5 py-1.5 text-xs font-semibold bg-[#894DEF] hover:bg-[#7839DF] text-white border border-[#894DEF] transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                aria-label="Get started with Pandem"
+              >
+                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Get started</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={connect}
+                className="px-3 py-1.5 text-xs font-medium bg-[#141414] hover:bg-[#181818] text-[#FAFAFA] border border-[#222222] hover:border-[#333333] transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                aria-label="Connect NEAR Wallet"
+              >
+                <Wallet className="w-3.5 h-3.5 text-[#8A8A8A]" aria-hidden="true" />
+                <span>Connect</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
+
+      <OnboardingDrawer
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+      />
 
       {walletError && (
         <div className="bg-[#141414] border-t border-[#222222] px-4 py-2 text-xs flex items-center justify-between gap-2 text-[#FAFAFA]" role="alert">

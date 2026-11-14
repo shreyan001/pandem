@@ -18,6 +18,7 @@ interface NearWalletContextType {
   refreshBalances: () => Promise<void>;
   registerStorage: () => Promise<string | null>;
   claimFaucet: () => Promise<string | null>;
+  setupPaymentsBatch: () => Promise<{ batchTx: string | null; storageTx: string | null; faucetTx: string | null }>;
   sendSubscribe: (productId: string, periods: number, amountYocto: string) => Promise<string | null>;
 }
 
@@ -254,6 +255,77 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const setupPaymentsBatch = async (): Promise<{ batchTx: string | null; storageTx: string | null; faucetTx: string | null }> => {
+    if (!connector || !accountId) return { batchTx: null, storageTx: null, faucetTx: null };
+    try {
+      setWalletError(null);
+      const wallet = await connector.wallet();
+
+      const balBigInt = BigInt(tokenBalance || "0");
+      const needsStorage = !isStorageRegistered;
+      const needsFaucet = balBigInt < 50000000n; // 50 tUSDC (6 decimals)
+
+      if (!needsStorage && !needsFaucet) {
+        return { batchTx: "already_funded", storageTx: "already_registered", faucetTx: "already_funded" };
+      }
+
+      const actions: any[] = [];
+      if (needsStorage) {
+        actions.push({
+          type: "FunctionCall",
+          params: {
+            methodName: "storage_deposit",
+            args: { account_id: accountId, registration_only: true },
+            gas: "30000000000000", // 30 TGas
+            deposit: "1250000000000000000000", // 0.00125 NEAR
+          },
+        });
+      }
+      if (needsFaucet) {
+        actions.push({
+          type: "FunctionCall",
+          params: {
+            methodName: "faucet",
+            args: {},
+            gas: "50000000000000", // 50 TGas
+            deposit: "0",
+          },
+        });
+      }
+
+      try {
+        const outcome: any = await wallet.signAndSendTransaction({
+          receiverId: PANDEM_TOKEN_ID,
+          actions,
+        });
+        const txHash = outcome?.transaction?.hash ?? outcome?.transaction_outcome?.id ?? "submitted";
+        await refreshBalances();
+        return {
+          batchTx: txHash,
+          storageTx: needsStorage ? txHash : "already_registered",
+          faucetTx: needsFaucet ? txHash : "already_funded",
+        };
+      } catch (batchErr) {
+        console.warn("Batch execution fallback to sequential:", batchErr);
+        let sTx = null;
+        let fTx = null;
+        if (needsStorage) {
+          sTx = await registerStorage();
+        }
+        if (needsFaucet) {
+          fTx = await claimFaucet();
+        }
+        await refreshBalances();
+        return { batchTx: null, storageTx: sTx, faucetTx: fTx };
+      }
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      console.warn("Setup payments batch error:", msg);
+      setWalletError(`Setup payments notice: ${msg}`);
+      return { batchTx: null, storageTx: null, faucetTx: null };
+    }
+  };
+
   const sendSubscribe = async (
     productId: string,
     periods: number,
@@ -314,6 +386,7 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
         refreshBalances,
         registerStorage,
         claimFaucet,
+        setupPaymentsBatch,
         sendSubscribe,
       }}
     >

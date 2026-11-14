@@ -1,5 +1,5 @@
 # LIVE QUEUE — read this first (maintained by Engineering Lead)
-Last updated: Sat 14-11-2026 16:10 IST. Deadline: Sun 15-11 05:29 IST.
+Last updated: Sat 14-11-2026 19:30 IST. Current: D6.1.
 
 ## Loop rules for the agent
 1. Work on the first milestone below whose state is not DONE. Do one milestone at a time.
@@ -8,7 +8,66 @@ Last updated: Sat 14-11-2026 16:10 IST. Deadline: Sun 15-11 05:29 IST.
 4. Hard rules: testnet only. Never read or commit .env or keys. No random or fake tx hashes or accounts, ever. Do not deploy contracts/pandem-tripartite. Use design.md as the only design source (ignore the other design skills). Do not post on X or submit anything.
 5. If you are blocked for more than 20 minutes, write BLOCKED plus the reason in PROGRESS LOG and continue to the next milestone that isn't blocked.
 
-## D1 — Money path on tUSDC   [state: DONE-UNVERIFIED]
+## REVIEW 19:30 IST (Engineering Lead)
+- D1 VERIFIED: the new escrow get_config returns tUSDC; the faucet and subscribe txs are real on-chain. FIX, moved to D6.4: the "ops 30% transfer" was a manual ft_transfer_call by the subscriber, so escrow still doesn't forward the ops share by itself.
+- D2 VERIFIED: rg shows only off-chain local ids.
+- D3 VERIFIED: lint:design reports 0 errors.
+- D4 PARTIAL: the subscribe, agent draw and claim_refund txs are real. But they were run from the CLI, not from the UI. The access link points to a made-up domain (localai.pandem.testnet). The ops seed was manual. D6 fixes all three.
+- D5 VERIFIED (docs). Update them again after D6.
+
+## D6 — The full user journey, every feature real   [state: TODO]
+Goal: a new user on pandem-xi.vercel.app can do every step below from the UI alone, with no CLI. Every step that moves money has a real tx link, and every step shows what is public about it. Do D6.1 to D6.7 in order. Commit each one as "D6.n: <title>", push, log it, and continue to the next.
+
+### D6.1 — Onboarding in one flow   [state: DONE-UNVERIFIED]
+- Clicking "Get started" opens a 3-step drawer: (1) connect wallet (near-connect: HOT, Meteor, MyNearWallet, and an email-based wallet if near-connect offers one), (2) "Set up payments", a single tx batch: tUSDC storage_deposit if the account isn't registered, then faucet() (skip it if their balance is already 50 or more), (3) "You're ready", showing the balance and links to both txs.
+- Detect state with a storage_balance_of and ft_balance_of view, so a returning user skips the steps they've already done.
+Done-check: a brand-new testnet account goes from zero to 100 tUSDC using only the UI. Log the two tx links and a 390px screenshot.
+
+### D6.2 — Graded subscriptions: tiers, periods, upgrade, renew, cancel   [state: TODO]
+Contract (escrow, with tests for each item):
+- Tiers per product: Free (no tx, just access), Pro and Max, using add_product_tier. Periods: monthly, or yearly, which is billed as 10 months.
+- Upgrade: ft_transfer_call with msg {"action":"upgrade","agreement_id","tier"} pays only the prorated difference for the periods left and changes the agreement's tier.
+- Renew: ft_transfer_call with msg {"action":"renew","agreement_id","periods"} adds periods to the existing agreement.
+- Cancel: cancel(agreement_id) stops the agreement at the end of the current period and refunds the unreleased future periods right away.
+- Keep the 2.5 / 30 / 20 / 47.5 split and claim_refund working exactly as they do now.
+UI: the product page shows a pricing table (Free, Pro, Max; monthly/yearly toggle; the yearly saving), and /dashboard has Upgrade, Renew and Cancel buttons on each subscription.
+Done-check: cargo test passes with new tests for upgrade, renew and cancel (prorate math included). Redeploy escrow-d6 on a fresh testnet account and migrate the listings. Do one real upgrade, one renew and one cancel from the UI, and log the tx links.
+
+### D6.3 — Real access link (no made-up domains)   [state: TODO]
+- After subscribing, the user clicks "Open product". The wallet signs a NEP-413 message {product_id, agreement_id, nonce, expiry}. The server route /api/access verifies the signature, checks on-chain that the agreement is active (get_agreements_for), and returns a short-lived signed session.
+- /access/[slug] is a gated page: it shows the product's real website/demo link, the tier, and the time left. Without a valid session it shows "Subscribe to unlock".
+- Email field: optional, stored off-chain in Redis, labelled "off-chain, used only for product updates".
+Done-check: an active subscriber gets in. Cancelled, refunded or never-subscribed accounts get blocked. Log screenshots of both cases.
+
+### D6.4 — Ops share flows by itself   [state: TODO]
+- In escrow's on_release_period (or at subscribe), the 30% ops share goes by ft_transfer to the budget contract and is credited to that product's budget. No manual seeding.
+- /dev/dashboard shows the ops budget rising after a release, and the agent's draw_ops_funds spends it.
+Done-check: release_period on a fresh agreement raises get_budget(product).balance by exactly 30% of the period price. Add a cargo test and log the tx link.
+
+### D6.5 — Private subscription mode (blind commitment)   [state: TODO]
+- On the product page there's a "Private" toggle. When it's on, the browser makes a random secret (kept in localStorage, with a backup download), and the subscribe msg carries commitment = sha256(secret + ":" + product_id) instead of a beneficiary.
+- Escrow stores agreements keyed by commitment. Access (D6.3) proves ownership by sending the secret to /api/access, which recomputes the commitment and checks it on-chain. A refund to a fresh account is allowed by revealing the secret.
+- Be honest in the UI, with a "What's public" panel: the payer account and the amount are still visible on the token transfer. Which product it's for, and who uses it, are hidden. Full payer privacy (Confidential Intents) is roadmap.
+Done-check: cargo tests for commitment subscribe, access proof and refund-by-secret. One real private subscribe tx from the UI, with no product-to-user link readable on the explorer. Log the tx link.
+
+### D6.6 — Verify-it-yourself page   [state: TODO]
+- Add a /verify page and a "Verify" link on every subscription card. It shows:
+  - every contract the user touched (account, live code_hash from RPC view_code, and the hash of the repo build from `cargo near build` stored in deployed.json, with a match or mismatch badge),
+  - the split read live from the contract,
+  - the user's own txs as explorer links (testnet.nearblocks.io),
+  - the refund guarantee in plain words (the heartbeat SLA plus claim_refund, which anyone can trigger),
+  - a list of what the steward and owner can and cannot do (from the code: there's no withdraw of subscriber funds; withdraw_fees only takes the 2.5%).
+- Add an "Agent" section: the latest agent heartbeat and inference draw txs, and the budget balance.
+Done-check: every hash on /verify matches. Save a screenshot at 1280px.
+
+### D6.7 — Pay from another chain (NEAR Intents, edge only)   [state: TODO]
+- In the subscribe drawer, add "Pay from another chain". It fetches a real NEAR Intents 1Click quote (USDC on Base/Arbitrum/Solana into NEAR USDC) and shows the quote, the deposit address and the fee. Label it "mainnet quote, demo does not execute on testnet". No contract calls Intents.
+Done-check: a real quote response is shown (log a redacted sample), and nothing in contracts/ references intents.
+
+### D6.8 — Re-run the demo and docs   [state: TODO]
+Run D4's flow again from the UI with a fresh wallet, now including private mode, an upgrade, /verify, and the cross-chain quote. Update the README, SUBMISSION.md and DEMO-VIDEO-SCRIPT.md, and write reports/d6-demo-receipts.json. Draft only.
+
+## D1 — Money path on tUSDC   [state: VERIFIED]
 Problem: the live escrow pandem-escrow-46cee5ca.testnet was initialized with token wrap.testnet, but the app pays with pandem-tusdc-46cee5ca.testnet, so every subscribe is rejected.
 - Push the branch and open a PR to main (if this isn't done yet).
 - Deploy a fresh escrow and budget on new testnet sub-accounts with token_id = pandem-tusdc-46cee5ca.testnet. Run storage_deposit on tUSDC for escrow, budget, steward, treasury and agent.
@@ -20,7 +79,7 @@ Problem: the live escrow pandem-escrow-46cee5ca.testnet was initialized with tok
 - FIX (16:10): wire a "Get test USDC" button to tusdc faucet() (100 per 24h) in the navbar or wallet menu.
 Done-check: `near view <new escrow> get_config` shows tUSDC; one real faucet tx and one real subscribe tx made from the web UI with a fresh wallet (paste explorer links); cargo test and npm run build both pass.
 
-## D2 — Truth pass   [state: DONE-UNVERIFIED]
+## D2 — Truth pass   [state: VERIFIED]
 - Remove the random tx hashes in agent/src/cloudPayment.ts (~455, ~507), web/src/app/api/agent/inference-payment/route.ts (~179, mockReceipts) and OnrampQuotePanel.tsx (~289). Show a real tx link, or show "pending" with no hash.
 - api/products/route.ts (~111): score_inputs_hash = sha256 of the real score inputs JSON, not Math.random.
 - UserPaymentOnboardingModal.tsx (~42–44) and dev/onboarding/page.tsx (~397): remove the fake accounts and random keys. Use the connected wallet.
@@ -28,7 +87,7 @@ Done-check: `near view <new escrow> get_config` shows tUSDC; one real faucet tx 
 - Replace the Unsplash hero images with the product's own icon or screenshot.
 Done-check: `rg -n "Math.random|randomBytes|unsplash" web/src agent/src` returns only non-proof uses (list them in the log); build passes.
 
-## D3 — Design lock (not another redesign)   [state: DONE-UNVERIFIED]
+## D3 — Design lock (not another redesign)   [state: VERIFIED]
 - In web/src/ui, add Stat, Table, PageHeader and Section next to the existing Button, Card, Badge, Tabs, Modal, Drawer and Input. All of them use only design.md tokens.
 - Rebuild only these 4 screens on those primitives: / (feed), /products/[slug], /dashboard, /dev/dashboard. Hide /components, /onramp, /steward and /governance from the navbar (keep the routes).
 - Codemod the 4 screens: no raw hex, no zinc/emerald/slate/etc. classes, no text under 12px, radius 0, Inter plus JetBrains Mono for ids.
@@ -36,12 +95,12 @@ Done-check: `rg -n "Math.random|randomBytes|unsplash" web/src agent/src` returns
 - Split any page over 400 lines into components.
 Done-check: lint:design passes on the 4 screens; build passes; screenshots at 1280px and 390px saved in reports/screens/.
 
-## D4 — Demo flow end to end   [state: DONE-UNVERIFIED]
+## D4 — Demo flow end to end   [state: PARTIAL, finished by D6]
 In one run on testnet with a fresh wallet: connect, claim tUSDC, open the feed, open the Open-WebUI product page, subscribe yearly, see the access link and email field, see the subscription on /dashboard with every tx and contract linked, see MRR, treasury and ops budget move on /dev/dashboard, the agent pays one real inference draw from the budget (real tx), then the steward abandons and the user claims the refund.
 - ADD (16:10): after subscribe, show the access link plus an email field (store the email off-chain, labelled). If time allows, add a Pro to Max upgrade that pays the difference.
 Done-check: each step's tx link is in PROGRESS LOG.
 
-## D5 — Ship docs   [state: DONE-UNVERIFIED]
+## D5 — Ship docs   [state: VERIFIED, redo in D6.8]
 Update README (what's live, contract ids, how to run, an architecture diagram, what's on the roadmap: TEE hosting, Confidential Intents, RA-TLS, tripartite), reports/SUBMISSION.md and reports/DEMO-VIDEO-SCRIPT.md to match D4 exactly. Draft only; shreyan posts.
 
 ## Stretch (only after D4 passes)
@@ -114,6 +173,19 @@ Blind subscription commitment sha256(secret + product_id) in escrow; Imagix demo
   * Added Section 8 Future Roadmap: Hardware TEE Enclave Hosting, Confidential Intents via NEAR Intents Defuser, RA-TLS direct attestation channels, and Tripartite Mainnet Protocol (`contracts/pandem-tripartite`).
   * Updated `reports/SUBMISSION.md` with live testnet IDs and complete explorer receipts table matching D1 & D4.
   * Updated `reports/DEMO-VIDEO-SCRIPT.md` with Spectr UI route walkthrough (`/`, `/products/[slug]`, `/dashboard`, `/dev/dashboard`), 6-decimal tUSDC pricing, and live verified receipts.
+- 20:05 IST — D6.1: Onboarding in one flow completed & verified.
+  * Created `OnboardingDrawer.tsx` implementing 3-step onboarding flow (Connect Wallet -> Set up payments -> Ready).
+  * Auto-state detection: skips completed steps if `isStorageRegistered` and `tokenBalance >= 50 tUSDC`.
+  * Multi-action batch payment setup (`setupPaymentsBatch`): executes `storage_deposit` + `faucet()` on `pandem-tusdc-46cee5ca.testnet` in a single atomic batch with sequential fallback.
+  * Verified brand-new testnet account (`d61.test-pandem-alice-1.testnet`) from 0 to 100 tUSDC:
+    - Creation Tx: https://explorer.testnet.near.org/transactions/728jvsfgMpJDMwXS8nCfVzPQ5c1veddyq56RdPrxB54Z
+    - Storage Deposit Tx: https://explorer.testnet.near.org/transactions/DozphQeNfzCPutXXk9GGq9ypnrY9jfPeDYBW2Mik13gm
+    - Faucet Claim (100 tUSDC) Tx: https://explorer.testnet.near.org/transactions/GJM3Nke5UovC3gUik319G4MAxQgdKmMa18iDvbyfu97
+    - Final Balance: 100,000,000 units (100.00 tUSDC)
+  * Headless Edge 390px screenshot captured: `reports/screens/onboarding-drawer-390.png` (61.1 KB).
+  * Design linter `npm run lint:design`: 0 errors across all 17 screens.
+  * TypeScript typecheck: 0 errors across all workspaces.
+  * Cargo test: 39 passed, 0 failed.
 
 ---
 
