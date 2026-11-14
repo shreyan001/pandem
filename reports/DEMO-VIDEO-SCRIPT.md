@@ -12,11 +12,11 @@
 | Scene | Time | Focus Area | Visual on Screen |
 |---|---|---|---|
 | **Scene 1** | 0:00 - 0:45 | Problem Pitch | Title slide / Diagram: Stripe vs Crypto Upfront Payments |
-| **Scene 2** | 0:45 - 1:30 | Storefront & Subscription | `http://localhost:3000` (Catalog & Subscribe Modal) |
+| **Scene 2** | 0:45 - 1:30 | Product Hunt Discovery & 4-Way Escrow | `http://localhost:3000` (Leaderboard, Scoring, Subscribe Modal) |
 | **Scene 3** | 1:30 - 2:15 | 1Click Cross-Chain On-Ramp | `http://localhost:3000/onramp` (Solver Dry-Quote & Intent Payload) |
-| **Scene 4** | 2:15 - 3:00 | Privacy & Hardware TEE | `http://localhost:3000/agent` (Intel TDX & NVIDIA NRAS Attestation) |
-| **Scene 5** | 3:00 - 4:00 | Lifecycle: Release, Killswitch, Refund | `http://localhost:3000/steward` & `/me` (Killswitch & Refund) |
-| **Scene 6** | 4:00 - 4:30 | Conclusion & Architecture | Testnet Explorer receipts & GitHub repo |
+| **Scene 4** | 2:15 - 3:00 | Privacy, Hardware TEE & Cloud Payments | `http://localhost:3000/agent` (Intel TDX & NVIDIA NRAS Attestation, Compute Ledger) |
+| **Scene 5** | 3:00 - 3:45 | Contingency Hub & Pro-Rata Refunds | `http://localhost:3000/governance` & `/me` (Proposal Voting, Killswitch, Refund) |
+| **Scene 6** | 3:45 - 4:15 | Multi-Contract Architecture & Verification | Testnet Explorer receipts & GitHub repo (`escrow`, `budget`, `registry`) |
 
 ---
 

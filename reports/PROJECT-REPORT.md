@@ -142,16 +142,28 @@ Pandem provides **programmable consumer protection** for recurring software serv
   - `/steward`: Provider dashboard, operational reserve balances, and `declare_abandoned` killswitch button.
   - `/agent`: Confidential AI enclave dashboard, runner health monitor, and hardware attestation viewer.
 
-### Milestone M7: Stage 2 Architecture, 1Click On-Ramp & Component Testbed
-- **Objective**: Formalize multi-stage evolution, integrate cross-chain edge on-ramp, and build interactive design system testbed.
+### Milestone M7: Stage 2 Multi-Contract Architecture & On-Ramp
+- **Objective**: Expand the single-escrow model into a modular 3-contract architecture (`escrow`, `budget`, `registry`), integrate 1Click cross-chain on-ramping, and establish design system primitives.
 - **Deliverables**:
-  - `docs/STAGE-2.md`: 707-line architecture specification for `contracts/budget`, yearly agreements (12 monthly periods), 7-day grace windows, and dynamic inference dampeners.
+  - `contracts/budget/src/lib.rs`: Operations budget streaming contract managing the 30% ops share, 120% burst period draw caps, direct agent compute draws, ±15% inference cost dampener, and 7-day review lock.
+  - `contracts/registry/src/lib.rs`: Decentralized product registry and Waterfall Contingency Hub for proposal voting with 50% quorum, 3-day vote windows, and 20% contingency pool grant caps.
   - `web/src/app/onramp/page.tsx` & `OnrampQuotePanel.tsx`: 1Click Defuser dry-quote simulator for cross-chain swaps (ETH, SOL, Base, Arb, BTC to USDC on NEAR).
   - `web/src/app/components/page.tsx`: Interactive testbed showcasing every UI primitive, button states, split calculators, and modals.
   - `web/src/components/Navbar.tsx`: Responsive navigation with 1-click testnet persona switching.
 
-### Milestone M8: Project Reports & Submission Dossier
-- **Objective**: Consolidate complete project report, hackathon submission documentation, video script, and architectural comparison in `reports/`.
+### Milestone M8: Full Multi-Contract Deployment, Voting, Cloud Payments & Reports
+- **Objective**: Deploy all 3 contracts to NEAR testnet, verify live governance proposal voting and cloud payments, and publish comprehensive documentation.
+- **Contract Deployments & Explorer Receipts**:
+  - `pandem-escrow-46cee5ca.testnet`: [Tx: 88Ms1iCu...](https://explorer.testnet.near.org/transactions/88Ms1iCuq3uC7qbNfWm7wgQ4uQd5icUAb1eSac3KAtts)
+  - `pandem-budget-46cee5ca.testnet`: [Tx: 59JVrLeF...](https://explorer.testnet.near.org/transactions/59JVrLeFwsBCQoP8YYSyY7Z8bnWWb7JBq756n5fsF1ox)
+  - `pandem-registry-46cee5ca.testnet`: [Tx: Gi6qzGSg...](https://explorer.testnet.near.org/transactions/Gi6qzGSg7tjchAmKRhNJAfSLKTQPMHUhhh9iUeMRUmqZ)
+  - Product Listing #1: [Tx: ERa8k4kt...](https://explorer.testnet.near.org/transactions/ERa8k4ktcCNSBSVmPnk8uh67NFutpBhQEfi29X2ujKyr)
+  - Contingency Reserve Update: [Tx: GifbYk1n...](https://explorer.testnet.near.org/transactions/GifbYk1neaxd4nVheJfYqqaozwrVx64hvnkUwcH7z17Q)
+  - Contingency Proposal #1 Creation: [Tx: BqNZuy17...](https://explorer.testnet.near.org/transactions/BqNZuy17iDo1PNcEvsVK21NoKuYWxXioDYKJc7Egt9Rc)
+  - Proposal #1 Vote: [Tx: FJvojngv...](https://explorer.testnet.near.org/transactions/FJvojngvT2Eddn9J74vG3qGPLBiT6HJkVNkkWToXnVaE)
+- **Cloud Inference Payment Engine**: `agent/src/cloudPayment.ts` autonomous token-metering and on-chain draw against `contracts/budget` for `Qwen/Qwen3.8-27B` with SHA-256 cost proofs.
+- **Product Hunt Discovery & Governance UI**: `web/src/app/page.tsx` Product Hunt ranking board, `web/src/components/ScoringExplainer.tsx`, and `web/src/app/governance/page.tsx` contingency voting hub.
+- **Verification**: 23/23 Rust unit tests passing across all 3 contracts; 0 TypeScript errors across 3 workspaces.
 
 ---
 
