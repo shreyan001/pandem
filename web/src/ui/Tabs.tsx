@@ -35,7 +35,7 @@ export const Tabs: React.FC<TabsProps> = ({
               className={`px-4 py-2 text-xs font-semibold font-mono tracking-wider rounded-none uppercase transition-all duration-150 inline-flex items-center gap-2 select-none border min-h-[36px] ${
                 isActive
                   ? "bg-spectr-primary border-spectr-primary text-spectr-ink"
-                  : "bg-spectr-surface border-spectr-hairline text-spectr-muted hover:text-spectr-ink hover:border-neutral-600"
+                  : "bg-spectr-surface border-spectr-hairline text-spectr-muted hover:text-spectr-ink hover:border-spectr-hairline"
               } disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               <span>{tab.label}</span>

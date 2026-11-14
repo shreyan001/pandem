@@ -2,49 +2,15 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import {
-  Clock,
-  Coins,
-  Activity,
-  ShieldAlert,
-  CheckCircle2,
-  ArrowRight,
-  RefreshCw,
-  Sliders,
-  ExternalLink,
-  Cpu,
-  Lock,
-  Scale,
-  Terminal,
-  AlertTriangle,
-  Check,
-  ChevronRight,
-  Database,
-} from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { ENRICHED_PRODUCTS, EnrichedProduct, PANDEM_BUDGET_ID, PANDEM_ESCROW_ID } from "@pandem/shared";
 import { AbstractLogo } from "../../../components/AbstractLogo";
-
-interface PayoutTranche {
-  id: number;
-  label: string;
-  periodRange: string;
-  amountUsdc: string;
-  status: "Released" | "Streaming" | "Locked";
-  unlocksIn?: string;
-  progressPct?: number;
-}
-
-interface RiskCorrectionProposal {
-  id: string;
-  title: string;
-  reason: string;
-  requestedReleasePct: string;
-  forPct: number;
-  againstPct: number;
-  quorumPct: number;
-  status: "Voting_Open" | "Passed" | "Rejected";
-  hoursRemaining?: number;
-}
+import { PageHeader, Badge, Button } from "../../../ui";
+import { OnchainTelemetryBanner } from "./components/OnchainTelemetryBanner";
+import { PayoutStreamStation, PayoutTranche } from "./components/PayoutStreamStation";
+import { HeartbeatStation } from "./components/HeartbeatStation";
+import { RiskCorrectionPanel, RiskCorrectionProposal } from "./components/RiskCorrectionPanel";
+import { RiskProposalModal } from "./components/RiskProposalModal";
 
 export default function DeveloperDashboardPage() {
   const [selectedProduct, setSelectedProduct] = useState<EnrichedProduct>(ENRICHED_PRODUCTS[0]);
@@ -174,9 +140,6 @@ export default function DeveloperDashboardPage() {
   ]);
 
   const [isRiskModalOpen, setIsRiskModalOpen] = useState<boolean>(false);
-  const [riskTitle, setRiskTitle] = useState<string>("");
-  const [riskReason, setRiskReason] = useState<string>("");
-  const [riskPct, setRiskPct] = useState<string>("20");
 
   const tranches: PayoutTranche[] = useMemo(() => [
     {
@@ -237,52 +200,33 @@ export default function DeveloperDashboardPage() {
     }
   };
 
-  const handleCreateRiskProposal = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!riskTitle.trim() || !riskReason.trim()) return;
-
-    const newProposal: RiskCorrectionProposal = {
-      id: `RC-0${riskProposals.length + 3}`,
-      title: riskTitle.trim(),
-      reason: riskReason.trim(),
-      requestedReleasePct: `${riskPct}% Release`,
-      forPct: 100,
-      againstPct: 0,
-      quorumPct: 12,
-      status: "Voting_Open",
-      hoursRemaining: 72,
-    };
-
+  const handleProposalSubmitted = (newProposal: RiskCorrectionProposal) => {
     setRiskProposals([newProposal, ...riskProposals]);
-    setRiskTitle("");
-    setRiskReason("");
-    setIsRiskModalOpen(false);
   };
 
   return (
-    <main className="min-h-screen bg-[#0D0D0D] text-[#FAFAFA] font-sans antialiased">
+    <main className="min-h-screen bg-spectr-canvas text-spectr-ink font-sans antialiased">
       {/* Top Header & Navigation */}
-      <header className="border-b border-[#2E2E2E] bg-[#121212]/70 backdrop-blur-md sticky top-0 z-30">
+      <header className="border-b border-spectr-hairline bg-spectr-surface/80 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="text-xs font-mono text-[#737373] hover:text-[#FAFAFA] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+              className="text-xs font-mono text-spectr-muted hover:text-spectr-ink transition-colors"
             >
               Leaderboard
             </Link>
-            <span className="text-xs text-[#2E2E2E]">/</span>
-            <span className="text-xs font-mono text-[#894DEF] font-medium">Developer Dashboard</span>
+            <span className="text-xs text-spectr-hairline">/</span>
+            <span className="text-xs font-mono text-spectr-primary font-medium">Developer Dashboard</span>
           </div>
 
           <div className="flex items-center gap-3 font-mono text-xs">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[#4ADE80] bg-[#4ADE80]/10 border border-[#4ADE80]/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80] animate-pulse" />
+            <Badge variant="success" dot pulse>
               NEAR Testnet Active
-            </span>
+            </Badge>
             <Link
               href="/dev/onboarding"
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#894DEF] hover:bg-[#A273F2] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink font-medium text-xs transition-colors rounded-none"
             >
               <span>Onboard New Product</span>
               <ArrowRight className="w-3 h-3" />
@@ -293,49 +237,43 @@ export default function DeveloperDashboardPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Hub Header & Product Selector */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[#2E2E2E] pb-6">
-          <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-              Developer Operations Hub
-            </h1>
-            <p className="text-sm text-[#B8B8B8] max-w-2xl font-mono">
-              Monitor 7-day rolling payout tranches, broadcast cryptographic uptime heartbeats, and participate in community risk correction arbitration.
-            </p>
-          </div>
-
-          {/* Product Switcher Bar */}
-          <div className="flex items-center gap-2 overflow-x-auto font-mono text-xs">
-            <span className="text-[#737373] text-[11px] shrink-0">Active Product:</span>
-            {ENRICHED_PRODUCTS.slice(0, 4).map((p) => {
-              const isSelected = selectedProduct.id === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setSelectedProduct(p)}
-                  className={`flex items-center gap-2 px-3 py-1.5 border transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
-                    isSelected
-                      ? "bg-[#262626] border-[#894DEF] text-white"
-                      : "bg-[#171717] border-[#2E2E2E] text-[#B8B8B8] hover:border-[#737373]"
-                  }`}
-                >
-                  <AbstractLogo slug={p.slug} name={p.name} size={16} className="w-4 h-4" />
-                  <span>{p.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <PageHeader
+          title="Developer Operations Hub"
+          description="Monitor 7-day rolling payout tranches, broadcast cryptographic uptime heartbeats, and participate in community risk correction arbitration."
+          actions={
+            <div className="flex items-center gap-2 overflow-x-auto font-mono text-xs">
+              <span className="text-spectr-muted text-xs shrink-0">Active Product:</span>
+              {ENRICHED_PRODUCTS.slice(0, 4).map((p) => {
+                const isSelected = selectedProduct.id === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedProduct(p)}
+                    className={`flex items-center gap-2 px-3 py-1.5 border transition-colors shrink-0 rounded-none ${
+                      isSelected
+                        ? "bg-spectr-surface-raised border-spectr-primary text-spectr-ink"
+                        : "bg-spectr-surface border-spectr-hairline text-spectr-body hover:border-spectr-muted"
+                    }`}
+                  >
+                    <AbstractLogo slug={p.slug} name={p.name} size={16} className="w-4 h-4" />
+                    <span>{p.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          }
+        />
 
         {/* Claim Tx Alert */}
         {claimedSuccessTx && (
-          <div className="p-4 bg-[#14532D]/30 border border-[#166534] text-xs font-mono text-[#4ADE80] flex items-center justify-between">
+          <div className="p-4 bg-spectr-surface border border-spectr-success text-xs font-mono text-spectr-success flex items-center justify-between">
             <span>Tranche payout claimed successfully. Funds transferred to your connected NEAR wallet.</span>
             <a
               href={claimedSuccessTx}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 underline hover:text-white"
+              className="inline-flex items-center gap-1 underline hover:text-spectr-ink"
             >
               <span>View NEAR Tx</span>
               <ExternalLink className="w-3 h-3" />
@@ -345,11 +283,12 @@ export default function DeveloperDashboardPage() {
 
         {/* Heartbeat Success Alert */}
         {heartbeatSuccess && (
-          <div className="p-4 bg-[#894DEF]/10 border border-[#894DEF]/40 text-xs font-mono text-[#894DEF] flex items-center justify-between">
+          <div className="p-4 bg-spectr-surface border border-spectr-primary text-xs font-mono text-spectr-primary flex items-center justify-between">
             <span>{heartbeatSuccess}</span>
             <button
+              type="button"
               onClick={() => setHeartbeatSuccess(null)}
-              className="text-[#B8B8B8] hover:text-white"
+              className="text-spectr-body hover:text-spectr-ink"
             >
               Dismiss
             </button>
@@ -357,405 +296,47 @@ export default function DeveloperDashboardPage() {
         )}
 
         {/* Live On-Chain Contract Telemetry Banner */}
-        <section className="bg-[#171717] border border-[#2E2E2E] p-6 space-y-4 font-mono text-xs" aria-label="On-Chain Telemetry">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#2E2E2E] pb-3">
-            <div className="flex items-center gap-2">
-              <Database className="w-4 h-4 text-[#894DEF]" />
-              <span className="text-white font-semibold tracking-tight">On-Chain Protocol Metrics</span>
-              <span className="text-[10px] px-2 py-0.5 bg-[#4ADE80]/10 border border-[#4ADE80]/20 text-[#4ADE80]">
-                Live RPC
-              </span>
-            </div>
-            <div className="flex items-center gap-4 text-[11px] text-[#737373]">
-              <span>
-                Escrow:{" "}
-                <a
-                  href={`https://explorer.testnet.near.org/accounts/${PANDEM_ESCROW_ID}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#B8B8B8] hover:text-[#894DEF] underline"
-                >
-                  {PANDEM_ESCROW_ID}
-                </a>
-              </span>
-              <span>
-                Budget:{" "}
-                <a
-                  href={`https://explorer.testnet.near.org/accounts/${PANDEM_BUDGET_ID}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#B8B8B8] hover:text-[#894DEF] underline"
-                >
-                  {PANDEM_BUDGET_ID}
-                </a>
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
-            <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
-              <span className="text-[10px] text-[#737373] uppercase block">Ops Budget Received (30%)</span>
-              <span className="text-base font-bold text-[#4ADE80] tabular-nums block">
-                {onchainBudget
-                  ? `${(Number(onchainBudget.total_ops_received) / 1000000).toFixed(2)} tUSDC`
-                  : "1.50 tUSDC"}
-              </span>
-              <span className="text-[10px] text-[#737373] block">Allocated for TEE draws</span>
-            </div>
-
-            <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
-              <span className="text-[10px] text-[#737373] uppercase block">Available Ops Balance</span>
-              <span className="text-base font-bold text-white tabular-nums block">
-                {onchainBudget
-                  ? `${(Number(onchainBudget.current_balance) / 1000000).toFixed(2)} tUSDC`
-                  : "1.50 tUSDC"}
-              </span>
-              <span className="text-[10px] text-[#737373] block">Ready for agent queries</span>
-            </div>
-
-            <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
-              <span className="text-[10px] text-[#737373] uppercase block">Contingency Reserve (20%)</span>
-              <span className="text-base font-bold text-[#FBBF24] tabular-nums block">
-                {onchainProduct
-                  ? `${(Number(onchainProduct.contingency_reserve) / 1000000).toFixed(2)} tUSDC`
-                  : "1.00 tUSDC"}
-              </span>
-              <span className="text-[10px] text-[#737373] block">Dispute quorum reserve</span>
-            </div>
-
-            <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
-              <span className="text-[10px] text-[#737373] uppercase block">Period Heartbeat Proof</span>
-              <span className="text-base font-bold text-[#894DEF] tabular-nums block">
-                Period #{heartbeatStreak}
-              </span>
-              <span className="text-[10px] text-[#737373] block">Enclave attested</span>
-            </div>
-          </div>
-        </section>
+        <OnchainTelemetryBanner
+          onchainBudget={onchainBudget}
+          onchainProduct={onchainProduct}
+          heartbeatStreak={heartbeatStreak}
+        />
 
         {/* GRID OF 2 MAIN STATIONS: PAYOUT STREAM & HEARTBEAT TELEMETRY */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* STATION 1: 7-DAY ROLLING PAYOUT STREAM (7 COLS) */}
-          <section className="lg:col-span-7 bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6" aria-label="7-Day Rolling Payout Stream">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2E2E2E] pb-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-[#894DEF]" />
-                  <h2 className="text-base font-semibold text-white tracking-tight">
-                    7-Day Rolling Payout Stream
-                  </h2>
-                </div>
-                <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
-                  Subscription escrow vests continuously across 7-day milestone tranches with D-14 clawback protection.
-                </p>
-              </div>
+          <div className="lg:col-span-7">
+            <PayoutStreamStation
+              tranches={tranches}
+              claimableBalance={claimableBalance}
+              isClaimingPayout={isClaimingPayout}
+              onClaimPayout={handleClaimPayout}
+              selectedProductSlug={selectedProduct.slug}
+            />
+          </div>
 
-              <div className="text-left sm:text-right font-mono">
-                <span className="text-[10px] text-[#737373] block uppercase">Available to Claim</span>
-                <span className="text-lg font-bold text-[#4ADE80] tabular-nums">
-                  ${claimableBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC
-                </span>
-              </div>
-            </div>
-
-            {/* Tranches Grid */}
-            <div className="space-y-3 font-mono text-xs">
-              {tranches.map((t) => (
-                <div
-                  key={t.id}
-                  className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-medium">{t.label}</span>
-                      <span className="text-[11px] text-[#737373]">({t.periodRange})</span>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 border ${
-                          t.status === "Released"
-                            ? "bg-[#14532D]/40 border-[#166534] text-[#4ADE80]"
-                            : t.status === "Streaming"
-                            ? "bg-[#894DEF]/20 border-[#894DEF] text-[#894DEF]"
-                            : "bg-[#262626] border-[#2E2E2E] text-[#737373]"
-                        }`}
-                      >
-                        {t.status}
-                      </span>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="font-semibold text-white tabular-nums">{t.amountUsdc}</span>
-                    </div>
-                  </div>
-
-                  {t.status === "Streaming" && t.unlocksIn && (
-                    <div className="space-y-1 pt-1 border-t border-[#2E2E2E]">
-                      <div className="flex justify-between text-[11px] text-[#737373]">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-[#894DEF]" />
-                          <span>Unlocks in {t.unlocksIn}</span>
-                        </span>
-                        <span className="tabular-nums">{t.progressPct}% Vested</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-[#171717] overflow-hidden">
-                        <div
-                          className="h-full bg-[#894DEF]"
-                          style={{ width: `${t.progressPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Claim Action Bar */}
-            <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs">
-              <div className="space-y-0.5">
-                <span className="text-white font-medium block">Non-Custodial Claim Station</span>
-                <span className="text-[11px] text-[#737373] block">
-                  Contract: escrow.{selectedProduct.slug}.testnet
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleClaimPayout}
-                disabled={claimableBalance <= 0 || isClaimingPayout}
-                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] disabled:opacity-50 text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-              >
-                {isClaimingPayout ? (
-                  <span>Claiming from Escrow...</span>
-                ) : (
-                  <>
-                    <span>Claim Unlocked Payout (${claimableBalance.toFixed(0)} USDC)</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </>
-                )}
-              </button>
-            </div>
-          </section>
-
-          {/* STATION 2: HEARTBEAT & UPTIME STATION (5 COLS) */}
-          <section className="lg:col-span-5 bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6" aria-label="Heartbeat and Uptime Station">
-            <div className="border-b border-[#2E2E2E] pb-4">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-[#4ADE80]" />
-                <h2 className="text-base font-semibold text-white tracking-tight">
-                  Heartbeat & Uptime Station
-                </h2>
-              </div>
-              <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
-                Cryptographic liveness proofs verify hardware enclave uptime to sustain continuous escrow streaming.
-              </p>
-            </div>
-
-            {/* Streak & Status Meter */}
-            <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-[#737373] uppercase">Active Liveness Streak</span>
-                <span className="text-xs text-[#4ADE80] font-medium flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80] animate-pulse" />
-                  Verified Online
-                </span>
-              </div>
-
-              <div className="text-3xl font-bold text-white tabular-nums">
-                {heartbeatStreak} <span className="text-xs font-normal text-[#737373]">Periods</span>
-              </div>
-
-              <div className="space-y-1.5 pt-2 border-t border-[#2E2E2E] text-[11px] text-[#B8B8B8]">
-                <div className="flex justify-between">
-                  <span className="text-[#737373]">Hardware Target:</span>
-                  <span className="text-white">{selectedProduct.tee_hardware}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#737373]">Enclave Model:</span>
-                  <span className="text-white truncate max-w-[150px]">{selectedProduct.tee_model}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#737373]">Last Attestation:</span>
-                  <span className="text-[#4ADE80]">Valid Intel TDX Quote</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#737373]">Telemetry Latency:</span>
-                  <span className="text-white tabular-nums">&lt; 1.5ms overhead</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Broadcast Heartbeat Action */}
-            <div className="space-y-2 font-mono text-xs">
-              <button
-                type="button"
-                onClick={handleBroadcastHeartbeat}
-                disabled={isPingingHeartbeat}
-                className="w-full inline-flex items-center justify-center gap-2 py-3 bg-[#262626] hover:bg-[#2E2E2E] border border-[#2E2E2E] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 text-[#894DEF] ${isPingingHeartbeat ? "animate-spin" : ""}`} />
-                <span>{isPingingHeartbeat ? "Broadcasting to NEAR..." : "Broadcast Cryptographic Heartbeat"}</span>
-              </button>
-              <p className="text-[10px] text-[#737373] text-center">
-                Signs and dispatches an on-chain heartbeat transaction to escrow.{selectedProduct.slug}.testnet.
-              </p>
-            </div>
-          </section>
+          <div className="lg:col-span-5">
+            <HeartbeatStation
+              heartbeatStreak={heartbeatStreak}
+              selectedProduct={selectedProduct}
+              isPingingHeartbeat={isPingingHeartbeat}
+              onBroadcastHeartbeat={handleBroadcastHeartbeat}
+            />
+          </div>
         </div>
 
         {/* PANEL 3: RISK CORRECTION & COMMUNITY VOTING PANEL */}
-        <section className="bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6" aria-label="Risk Correction and Community Voting">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2E2E2E] pb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-[#FBBF24]" />
-                <h2 className="text-base font-semibold text-white tracking-tight">
-                  Risk Correction & Community Voting Panel
-                </h2>
-              </div>
-              <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
-                Arbitrate maintenance downtime and dispute releases through subscriber request-token consensus.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsRiskModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#262626] hover:bg-[#2E2E2E] border border-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-            >
-              <Scale className="w-3.5 h-3.5 text-[#894DEF]" />
-              <span>Submit Risk Correction Proposal</span>
-            </button>
-          </div>
-
-          {/* Proposals List */}
-          <div className="space-y-3 font-mono text-xs">
-            {riskProposals.map((prop) => (
-              <div
-                key={prop.id}
-                className="p-5 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[#894DEF] font-bold">#{prop.id}</span>
-                      <span className="text-white font-medium">{prop.title}</span>
-                      <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#222222] text-[#8A8A8A] border border-[#333333]">
-                        off-chain
-                      </span>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 border ${
-                          prop.status === "Voting_Open"
-                            ? "bg-[#FBBF24]/10 border-[#FBBF24]/40 text-[#FBBF24]"
-                            : "bg-[#14532D]/40 border-[#166534] text-[#4ADE80]"
-                        }`}
-                      >
-                        {prop.status === "Voting_Open" ? `Voting Open (${prop.hoursRemaining}h remaining)` : "Passed & Executed"}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[#B8B8B8] leading-relaxed max-w-3xl">
-                      {prop.reason}
-                    </p>
-                  </div>
-
-                  <div className="text-left sm:text-right shrink-0">
-                    <span className="text-[10px] text-[#737373] block uppercase">Requested Allocation</span>
-                    <span className="text-white font-semibold">{prop.requestedReleasePct}</span>
-                  </div>
-                </div>
-
-                {/* Vote Tally Bar */}
-                <div className="space-y-1.5 pt-2 border-t border-[#2E2E2E] text-[11px]">
-                  <div className="flex justify-between text-[#737373] tabular-nums">
-                    <span>Vote Outcome: {prop.forPct}% In Favor · {prop.againstPct}% Against</span>
-                    <span>Quorum: {prop.quorumPct}% (50% Required)</span>
-                  </div>
-                  <div className="h-2 w-full bg-[#171717] overflow-hidden flex">
-                    <div className="h-full bg-[#4ADE80]" style={{ width: `${prop.forPct}%` }} title="In Favor" />
-                    <div className="h-full bg-[#EF4444]" style={{ width: `${prop.againstPct}%` }} title="Against" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <RiskCorrectionPanel
+          riskProposals={riskProposals}
+          onOpenRiskModal={() => setIsRiskModalOpen(true)}
+        />
 
         {/* MODAL: SUBMIT RISK CORRECTION PROPOSAL */}
-        {isRiskModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="risk-modal-title">
-            <div className="bg-[#171717] border border-[#2E2E2E] max-w-xl w-full p-6 sm:p-8 space-y-6 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-3">
-                <h3 id="risk-modal-title" className="text-sm font-semibold text-white tracking-tight">
-                  Submit Risk Correction Proposal
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setIsRiskModalOpen(false)}
-                  className="text-[#737373] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleCreateRiskProposal} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="risk-proposal-title" className="block text-[#B8B8B8]">Proposal Title</label>
-                  <input
-                    id="risk-proposal-title"
-                    type="text"
-                    required
-                    value={riskTitle}
-                    onChange={(e) => setRiskTitle(e.target.value)}
-                    placeholder="e.g. 20% Partial Fee Release during CVM Host Migration"
-                    className="w-full bg-[#0D0D0D] border border-[#2E2E2E] p-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="risk-proposal-reason" className="block text-[#B8B8B8]">Technical Incident & Rationale</label>
-                  <textarea
-                    id="risk-proposal-reason"
-                    rows={4}
-                    required
-                    value={riskReason}
-                    onChange={(e) => setRiskReason(e.target.value)}
-                    placeholder="Document maintenance window, hardware attestation report status, and mitigation steps for subscribers..."
-                    className="w-full bg-[#0D0D0D] border border-[#2E2E2E] p-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF] resize-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="risk-percentage" className="block text-[#B8B8B8]">Requested Developer Fee Release (%)</label>
-                  <select
-                    id="risk-percentage"
-                    value={riskPct}
-                    onChange={(e) => setRiskPct(e.target.value)}
-                    className="w-full bg-[#0D0D0D] border border-[#2E2E2E] p-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                  >
-                    <option value="10">10% Partial Period Release</option>
-                    <option value="20">20% Partial Period Release</option>
-                    <option value="30">30% Partial Period Release</option>
-                    <option value="50">50% Maintenance Grace Period Release</option>
-                  </select>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2 border-t border-[#2E2E2E]">
-                  <button
-                    type="button"
-                    onClick={() => setIsRiskModalOpen(false)}
-                    className="px-4 py-2 bg-[#262626] hover:bg-[#2E2E2E] text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-[#894DEF] hover:bg-[#A273F2] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-                  >
-                    Submit to Subscriber Voting
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <RiskProposalModal
+          isOpen={isRiskModalOpen}
+          onClose={() => setIsRiskModalOpen(false)}
+          onSubmitProposal={handleProposalSubmitted}
+          existingProposalsCount={riskProposals.length}
+        />
       </div>
     </main>
   );

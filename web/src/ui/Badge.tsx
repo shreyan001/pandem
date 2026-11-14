@@ -31,12 +31,12 @@ export const Badge: React.FC<BadgeProps> = ({
   const variantStyles: Record<BadgeVariant, string> = {
     default: "bg-spectr-surface-raised border-spectr-hairline text-spectr-ink",
     primary: "bg-spectr-primary/15 border-spectr-primary/50 text-spectr-primary-hover font-semibold",
-    success: "bg-[#14532D]/40 border-[#166534] text-spectr-success font-medium",
-    warning: "bg-amber-950/40 border-amber-700/60 text-spectr-warning font-medium",
-    danger: "bg-rose-950/40 border-rose-800/60 text-spectr-danger font-medium",
+    success: "bg-spectr-surface border-spectr-success/50 text-spectr-success font-medium",
+    warning: "bg-spectr-surface border-spectr-warning/50 text-spectr-warning font-medium",
+    danger: "bg-spectr-surface border-spectr-danger/50 text-spectr-danger font-medium",
     score: "bg-spectr-surface border-spectr-primary text-spectr-ink font-bold tracking-tight px-2.5 py-1",
     category:
-      "bg-spectr-surface border-spectr-hairline text-spectr-muted text-[11px] uppercase tracking-wider",
+      "bg-spectr-surface border-spectr-hairline text-spectr-muted text-xs uppercase tracking-wider",
   };
 
   const dotColor: Record<BadgeVariant, string> = {
@@ -60,9 +60,9 @@ export const Badge: React.FC<BadgeProps> = ({
       )}
       {variant === "score" && score !== undefined ? (
         <span>
-          <span className="text-spectr-muted text-[10px] mr-1 uppercase">Score</span>
+          <span className="text-spectr-muted text-xs mr-1 uppercase">Score</span>
           <span className="text-spectr-primary font-bold">{score}</span>
-          <span className="text-spectr-muted text-[10px]">/100</span>
+          <span className="text-spectr-muted text-xs">/100</span>
         </span>
       ) : (
         children

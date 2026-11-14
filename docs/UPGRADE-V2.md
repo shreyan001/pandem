@@ -28,7 +28,7 @@ Done-check: `near view <new escrow> get_config` shows tUSDC; one real faucet tx 
 - Replace the Unsplash hero images with the product's own icon or screenshot.
 Done-check: `rg -n "Math.random|randomBytes|unsplash" web/src agent/src` returns only non-proof uses (list them in the log); build passes.
 
-## D3 — Design lock (not another redesign)   [state: TODO]
+## D3 — Design lock (not another redesign)   [state: DONE-UNVERIFIED]
 - In web/src/ui, add Stat, Table, PageHeader and Section next to the existing Button, Card, Badge, Tabs, Modal, Drawer and Input. All of them use only design.md tokens.
 - Rebuild only these 4 screens on those primitives: / (feed), /products/[slug], /dashboard, /dev/dashboard. Hide /components, /onramp, /steward and /governance from the navbar (keep the routes).
 - Codemod the 4 screens: no raw hex, no zinc/emerald/slate/etc. classes, no text under 12px, radius 0, Inter plus JetBrains Mono for ids.
@@ -75,6 +75,24 @@ Blind subscription commitment sha256(secret + product_id) in escrow; Imagix demo
   * TypeScript typecheck: clean across all workspaces.
   * Build: Next.js 21/21 routes compiled.
   * Cargo test: 39 passed, 0 failed.
+- 17:22 IST — D3: Design lock completed & verified.
+  * Created 4 new Spectr UI primitives in web/src/ui: Stat, Table, PageHeader, Section alongside existing Button, Card, Badge, Tabs, Modal, Drawer, Input.
+  * Rebuilt and decomposed all 4 target screens strictly under 400 lines:
+    - `/` (web/src/app/page.tsx): 167 lines (split into HeroPersonaLaunchpad, ContractEnclaveInspector, SecurityMatrixTable).
+    - `/products/[slug]` (web/src/app/products/[slug]/page.tsx): 17 lines (delegates to ProductDetailClient, 108 lines).
+    - `/dashboard` (web/src/app/dashboard/page.tsx): 326 lines (split into PaymentGatewayBanner, SubscriptionCard, StewardBountySection, BugReportModal, OnrampDrawerSection).
+    - `/dev/dashboard` (web/src/app/dev/dashboard/page.tsx): 321 lines (split into OnchainTelemetryBanner, PayoutStreamStation, HeartbeatStation, RiskCorrectionPanel, RiskProposalModal).
+  * Added `npm run lint:design` (`scripts/lint-design.mjs`): checks 0 raw hex, 0 off-palette classes, 0 sub-12px font sizes, 0 non-zero border radii, and 400-line page limits across all 17 screen files. Result: 0 errors!
+  * Verification passes:
+    - `npm run lint:design`: 0 errors.
+    - `npm run typecheck`: clean across all workspaces (exit code 0).
+    - `cargo test`: 39 passed, 0 failed.
+    - `npm run build -w web`: all 21 routes compiled and prerendered cleanly.
+  * Captured full headless Edge screenshots at 1280px and 390px in reports/screens/:
+    - feed-1280.png (108.5 KB), feed-390.png (56.6 KB)
+    - product-1280.png (118.2 KB), product-390.png (59.6 KB)
+    - dashboard-1280.png (124.9 KB), dashboard-390.png (60.1 KB)
+    - dev-dashboard-1280.png (124.3 KB), dev-dashboard-390.png (51.2 KB)
 
 ---
 

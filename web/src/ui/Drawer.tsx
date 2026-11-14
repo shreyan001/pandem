@@ -85,7 +85,7 @@ export const Drawer: React.FC<DrawerProps> = ({
           {/* Sharp Close Button */}
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-none border border-spectr-hairline bg-spectr-surface-raised hover:bg-neutral-800 text-spectr-body hover:text-spectr-ink flex items-center justify-center transition-colors shrink-0"
+            className="w-8 h-8 rounded-none border border-spectr-hairline bg-spectr-surface-raised hover:bg-spectr-surface-raised/80 text-spectr-body hover:text-spectr-ink flex items-center justify-center transition-colors shrink-0"
             aria-label="Close drawer"
           >
             <span className="font-mono text-sm leading-none">✕</span>

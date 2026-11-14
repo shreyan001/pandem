@@ -11,3 +11,7 @@ export * from "./Input";
 export * from "./Modal";
 export * from "./Drawer";
 export * from "./Tabs";
+export * from "./Stat";
+export * from "./Table";
+export * from "./PageHeader";
+export * from "./Section";

@@ -42,13 +42,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         "bg-spectr-primary text-spectr-ink border border-spectr-ink hover:bg-spectr-primary-hover active:bg-spectr-primary shadow-none",
       secondary:
-        "bg-spectr-surface-raised text-spectr-ink border border-spectr-hairline hover:bg-neutral-800 hover:border-neutral-600 active:bg-neutral-900",
+        "bg-spectr-surface-raised text-spectr-ink border border-spectr-hairline hover:bg-spectr-surface-raised/80 hover:border-spectr-hairline active:bg-spectr-surface",
       outline:
         "bg-transparent text-spectr-ink border border-spectr-hairline hover:bg-spectr-surface hover:border-spectr-primary active:bg-spectr-surface-raised",
       ghost:
         "bg-transparent text-spectr-body hover:text-spectr-ink hover:bg-spectr-surface active:bg-spectr-surface-raised border border-transparent",
       danger:
-        "bg-spectr-danger text-spectr-ink border border-red-700 hover:bg-red-600 active:bg-red-700",
+        "bg-spectr-danger text-spectr-ink border border-spectr-danger hover:opacity-90 active:opacity-100",
     };
 
     const widthStyle = fullWidth ? "w-full" : "";
