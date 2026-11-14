@@ -23,6 +23,7 @@ interface NearWalletContextType {
   sendUpgrade: (agreementId: number, targetTier: string, amountUnits: string) => Promise<string | null>;
   sendRenew: (agreementId: number, periods: number, amountUnits: string) => Promise<string | null>;
   sendCancel: (agreementId: number) => Promise<string | null>;
+  sendTransfer: (receiverId: string, amountUnits: string, memo?: string) => Promise<string | null>;
   signNep413Message: (params: { message: string; recipient: string; nonce: Uint8Array }) => Promise<{ accountId: string; publicKey: string; signature: string } | null>;
 }
 
@@ -503,6 +504,43 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const sendTransfer = async (
+    receiverId: string,
+    amountUnits: string,
+    memo?: string
+  ): Promise<string | null> => {
+    if (!connector || !accountId) return null;
+    try {
+      setWalletError(null);
+      const wallet = await connector.wallet();
+      const outcome: any = await wallet.signAndSendTransaction({
+        receiverId: PANDEM_TOKEN_ID,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "ft_transfer",
+              args: {
+                receiver_id: receiverId.trim(),
+                amount: amountUnits,
+                memo: memo || "Transfer via Pandem",
+              },
+              gas: "50000000000000", // 50 TGas
+              deposit: "1",          // 1 yocto
+            },
+          },
+        ],
+      });
+      await refreshBalances();
+      return outcome?.transaction?.hash ?? outcome?.transaction_outcome?.id ?? "submitted";
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      console.warn("Transfer notice:", msg);
+      setWalletError(`Transfer notice: ${msg}`);
+      return null;
+    }
+  };
+
   const signNep413Message = async (params: {
     message: string;
     recipient: string;
@@ -564,6 +602,7 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
         sendUpgrade,
         sendRenew,
         sendCancel,
+        sendTransfer,
         signNep413Message,
       }}
     >

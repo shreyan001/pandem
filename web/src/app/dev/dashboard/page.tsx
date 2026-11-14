@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { ENRICHED_PRODUCTS, EnrichedProduct, PANDEM_BUDGET_ID, PANDEM_ESCROW_ID } from "@pandem/shared";
 import { AbstractLogo } from "../../../components/AbstractLogo";
-import { PageHeader, Badge, Button } from "../../../ui";
+import { PageHeader, Badge, Button, Tabs, TabItem } from "../../../ui";
 import { OnchainTelemetryBanner } from "./components/OnchainTelemetryBanner";
 import { PayoutStreamStation, PayoutTranche } from "./components/PayoutStreamStation";
 import { HeartbeatStation } from "./components/HeartbeatStation";
@@ -204,66 +204,55 @@ export default function DeveloperDashboardPage() {
     setRiskProposals([newProposal, ...riskProposals]);
   };
 
+  // Product Tabs for clean switching
+  const productTabs: TabItem[] = useMemo(
+    () =>
+      ENRICHED_PRODUCTS.slice(0, 4).map((p) => ({
+        id: String(p.id),
+        label: (
+          <span className="flex items-center gap-2">
+            <AbstractLogo slug={p.slug} name={p.name} size={16} className="w-4 h-4 shrink-0" />
+            <span>{p.name}</span>
+          </span>
+        ),
+      })),
+    []
+  );
+
   return (
     <main className="min-h-screen bg-spectr-canvas text-spectr-ink font-sans antialiased">
-      {/* Top Header & Navigation */}
-      <header className="border-b border-spectr-hairline bg-spectr-surface/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-xs font-mono text-spectr-muted hover:text-spectr-ink transition-colors"
-            >
-              Leaderboard
-            </Link>
-            <span className="text-xs text-spectr-hairline">/</span>
-            <span className="text-xs font-mono text-spectr-primary font-medium">Developer Dashboard</span>
-          </div>
-
-          <div className="flex items-center gap-3 font-mono text-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* PageHeader: Title "Dashboard", one-line description, success Badge + primary Button */}
+        <PageHeader
+          title="Dashboard"
+          description="Monitor 7-day rolling payout tranches, uptime heartbeats, and community risk correction."
+          badge={
             <Badge variant="success" dot pulse>
               NEAR Testnet Active
             </Badge>
-            <Link
-              href="/dev/onboarding"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink font-medium text-xs transition-colors rounded-none"
-            >
-              <span>Onboard New Product</span>
-              <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Hub Header & Product Selector */}
-        <PageHeader
-          title="Developer Operations Hub"
-          description="Monitor 7-day rolling payout tranches, broadcast cryptographic uptime heartbeats, and participate in community risk correction arbitration."
+          }
           actions={
-            <div className="flex items-center gap-2 overflow-x-auto font-mono text-xs">
-              <span className="text-spectr-muted text-xs shrink-0">Active Product:</span>
-              {ENRICHED_PRODUCTS.slice(0, 4).map((p) => {
-                const isSelected = selectedProduct.id === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setSelectedProduct(p)}
-                    className={`flex items-center gap-2 px-3 py-1.5 border transition-colors shrink-0 rounded-none ${
-                      isSelected
-                        ? "bg-spectr-surface-raised border-spectr-primary text-spectr-ink"
-                        : "bg-spectr-surface border-spectr-hairline text-spectr-body hover:border-spectr-muted"
-                    }`}
-                  >
-                    <AbstractLogo slug={p.slug} name={p.name} size={16} className="w-4 h-4" />
-                    <span>{p.name}</span>
-                  </button>
-                );
-              })}
+            <div className="flex flex-wrap items-center gap-3">
+              <Button href="/dev/onboarding" variant="primary" size="sm">
+                <span>Onboard product</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
             </div>
           }
         />
+
+        {/* Clean Tabs for Product Switching */}
+        <div className="border-b border-spectr-hairline">
+          <Tabs
+            items={productTabs}
+            activeTab={String(selectedProduct.id)}
+            onChange={(id) => {
+              const found = ENRICHED_PRODUCTS.find((p) => String(p.id) === id);
+              if (found) setSelectedProduct(found);
+            }}
+            variant="underline"
+          />
+        </div>
 
         {/* Claim Tx Alert */}
         {claimedSuccessTx && (
@@ -295,7 +284,7 @@ export default function DeveloperDashboardPage() {
           </div>
         )}
 
-        {/* Live On-Chain Contract Telemetry Banner */}
+        {/* Live On-Chain Contract Telemetry Banner (Four Stat primitives) */}
         <OnchainTelemetryBanner
           onchainBudget={onchainBudget}
           onchainProduct={onchainProduct}

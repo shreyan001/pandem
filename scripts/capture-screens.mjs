@@ -12,8 +12,8 @@ if (!fs.existsSync(screensDir)) {
 const targets = [
   { name: "feed-1280.png", url: "http://localhost:3000", width: 1280, height: 1000 },
   { name: "feed-390.png", url: "http://localhost:3000", width: 390, height: 844 },
-  { name: "product-1280.png", url: "http://localhost:3000/products/aegis-legal", width: 1280, height: 1000 },
-  { name: "product-390.png", url: "http://localhost:3000/products/aegis-legal", width: 390, height: 844 },
+  { name: "product-1280.png", url: "http://localhost:3000/products/open-webui", width: 1280, height: 1000 },
+  { name: "product-390.png", url: "http://localhost:3000/products/open-webui", width: 390, height: 844 },
   { name: "dashboard-1280.png", url: "http://localhost:3000/dashboard", width: 1280, height: 1000 },
   { name: "dashboard-390.png", url: "http://localhost:3000/dashboard", width: 390, height: 844 },
   { name: "dev-dashboard-1280.png", url: "http://localhost:3000/dev/dashboard", width: 1280, height: 1000 },

@@ -3,74 +3,118 @@
 import React from "react";
 import { EnrichedProduct } from "@pandem/shared";
 import { AbstractLogo } from "../AbstractLogo";
+import { Badge, Button, Card, Stat } from "../../ui";
 
 interface ProductHeaderProps {
   product: EnrichedProduct;
   onSubscribeClick: () => void;
 }
 
+const KNOWN_COVERS: Record<string, string> = {
+  "open-webui": "/covers/open-webui.png",
+  "localai": "/covers/localai.png",
+  "searxng": "/covers/searxng.png",
+  "vaultwarden": "/covers/vaultwarden.png",
+  "immich": "/covers/immich.png",
+  "nextcloud": "/covers/nextcloud.png",
+};
+
+function getProductCover(slug?: string, id?: string): string | null {
+  const s = (slug || id || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
+  for (const key of Object.keys(KNOWN_COVERS)) {
+    if (s.includes(key)) return KNOWN_COVERS[key];
+  }
+  return null;
+}
+
 export function ProductHeader({ product, onSubscribeClick }: ProductHeaderProps) {
+  const coverUrl = getProductCover(product.slug, String(product.product_id));
+  const displayPrice = product.tiers?.[0]?.price_monthly
+    ? `$${(Number(product.tiers[0].price_monthly) / 1000000).toFixed(0)} tUSDC`
+    : "5 tUSDC";
+
   return (
-    <div className="p-6 sm:p-8 rounded-none bg-[#171717] border border-[#2E2E2E] relative overflow-hidden">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-        <div className="flex items-start gap-5">
-          {/* Monochrome Abstract Protocol Diagram Logo */}
+    <Card className="rounded-none bg-spectr-surface border-spectr-hairline overflow-hidden">
+      {/* 16:9 Cover Plane with Inset AbstractLogo */}
+      <div className="relative aspect-[16/9] max-h-72 w-full overflow-hidden bg-spectr-surface border-b border-spectr-hairline rounded-none">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={product.name}
+            className="w-full h-full object-cover object-center rounded-none"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-spectr-surface-raised via-spectr-surface to-spectr-canvas flex items-center justify-center rounded-none">
+            <AbstractLogo slug={product.slug} name={product.name} size={64} />
+          </div>
+        )}
+
+        {/* AbstractLogo (76px) inset on bottom-left of cover */}
+        <div className="absolute bottom-4 left-6 z-10 p-1 bg-spectr-surface border border-spectr-hairline rounded-none shadow-2xl">
           <AbstractLogo
             slug={product.slug}
             name={product.name}
-            className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0"
-            size={72}
+            size={76}
+            className="w-16 h-16 sm:w-20 sm:h-20"
           />
+        </div>
+      </div>
 
-          <div className="space-y-2">
+      {/* Header Content Body */}
+      <div className="p-6 sm:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-3 min-w-0 flex-1">
+            {/* Category / Rank / TEE Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-none text-[11px] font-mono font-medium bg-[#0D0D0D] text-[#B8B8B8] border border-[#2E2E2E]">
-                {product.suite}
-              </span>
-              <span className="px-2.5 py-0.5 rounded-none text-[11px] font-mono font-medium bg-[#262626] text-[#FAFAFA] border border-[#2E2E2E] flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-none bg-[#894DEF]" />
-                {product.heartbeat_streak}-Period Heartbeat Streak
-              </span>
-              <span className="px-2.5 py-0.5 rounded-none text-[11px] font-mono font-medium bg-[#262626] text-[#894DEF] border border-[#2E2E2E]">
-                {product.tee_hardware}
-              </span>
+              <Badge variant="category">{product.suite}</Badge>
+              <Badge variant="default">Rank #{product.rank}</Badge>
+              <Badge variant="primary">{product.tee_hardware}</Badge>
+              <Badge variant="success" dot>
+                {product.heartbeat_streak}-Period Liveness
+              </Badge>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-[#FAFAFA] tracking-tight flex items-center gap-3">
-              <span>{product.name}</span>
-              <span className="text-xs font-mono font-normal px-2.5 py-1 rounded-none bg-[#0D0D0D] text-[#B8B8B8] border border-[#2E2E2E]">
-                Rank #{product.rank}
-              </span>
+            {/* Product Name (heading-lg) */}
+            <h1 className="text-2xl sm:text-3xl font-bold text-spectr-ink tracking-tight font-sans">
+              {product.name}
             </h1>
 
-            <p className="text-sm sm:text-base text-[#B8B8B8] font-medium max-w-2xl">
+            {/* One-line Tagline */}
+            <p className="text-xs sm:text-sm text-spectr-body font-sans max-w-2xl truncate">
               {product.tagline}
             </p>
           </div>
-        </div>
 
-        {/* Action & Score Pill */}
-        <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-3 flex-shrink-0">
-          <div className="flex items-center gap-3 bg-[#0D0D0D] p-3.5 rounded-none border border-[#2E2E2E]">
-            <div className="text-right">
-              <div className="text-[10px] font-mono text-[#6B6B6B] uppercase tracking-wider">Algorithmic Score</div>
-              <div className="text-2xl font-mono font-bold text-[#894DEF]">{product.score}/100</div>
+          {/* Right Column: Score & Heartbeat Stat + Primary Subscribe Button */}
+          <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-3 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-spectr-canvas border border-spectr-hairline text-right font-mono text-xs rounded-none">
+                <span className="text-xs text-spectr-muted uppercase block">Algorithmic Score</span>
+                <span className="text-xl font-bold text-spectr-primary tabular-nums">
+                  {product.score}/100
+                </span>
+              </div>
+
+              <div className="p-3 bg-spectr-canvas border border-spectr-hairline text-right font-mono text-xs rounded-none">
+                <span className="text-xs text-spectr-muted uppercase block">Heartbeat Proof</span>
+                <span className="text-xl font-bold text-spectr-success tabular-nums">
+                  {product.heartbeat_streak}d
+                </span>
+              </div>
             </div>
-            <div className="h-8 w-px bg-[#2E2E2E]" />
-            <div className="text-right">
-              <div className="text-[10px] font-mono text-[#6B6B6B] uppercase tracking-wider">TEE Attestation</div>
-              <div className="text-xs font-mono text-[#FAFAFA] font-semibold">Verified NRAS</div>
-            </div>
+
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={onSubscribeClick}
+              className="w-full sm:w-auto font-mono text-xs"
+            >
+              Subscribe · {displayPrice}
+            </Button>
           </div>
-
-          <button
-            onClick={onSubscribeClick}
-            className="w-full sm:w-auto px-6 py-3 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold text-sm transition-colors"
-          >
-            Subscribe via Escrow
-          </button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

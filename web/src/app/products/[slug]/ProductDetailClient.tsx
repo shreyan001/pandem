@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { EnrichedProduct, CatalogItem } from "@pandem/shared";
 import { ProductHeader } from "../../../components/product/ProductHeader";
+import { PricingTable } from "../../../components/product/PricingTable";
 import { TreasuryAutopaymentCard } from "../../../components/product/TreasuryAutopaymentCard";
 import { DeveloperActivityCard } from "../../../components/product/DeveloperActivityCard";
 import { SubscriberRequestsCard } from "../../../components/product/SubscriberRequestsCard";
 import { SubscriberBugCenterCard } from "../../../components/product/SubscriberBugCenterCard";
-import { PricingTable } from "../../../components/product/PricingTable";
 import { SubscribeModal } from "../../../components/SubscribeModal";
-import { Badge, Card, CardHeader, CardTitle, CardContent } from "../../../ui";
+import { Badge, Card } from "../../../ui";
 
 export interface ProductDetailClientProps {
   product: EnrichedProduct;
@@ -33,10 +33,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
     name: product.name,
     tagline: product.tagline,
     description: product.description,
-    price_per_period: "5000000",
-    price_display: "5 tUSDC",
-    period_seconds: 2592000,
-    period_display: "30 days",
+    price_per_period: selectedTier === "max" ? "15000000" : "5000000",
+    price_display: selectedTier === "max" ? "15 tUSDC" : "5 tUSDC",
+    period_seconds: selectedYearly ? 31536000 : 2592000,
+    period_display: selectedYearly ? "365 days" : "30 days",
     grace_seconds: 604800,
     grace_display: "7 days",
     category: product.category,
@@ -50,7 +50,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 bg-spectr-canvas font-sans">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-spectr-canvas font-sans">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs font-mono text-spectr-muted">
         <Link href="/" className="hover:text-spectr-ink transition-colors">
@@ -62,49 +62,49 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
         <span className="text-spectr-primary font-semibold">{product.name}</span>
       </nav>
 
-      {/* Main Product Header */}
+      {/* 1. Main Product Header (with 16:9 Cover & Logo Inset) */}
       <ProductHeader
         product={product}
         onSubscribeClick={() => setIsSubscribeOpen(true)}
       />
 
-      {/* Real-Life Problem & Privacy Violation Spotlight */}
-      <Card className="p-6 bg-spectr-surface border-spectr-hairline space-y-3">
-        <div className="flex items-center gap-2">
-          <Badge variant="primary" dot>
-            Real-Life Crisis Solved: Privacy & Data Exploitation
-          </Badge>
-        </div>
-        <h3 className="text-lg font-bold text-spectr-ink font-sans">
-          {product.privacy_problem}
-        </h3>
-        <p className="text-xs sm:text-sm text-spectr-body leading-relaxed max-w-3xl">
-          Centralized SaaS platforms and public AI models log queries, retain confidential IP, and expose unencrypted user data to third-party data brokers and regulatory subpoenas.
-          <strong className="text-spectr-ink block mt-1">
-            Pandem isolates execution within hardware-attested confidential TEE enclaves. Data self-destructs post-inference.
-          </strong>
-        </p>
-      </Card>
-
-      {/* Graded Subscription Pricing Table */}
+      {/* 2. Graded Subscription Pricing Table (Immediately below Header!) */}
       <PricingTable
         productName={product.name}
         onSelectTier={handleSelectTier}
       />
 
-      {/* On-Chain Treasury & Autopayment System Card */}
+      {/* 3. Real-Life Problem & Privacy Violation Spotlight */}
+      <Card className="p-6 bg-spectr-surface border-spectr-hairline space-y-3 rounded-none">
+        <div className="flex items-center gap-2">
+          <Badge variant="primary" dot>
+            Real-Life Crisis Solved: Privacy & Data Exploitation
+          </Badge>
+        </div>
+        <h3 className="text-base sm:text-lg font-bold text-spectr-ink font-sans">
+          {product.privacy_problem}
+        </h3>
+        <p className="text-xs sm:text-sm text-spectr-body leading-relaxed max-w-3xl">
+          Centralized SaaS platforms log prompts and expose unencrypted user data.
+          <strong className="text-spectr-ink block mt-1">
+            Pandem isolates execution within hardware-attested Intel TDX confidential enclaves. Data self-destructs post-inference.
+          </strong>
+        </p>
+      </Card>
+
+      {/* 4. On-Chain Treasury & Autopayment System Card */}
       <TreasuryAutopaymentCard product={product} />
 
-      {/* Grid: Developer Reputation & Activity */}
+      {/* 5. Grid: Developer Reputation & Activity */}
       <DeveloperActivityCard developer={product.developer} />
 
-      {/* Grid: Subscriber Requests & Governance Voting */}
+      {/* 6. Grid: Subscriber Requests & Governance Voting */}
       <SubscriberRequestsCard
         proposals={product.proposals}
         productId={product.product_id}
       />
 
-      {/* Subscriber Bug Center & 7% Warranty Reserve Tracking */}
+      {/* 7. Subscriber Bug Center & 7% Warranty Reserve Tracking */}
       <SubscriberBugCenterCard
         bugReports={product.bug_reports}
         treasury={product.treasury}
@@ -115,8 +115,6 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       {isSubscribeOpen && (
         <SubscribeModal
           product={catalogItem}
-          initialTier={selectedTier}
-          initialYearly={selectedYearly}
           onClose={() => setIsSubscribeOpen(false)}
         />
       )}

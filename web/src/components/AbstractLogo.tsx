@@ -3,14 +3,14 @@
 import React from "react";
 
 interface AbstractLogoProps {
-  slug: string;
+  slug?: string;
   name?: string;
   className?: string;
   size?: number;
 }
 
-export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }: AbstractLogoProps) {
-  const normalizedSlug = slug.toLowerCase();
+export function AbstractLogo({ slug = "", name = "", className = "w-10 h-10", size = 40 }: AbstractLogoProps) {
+  const normalizedSlug = (slug || name || "").toLowerCase();
 
   // Render dedicated crisp monochrome abstract protocol diagram for each product
   const renderDiagram = () => {
@@ -18,7 +18,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "aegis-legal":
         // Shield + Cryptographic Intersection
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <path d="M24 4L8 10V22C8 32 15 40 24 44C33 40 40 32 40 22V10L24 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="24" cy="22" r="7" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
             <path d="M24 18V26M20 22H28" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -29,7 +29,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "pulsemed-tee":
         // Hexagonal Enclave + ECG Heartbeat
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <polygon points="24,4 42,14 42,34 24,44 6,34 6,14" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
             <path d="M12 24H18L21 16L25 32L29 20L31 24H36" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="24" cy="24" r="1.5" fill="currentColor" />
@@ -39,7 +39,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "chrono-executive":
         // High-precision Orbital Chrono Dial with Meridiens
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="2" />
             <circle cx="24" cy="24" r="12" stroke="currentColor" strokeWidth="1" strokeDasharray="2 3" />
             <circle cx="24" cy="24" r="3" fill="currentColor" />
@@ -51,7 +51,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "ciphertax-ai":
         // Zero-Knowledge Proof Trinity Triangle & Balance Loops
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <polygon points="24,6 42,38 6,38" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
             <circle cx="24" cy="20" r="5" stroke="currentColor" strokeWidth="1.5" />
             <circle cx="16" cy="32" r="4" stroke="currentColor" strokeWidth="1.5" />
@@ -65,7 +65,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "sentience-agent":
         // Autonomous Neural Nexus & Attestation Orbit
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <circle cx="24" cy="24" r="19" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 4" />
             <circle cx="24" cy="24" r="8" stroke="currentColor" strokeWidth="2" />
             <circle cx="24" cy="24" r="3" fill="currentColor" />
@@ -81,7 +81,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "searxng":
         // Concentric Metasearch Radar Array
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <circle cx="21" cy="21" r="14" stroke="currentColor" strokeWidth="2" />
             <circle cx="21" cy="21" r="8" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" />
             <circle cx="21" cy="21" r="3" fill="currentColor" />
@@ -94,7 +94,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "vaultwarden":
         // Multi-Party Iris Aperture & Secure Vault Lock
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <rect x="10" y="18" width="28" height="24" rx="4" stroke="currentColor" strokeWidth="2" />
             <path d="M16 18V12C16 7.5 19.5 4 24 4C28.5 4 32 7.5 32 12V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             <circle cx="24" cy="30" r="4" stroke="currentColor" strokeWidth="2" />
@@ -105,7 +105,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "krypton-enclave":
         // Asymmetric Labyrinth & Forward Secrecy Egress
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <rect x="6" y="6" width="36" height="36" rx="6" stroke="currentColor" strokeWidth="2" />
             <path d="M14 14H34V22H20V30H34V34H14V14Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
             <circle cx="34" cy="34" r="2.5" fill="currentColor" />
@@ -116,7 +116,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "open-webui-tee":
         // Modular LLM Enclave Node Array
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <rect x="8" y="8" width="32" height="32" rx="4" stroke="currentColor" strokeWidth="2" />
             <rect x="14" y="14" width="8" height="8" rx="1" fill="currentColor" />
             <rect x="26" y="14" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.5" />
@@ -129,7 +129,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "immich-private":
         // Spatial Perceptual Hash Mesh
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <polygon points="24,6 40,16 40,32 24,42 8,32 8,16" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
             <polygon points="24,14 33,20 33,28 24,34 15,28 15,20" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 2" />
             <circle cx="24" cy="24" r="3" fill="currentColor" />
@@ -140,7 +140,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       case "synapse-tee":
         // Decentralized Federated Matrix Nodes
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
             <circle cx="24" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
             <circle cx="12" cy="34" r="4" stroke="currentColor" strokeWidth="2" />
             <circle cx="36" cy="34" r="4" stroke="currentColor" strokeWidth="2" />
@@ -154,8 +154,8 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
       default:
         // Algorithmic Cryptographic Node (Universal fallback)
         return (
-          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-zinc-200">
-            <rect x="8" y="8" width="32" height="32" rx="6" stroke="currentColor" strokeWidth="2" />
+          <svg viewBox="0 0 48 48" fill="none" className="w-full h-full text-spectr-ink">
+            <rect x="8" y="8" width="32" height="32" stroke="currentColor" strokeWidth="2" />
             <circle cx="24" cy="24" r="8" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
             <circle cx="24" cy="24" r="3" fill="currentColor" />
             <path d="M24 8V12M24 36V40M8 24H12M36 24H40" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -166,7 +166,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
 
   return (
     <div
-      className={`inline-flex items-center justify-center p-2 rounded-none bg-[#171717] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors ${className}`}
+      className={`inline-flex items-center justify-center p-2 rounded-none bg-spectr-surface border border-spectr-hairline hover:border-spectr-primary transition-colors ${className}`}
       style={{ width: size, height: size }}
       title={name || slug}
     >

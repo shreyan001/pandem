@@ -15,7 +15,7 @@ import {
   UserPaymentOnboardingModal,
   OnboardedPaymentMethod,
 } from "../../components/UserPaymentOnboardingModal";
-import { PageHeader, Badge, Button } from "../../ui";
+import { PageHeader, Badge, Button, Card } from "../../ui";
 import { PaymentGatewayBanner } from "./components/PaymentGatewayBanner";
 import { SubscriptionCard, AgreementItem } from "./components/SubscriptionCard";
 import { StewardBountySection } from "./components/StewardBountySection";
@@ -217,37 +217,30 @@ export default function SubscriberDashboardPage() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 font-sans bg-spectr-canvas text-spectr-ink">
-      {/* Header & Account Identity */}
+      {/* 1. Page Header with Truncated Account & Escrow Badge */}
       <PageHeader
-        title="Subscriber Dashboard"
-        description="Monitor active subscriptions, 4-segment privacy audits, 7-day refund guarantees, and cross-chain payment methods."
-        badge={<Badge variant="primary">Active Escrow Protections</Badge>}
+        title="Subscriptions"
+        description="Monitor active subscriptions, verifiable SLA heartbeats, and 7-day non-custodial refund guarantees."
+        badge={<Badge variant="success">Escrow Protected</Badge>}
         actions={
           <div className="flex flex-wrap items-center gap-3">
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => setIsPaymentModalOpen(true)}
-            >
-              + Add a Payment Method
-            </Button>
-            <div className="px-3.5 py-2 bg-spectr-surface border border-spectr-hairline font-mono text-xs">
+            <div className="px-3.5 py-1.5 bg-spectr-surface border border-spectr-hairline font-mono text-xs">
               <span className="text-spectr-muted">Subscriber: </span>
-              <span className="text-spectr-primary font-semibold">{targetAccount}</span>
+              <span className="text-spectr-ink font-semibold">
+                {targetAccount.length > 20
+                  ? `${targetAccount.slice(0, 10)}...${targetAccount.slice(-8)}`
+                  : targetAccount}
+              </span>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-spectr-surface border border-spectr-hairline font-mono text-xs text-spectr-muted">
-              <span className="w-2 h-2 rounded-none bg-spectr-success" />
-              <span>Escrow Protected</span>
-            </div>
+            {agreements.length === 0 && (
+              <Link href="/#storefront">
+                <Button type="button" variant="primary" size="sm">
+                  Browse catalog
+                </Button>
+              </Link>
+            )}
           </div>
         }
-      />
-
-      {/* Near Intents Multi-Chain Payment Gateway Banner */}
-      <PaymentGatewayBanner
-        activePaymentMethod={activePaymentMethod}
-        onConfigureClick={() => setIsPaymentModalOpen(true)}
       />
 
       {/* Claim Tx Alert */}
@@ -282,43 +275,68 @@ export default function SubscriberDashboardPage() {
         </div>
       )}
 
-      {/* Section 1: Active Subscriptions List */}
+      {/* 2. Top-Level Subscriptions Section (Active Subscriptions First) */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-spectr-hairline">
           <div>
             <h2 className="text-lg font-bold text-spectr-ink flex items-center gap-2 font-sans">
-              <span>Active Subscriptions & Privacy Standards</span>
+              <span>Active Subscriptions</span>
               <span className="text-xs font-mono text-spectr-muted font-normal">
-                ({agreements.length} Active on NEAR Escrow)
+                ({agreements.length} on NEAR Escrow)
               </span>
             </h2>
             <p className="text-xs text-spectr-body font-mono mt-0.5">
-              Verified 4-segment privacy audits with automated 7-day refund protection on heartbeat lapse.
+              Verified SLA heartbeats with automated 7-day refund protection on heartbeat lapse.
             </p>
           </div>
 
           <Link
-            href="/"
+            href="/#storefront"
             className="text-xs font-mono text-spectr-primary hover:text-spectr-primary-hover transition-colors"
           >
-            + Browse SaaS Catalog
+            + Browse Catalog
           </Link>
         </div>
 
         {isLoading ? (
-          <div className="p-12 text-center text-xs font-mono text-spectr-muted bg-spectr-surface border border-spectr-hairline">
-            Querying native NEAR Rust Escrow contracts...
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <Card key={i} className="p-6 bg-spectr-surface border-spectr-hairline space-y-4 animate-pulse">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-spectr-hairline">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-spectr-surface-raised border border-spectr-hairline shrink-0" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-48 bg-spectr-surface-raised" />
+                      <div className="h-3 w-32 bg-spectr-surface-raised" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-24 bg-spectr-surface-raised" />
+                    <div className="h-8 w-20 bg-spectr-surface-raised" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                  <div className="h-10 bg-spectr-surface-raised" />
+                  <div className="h-10 bg-spectr-surface-raised" />
+                  <div className="h-10 bg-spectr-surface-raised" />
+                  <div className="h-10 bg-spectr-surface-raised" />
+                </div>
+              </Card>
+            ))}
           </div>
         ) : agreements.length === 0 ? (
-          <div className="p-12 text-center bg-spectr-surface border border-spectr-hairline space-y-3">
-            <p className="text-sm text-spectr-body">You don&apos;t have any active subscriptions yet.</p>
-            <Link
-              href="/"
-              className="inline-block px-5 py-2 bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink font-semibold text-xs transition-colors"
-            >
-              Browse Verified SaaS Catalog
-            </Link>
-          </div>
+          <Card className="p-12 text-center bg-spectr-surface border-spectr-hairline space-y-4">
+            <p className="text-sm text-spectr-body font-sans">
+              You do not have any active subscriptions on NEAR Escrow yet.
+            </p>
+            <div>
+              <Link href="/#storefront">
+                <Button type="button" variant="primary" size="md">
+                  Browse catalog
+                </Button>
+              </Link>
+            </div>
+          </Card>
         ) : (
           agreements.map((item) => (
             <SubscriptionCard
@@ -333,13 +351,19 @@ export default function SubscriberDashboardPage() {
         )}
       </section>
 
-      {/* Section 2: Steward Bounty Program */}
+      {/* 3. Near Intents Multi-Chain Payment Gateway Banner (Below List) */}
+      <PaymentGatewayBanner
+        activePaymentMethod={activePaymentMethod}
+        onConfigureClick={() => setIsPaymentModalOpen(true)}
+      />
+
+      {/* 4. Steward Bounty Program (Below List) */}
       <StewardBountySection
         bugReports={bugReports}
         onOpenBugModal={() => handleOpenBugModal()}
       />
 
-      {/* Section 3: 1Click On-Ramp Drawer */}
+      {/* 5. 1Click On-Ramp Drawer Trigger */}
       <OnrampDrawerSection />
 
       {/* Modal: File Bug Bounty Ticket */}

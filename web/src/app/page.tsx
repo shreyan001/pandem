@@ -101,8 +101,8 @@ export default function Home() {
   }, [catalog, searchQuery]);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24 bg-spectr-canvas text-spectr-ink font-sans">
-      {/* 1. Hero & Persona Launchpad Section */}
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 bg-spectr-canvas text-spectr-ink font-sans">
+      {/* 1. Compact Hero PageHeader Band */}
       <HeroPersonaLaunchpad
         isConnected={isConnected}
         accountId={accountId}
@@ -110,20 +110,11 @@ export default function Home() {
         onDeveloperPathway={handleDeveloperPathway}
       />
 
-      {/* Hero Centerpiece: Contract & Enclave Inspector */}
-      <ContractEnclaveInspector
-        monthlySimAmount={monthlySimAmount}
-        onMonthlySimChange={setMonthlySimAmount}
-      />
-
-      {/* 2. Architecture & Security Matrix */}
-      <SecurityMatrixTable />
-
-      {/* 3. Live Storefront Directory */}
-      <section id="storefront" className="space-y-6 pt-4 border-t border-spectr-hairline scroll-mt-20">
+      {/* 2. Storefront Directory (Above the fold!) */}
+      <section id="storefront" className="space-y-6 scroll-mt-20">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-spectr-hairline">
           <div>
-            <h2 className="text-2xl font-bold text-spectr-ink tracking-tight">
+            <h2 className="text-2xl font-bold text-spectr-ink tracking-tight font-sans">
               Storefront Directory
             </h2>
             <p className="text-xs text-spectr-body font-mono mt-0.5">
@@ -155,6 +146,15 @@ export default function Home() {
           onSelectProduct={handleSelectProduct}
         />
       </section>
+
+      {/* 3. Hero Centerpiece: Contract & Enclave Inspector */}
+      <ContractEnclaveInspector
+        monthlySimAmount={monthlySimAmount}
+        onMonthlySimChange={setMonthlySimAmount}
+      />
+
+      {/* 4. Architecture & Security Matrix */}
+      <SecurityMatrixTable />
 
       {/* Product Detail Modal */}
       {detailProduct && (

@@ -71,24 +71,38 @@ export function Navbar() {
     }
   };
 
+  // Truncate long account IDs for mobile (e.g. alice...testnet)
+  const truncateAccountMobile = (acc: string | null) => {
+    if (!acc) return "";
+    if (acc.length <= 14) return acc;
+    const parts = acc.split(".");
+    if (parts.length > 1) {
+      const user = parts[0];
+      const suffix = parts.slice(1).join(".");
+      const shortUser = user.length > 5 ? user.slice(0, 5) : user;
+      return `${shortUser}...${suffix}`;
+    }
+    return `${acc.slice(0, 5)}...${acc.slice(-5)}`;
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-[#0D0D0D]/95 backdrop-blur-md border-b border-[#222222] font-sans" suppressHydrationWarning>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 bg-spectr-canvas/95 backdrop-blur-md border-b border-spectr-hairline font-sans" suppressHydrationWarning>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         {/* Brand & Nav */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-6 md:gap-8">
           <Link
             href="/"
-            className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+            className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
             aria-label="Pandem Home"
           >
-            <div className="w-8 h-8 bg-[#894DEF] flex items-center justify-center text-white shrink-0">
-              <ShieldCheck className="w-4 h-4 text-white" aria-hidden="true" />
+            <div className="w-8 h-8 bg-spectr-primary flex items-center justify-center text-spectr-ink shrink-0">
+              <ShieldCheck className="w-4 h-4 text-spectr-ink" aria-hidden="true" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-[#FAFAFA] tracking-tight">
+              <span className="text-base font-bold text-spectr-ink tracking-tight font-sans">
                 Pandem
               </span>
-              <span className="text-[11px] font-medium text-[#737373] bg-[#141414] px-2 py-0.5 border border-[#222222]">
+              <span className="text-xs font-mono font-medium text-spectr-muted bg-spectr-surface px-2 py-0.5 border border-spectr-hairline">
                 Testnet
               </span>
             </div>
@@ -106,10 +120,10 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary ${
                     isActive
-                      ? "text-[#FAFAFA] bg-[#181818]"
-                      : "text-[#8A8A8A] hover:text-[#FAFAFA] hover:bg-[#141414]"
+                      ? "text-spectr-ink bg-spectr-surface-raised"
+                      : "text-spectr-body hover:text-spectr-ink hover:bg-spectr-surface"
                   }`}
                 >
                   {link.label}
@@ -119,52 +133,60 @@ export function Navbar() {
           </nav>
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-3 shrink-0" suppressHydrationWarning>
+        {/* Right Actions: Clean layout on 390px, no CTA collision */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0" suppressHydrationWarning>
+          {/* Launch Product: hidden on mobile (<640px) to prevent collision with wallet button */}
           <Link
             href="/dev/onboarding"
-            className="bg-[#894DEF] hover:bg-[#7839DF] text-white px-3.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+            className="hidden sm:inline-flex bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink px-3 py-1.5 text-xs font-medium transition-colors items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
           >
             <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Launch Product</span>
           </Link>
 
           {mounted && isConnected ? (
-            <div className="flex items-center gap-2" suppressHydrationWarning>
+            <div className="flex items-center gap-1.5 sm:gap-2" suppressHydrationWarning>
+              {/* Claim Faucet: hidden on mobile */}
               <button
                 type="button"
                 onClick={handleClaimFaucet}
                 disabled={isClaimingFaucet}
-                className="px-2.5 py-1.5 text-xs font-mono font-medium bg-[#141414] hover:bg-[#181818] text-[#894DEF] hover:text-[#A273F2] border border-[#222222] hover:border-[#894DEF]/50 transition-colors flex items-center gap-1.5 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                className="hidden sm:inline-flex px-2.5 py-1.5 text-xs font-mono font-medium bg-spectr-surface hover:bg-spectr-surface-raised text-spectr-primary hover:text-spectr-primary-hover border border-spectr-hairline transition-colors items-center gap-1.5 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
                 title="Claim 100 test USDC (once per 24 hours)"
               >
                 <span>{isClaimingFaucet ? "Claiming..." : "Get test USDC"}</span>
               </button>
 
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#141414] border border-[#222222] text-xs">
-                <span className="w-1.5 h-1.5 bg-[#22C55E]" aria-hidden="true" />
-                <span className="font-mono text-[#FAFAFA] text-xs">
-                  {accountId?.slice(0, 14)}
-                  {accountId && accountId.length > 14 ? "..." : ""}
+              {/* Account identity badge: truncated on mobile */}
+              <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-spectr-surface border border-spectr-hairline text-xs">
+                <span className="w-1.5 h-1.5 bg-spectr-success shrink-0" aria-hidden="true" />
+                <span className="font-mono text-spectr-ink text-xs sm:hidden">
+                  {truncateAccountMobile(accountId)}
                 </span>
-                <span className="text-[#333333]" aria-hidden="true">|</span>
-                <span className="font-mono text-[#A1A1A1] text-xs tabular-nums">
+                <span className="font-mono text-spectr-ink text-xs hidden sm:inline">
+                  {accountId?.length && accountId.length > 16
+                    ? `${accountId.slice(0, 10)}...${accountId.slice(-6)}`
+                    : accountId}
+                </span>
+                <span className="text-spectr-hairline hidden md:inline" aria-hidden="true">|</span>
+                <span className="font-mono text-spectr-body text-xs tabular-nums hidden md:inline">
                   {formatBalance(tokenBalance)} tUSDC
                 </span>
               </div>
+
               <button
                 type="button"
                 onClick={() => setIsOnboardingOpen(true)}
-                className="px-2.5 py-1.5 text-xs font-mono font-medium bg-[#141414] hover:bg-[#181818] text-[#8A8A8A] hover:text-[#FAFAFA] border border-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                className="hidden sm:inline-flex px-2 py-1.5 text-xs font-mono font-medium bg-spectr-surface hover:bg-spectr-surface-raised text-spectr-body hover:text-spectr-ink border border-spectr-hairline transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
                 title="Open 3-step payments onboarding"
               >
-                <span>Onboarding</span>
+                <span>Setup</span>
               </button>
 
               <button
                 type="button"
                 onClick={disconnect}
-                className="p-1.5 bg-[#141414] hover:bg-[#181818] border border-[#222222] text-[#8A8A8A] hover:text-[#FAFAFA] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                className="p-1.5 bg-spectr-surface hover:bg-spectr-surface-raised border border-spectr-hairline text-spectr-muted hover:text-spectr-ink transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary shrink-0"
                 aria-label="Disconnect wallet"
                 title="Disconnect wallet"
               >
@@ -176,7 +198,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => setIsOnboardingOpen(true)}
-                className="px-3.5 py-1.5 text-xs font-semibold bg-[#894DEF] hover:bg-[#7839DF] text-white border border-[#894DEF] transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                className="px-3 py-1.5 text-xs font-semibold bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
                 aria-label="Get started with Pandem"
               >
                 <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
@@ -186,10 +208,10 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={connect}
-                className="px-3 py-1.5 text-xs font-medium bg-[#141414] hover:bg-[#181818] text-[#FAFAFA] border border-[#222222] hover:border-[#333333] transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                className="hidden sm:inline-flex px-3 py-1.5 text-xs font-medium bg-spectr-surface hover:bg-spectr-surface-raised text-spectr-ink border border-spectr-hairline transition-colors items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
                 aria-label="Connect NEAR Wallet"
               >
-                <Wallet className="w-3.5 h-3.5 text-[#8A8A8A]" aria-hidden="true" />
+                <Wallet className="w-3.5 h-3.5 text-spectr-muted" aria-hidden="true" />
                 <span>Connect</span>
               </button>
             </div>
@@ -203,15 +225,15 @@ export function Navbar() {
       />
 
       {walletError && (
-        <div className="bg-[#141414] border-t border-[#222222] px-4 py-2 text-xs flex items-center justify-between gap-2 text-[#FAFAFA]" role="alert">
+        <div className="bg-spectr-surface border-t border-spectr-hairline px-4 py-2 text-xs flex items-center justify-between gap-2 text-spectr-ink" role="alert">
           <div className="flex items-center gap-2">
-            <span className="text-[#894DEF] font-medium">Notice:</span>
-            <span className="text-[#A1A1A1]">{walletError}</span>
+            <span className="text-spectr-primary font-medium">Notice:</span>
+            <span className="text-spectr-body">{walletError}</span>
           </div>
           <button
             type="button"
             onClick={clearWalletError}
-            className="text-[#737373] hover:text-[#FAFAFA] p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+            className="text-spectr-muted hover:text-spectr-ink p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-spectr-primary"
             aria-label="Dismiss notice"
           >
             <X className="w-3.5 h-3.5" aria-hidden="true" />

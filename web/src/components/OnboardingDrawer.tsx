@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { useNearWallet } from "../context/NearWalletContext";
 import { Drawer, Button, Badge, Card, CardHeader, CardTitle, CardContent, Stat } from "../ui";
 import { Wallet, ShieldCheck, CheckCircle2, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
@@ -105,18 +104,18 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
       isOpen={isOpen}
       onClose={onClose}
       title="Get Started with Pandem"
-      description="Onboard in 3 simple steps: connect your NEAR wallet, set up test payments, and unlock private SaaS subscriptions."
+      description="Connect your NEAR wallet and set up testnet payments in under 60 seconds."
       width="md"
     >
       <div className="space-y-6 font-sans">
-        {/* Progress Tracker (3-step indicator) */}
+        {/* Progress Tracker (3 equal cells, only current step is primary) */}
         <div className="grid grid-cols-3 border border-spectr-hairline bg-spectr-canvas font-mono text-xs">
           <div
             className={`p-2.5 text-center border-r border-spectr-hairline transition-colors ${
               step === 1
                 ? "bg-spectr-primary text-spectr-ink font-bold"
                 : isConnected
-                ? "text-spectr-ink font-medium bg-spectr-surface-raised/40"
+                ? "text-spectr-ink font-medium bg-spectr-surface-raised"
                 : "text-spectr-muted"
             }`}
           >
@@ -127,7 +126,7 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
               step === 2
                 ? "bg-spectr-primary text-spectr-ink font-bold"
                 : isStorageRegistered && has50OrMore
-                ? "text-spectr-ink font-medium bg-spectr-surface-raised/40"
+                ? "text-spectr-ink font-medium bg-spectr-surface-raised"
                 : "text-spectr-muted"
             }`}
           >
@@ -157,7 +156,7 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
               </CardHeader>
               <CardContent className="space-y-4 text-xs text-spectr-body">
                 <p>
-                  Connect any supported NEAR wallet using <span className="text-spectr-ink font-mono font-medium">near-connect</span>. Supported wallets include HOT Wallet, Meteor, MyNearWallet, and mobile/email web3 wallets.
+                  Connect any supported NEAR wallet (HOT, Meteor, MyNearWallet) to manage non-custodial subscriptions.
                 </p>
 
                 <div className="p-3 bg-spectr-canvas border border-spectr-hairline space-y-2 font-mono text-xs">
@@ -184,7 +183,7 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
                   onClick={handleConnectWallet}
                 >
                   <Wallet className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>Connect NEAR Wallet</span>
+                  <span>Connect NEAR wallet</span>
                 </Button>
               </CardContent>
             </Card>
@@ -204,41 +203,22 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
               </CardHeader>
               <CardContent className="space-y-4 text-xs text-spectr-body">
                 <p>
-                  To subscribe without transaction failures, your wallet requires token storage registration and testnet funds on the NEP-141 USDC contract.
+                  Register token storage and claim 100 tUSDC testnet funds in one atomic batch transaction.
                 </p>
 
-                <div className="p-3 bg-spectr-canvas border border-spectr-hairline space-y-2.5 font-mono text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-spectr-muted">Account:</span>
-                    <span className="text-spectr-ink font-bold truncate max-w-[200px]">{accountId}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-spectr-muted">Storage Registered:</span>
-                    <span className={isStorageRegistered ? "text-spectr-success font-medium" : "text-spectr-danger font-medium"}>
-                      {isStorageRegistered ? "Registered ✓" : "Needs Registration (0.00125 NEAR)"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-spectr-muted">tUSDC Balance:</span>
-                    <span className="text-spectr-ink font-medium">{formatBalance(tokenBalance)} tUSDC</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-spectr-muted">Token Contract:</span>
-                    <span className="text-spectr-muted text-xs truncate max-w-[180px]">{PANDEM_TOKEN_ID}</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-spectr-surface-raised border border-spectr-hairline text-xs space-y-1">
-                  <div className="font-semibold text-spectr-ink flex items-center gap-1.5">
-                    <span>1-Click Batch Transaction</span>
-                  </div>
-                  <p className="text-spectr-body text-xs leading-relaxed">
-                    {!isStorageRegistered && !has50OrMore
-                      ? "Executes both storage_deposit and faucet() in a single atomic batch transaction to fund 100 tUSDC."
-                      : !isStorageRegistered
-                      ? "Registers your account storage on the tUSDC contract."
-                      : "Claims 100 tUSDC test tokens from the contract faucet."}
-                  </p>
+                {/* Stat for tUSDC Balance & Account */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Stat
+                    label="Account"
+                    value={accountId ? `${accountId.slice(0, 10)}...` : "Connected"}
+                    hint="Signed in on testnet"
+                  />
+                  <Stat
+                    label="tUSDC Balance"
+                    value={`${formatBalance(tokenBalance)} tUSDC`}
+                    hint={isStorageRegistered ? "Storage registered ✓" : "Needs 0.00125 N storage"}
+                    tone={has50OrMore ? "success" : "default"}
+                  />
                 </div>
 
                 {setupError && (
@@ -251,7 +231,7 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1 justify-center"
+                    className="w-24 justify-center"
                     onClick={() => setStep(1)}
                   >
                     Back
@@ -270,7 +250,7 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
                       </>
                     ) : (
                       <>
-                        <span>Set Up Payments</span>
+                        <span>Claim test USDC</span>
                         <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                       </>
                     )}
@@ -307,12 +287,13 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
                     label="Available Balance"
                     value={`${formatBalance(tokenBalance)} tUSDC`}
                     hint="NEP-141 liquid tokens"
+                    tone="success"
                   />
                 </div>
 
                 {/* Real Verified Transaction Links */}
                 <div className="p-3 bg-spectr-canvas border border-spectr-hairline space-y-2.5 font-mono text-xs">
-                  <div className="text-spectr-muted uppercase font-bold text-[11px] pb-1 border-b border-spectr-hairline">
+                  <div className="text-spectr-muted uppercase font-bold text-xs pb-1 border-b border-spectr-hairline">
                     Verified On-Chain Transactions
                   </div>
 
@@ -372,7 +353,7 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1 justify-center"
+                    className="w-24 justify-center"
                     onClick={onClose}
                   >
                     Close
@@ -387,7 +368,7 @@ export function OnboardingDrawer({ isOpen, onClose, onSuccess }: OnboardingDrawe
                       if (storefront) storefront.scrollIntoView({ behavior: "smooth" });
                     }}
                   >
-                    <span>Browse Storefront</span>
+                    <span>Browse storefront</span>
                     <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                   </Button>
                 </div>

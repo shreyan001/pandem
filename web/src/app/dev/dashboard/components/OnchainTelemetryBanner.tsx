@@ -52,7 +52,7 @@ export const OnchainTelemetryBanner: React.FC<OnchainTelemetryBannerProps> = ({
             Live RPC
           </Badge>
         </div>
-        <div className="flex items-center gap-4 text-xs text-spectr-muted">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-spectr-muted">
           <span>
             Escrow:{" "}
             <a
@@ -60,8 +60,11 @@ export const OnchainTelemetryBanner: React.FC<OnchainTelemetryBannerProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               className="text-spectr-body hover:text-spectr-primary underline"
+              title={PANDEM_ESCROW_ID}
             >
-              {PANDEM_ESCROW_ID}
+              {PANDEM_ESCROW_ID.length > 20
+                ? `${PANDEM_ESCROW_ID.slice(0, 10)}...${PANDEM_ESCROW_ID.slice(-8)}`
+                : PANDEM_ESCROW_ID}
             </a>
           </span>
           <span>
@@ -71,8 +74,11 @@ export const OnchainTelemetryBanner: React.FC<OnchainTelemetryBannerProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               className="text-spectr-body hover:text-spectr-primary underline"
+              title={PANDEM_BUDGET_ID}
             >
-              {PANDEM_BUDGET_ID}
+              {PANDEM_BUDGET_ID.length > 20
+                ? `${PANDEM_BUDGET_ID.slice(0, 10)}...${PANDEM_BUDGET_ID.slice(-8)}`
+                : PANDEM_BUDGET_ID}
             </a>
           </span>
         </div>
@@ -80,27 +86,27 @@ export const OnchainTelemetryBanner: React.FC<OnchainTelemetryBannerProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
         <Stat
-          label="Ops Budget Received (30%)"
+          label="Ops received (30%)"
           value={opsReceived}
           hint="Allocated for TEE draws"
           tone="success"
         />
         <Stat
-          label="Available Ops Balance"
+          label="Ops available"
           value={opsBalance}
           hint="Ready for agent queries"
           tone="default"
         />
         <Stat
-          label="Contingency Reserve (20%)"
+          label="Update buffer (20%)"
           value={contingency}
           hint="Dispute quorum reserve"
           tone="warning"
         />
         <Stat
-          label="Period Heartbeat Proof"
+          label="Heartbeat period"
           value={`Period #${heartbeatStreak}`}
-          hint="Enclave attested"
+          hint="Verifiable liveness SLA"
           tone="primary"
         />
       </div>

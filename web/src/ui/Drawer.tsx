@@ -49,8 +49,8 @@ export const Drawer: React.FC<DrawerProps> = ({
   };
 
   const positionStyles: Record<string, string> = {
-    right: `top-0 right-0 bottom-0 w-full ${widthStyles[width]} border-l border-spectr-hairline`,
-    left: `top-0 left-0 bottom-0 w-full ${widthStyles[width]} border-r border-spectr-hairline`,
+    right: `top-0 right-0 bottom-0 w-full max-sm:inset-0 max-sm:w-full max-sm:h-full max-sm:max-w-none sm:${widthStyles[width]} border-l border-spectr-hairline`,
+    left: `top-0 left-0 bottom-0 w-full max-sm:inset-0 max-sm:w-full max-sm:h-full max-sm:max-w-none sm:${widthStyles[width]} border-r border-spectr-hairline`,
     bottom: "bottom-0 left-0 right-0 w-full max-h-[80vh] border-t border-spectr-hairline",
   };
 

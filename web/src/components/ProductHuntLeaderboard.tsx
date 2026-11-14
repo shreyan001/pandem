@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { CatalogItem } from "@pandem/shared";
 import { ScoreBadge, ScoringExplainer } from "./ScoringExplainer";
+import { AbstractLogo } from "./AbstractLogo";
+import { Badge, Button, Card } from "../ui";
 import {
   Trophy,
-  Zap,
-  Database,
   ChevronUp,
-  ShieldCheck,
-  Cpu,
+  Database,
   Layers,
   ChevronDown,
 } from "lucide-react";
@@ -17,6 +16,23 @@ import {
 interface ProductHuntLeaderboardProps {
   products: CatalogItem[];
   onSelectProduct: (product: CatalogItem) => void;
+}
+
+const KNOWN_COVERS: Record<string, string> = {
+  "open-webui": "/covers/open-webui.png",
+  "localai": "/covers/localai.png",
+  "searxng": "/covers/searxng.png",
+  "vaultwarden": "/covers/vaultwarden.png",
+  "immich": "/covers/immich.png",
+  "nextcloud": "/covers/nextcloud.png",
+};
+
+function getProductCover(slug?: string, id?: string): string | null {
+  const s = (slug || id || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
+  for (const key of Object.keys(KNOWN_COVERS)) {
+    if (s.includes(key)) return KNOWN_COVERS[key];
+  }
+  return null;
 }
 
 export function ProductHuntLeaderboard({
@@ -66,131 +82,143 @@ export function ProductHuntLeaderboard({
     const frontend = index % 2 === 0 ? "Frontend: Filecoin Pin" : "Frontend: FastFS CID";
     const backend = "Node: Isolated Runtime";
     const database = "Database: KMS Sealed";
-    const escrow = "7-Day Refund Escrow";
-    return { frontend, backend, database, escrow };
+    return { frontend, backend, database };
   };
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Featured Product Spotlight Card */}
+      {/* 1. Featured Product Spotlight Card with 16:9 Banner */}
       {productOfTheDay && (() => {
         const podAudit = getStackPrivacyAudit(productOfTheDay, 0);
         const upvoteData = upvotesState[productOfTheDay.id] || {
           count: productOfTheDay.upvotes || 348,
           voted: false,
         };
+        const coverUrl = getProductCover((productOfTheDay as any).slug || productOfTheDay.id, productOfTheDay.id);
 
         return (
-          <div
+          <Card
             onClick={() => onSelectProduct(productOfTheDay)}
-            className="group relative bg-[#141414] border border-[#222222] hover:border-[#383838] hover:bg-[#181818] p-6 sm:p-7 transition-colors cursor-pointer"
+            className="group relative bg-spectr-surface border-spectr-hairline hover:border-spectr-muted transition-all cursor-pointer overflow-hidden rounded-none"
           >
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="flex items-start gap-5">
-                <div className="w-14 h-14 bg-[#1A1A1A] border border-[#2A2A2A] group-hover:border-[#894DEF] flex items-center justify-center font-bold text-xl text-[#FAFAFA] shrink-0 transition-colors">
-                  {productOfTheDay.name.charAt(0)}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium bg-[#1F172B] text-[#C084FC] border border-[#894DEF]/30">
-                      <Trophy className="w-3 h-3 text-[#C084FC]" aria-hidden="true" />
-                      <span>Product of the Day</span>
-                    </span>
-
-                    <ScoreBadge
-                      upvotes={upvoteData.count}
-                      isTeeVerified={Boolean(productOfTheDay.teeHardware)}
-                      streak={12}
-                      tvl={15}
-                    />
-
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#22C55E] bg-[#141F18] border border-[#22C55E]/30">
-                      <span className="w-1.5 h-1.5 bg-[#22C55E]" aria-hidden="true" />
-                      <span>{podAudit.frontend}</span>
-                    </span>
-
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#FAFAFA] bg-[#181818] border border-[#2A2A2A]">
-                      <span className="w-1.5 h-1.5 bg-[#894DEF]" aria-hidden="true" />
-                      <span>{podAudit.backend}</span>
-                    </span>
-
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#A1A1A1] bg-[#181818] border border-[#2A2A2A] hidden sm:inline-flex">
-                      <Database className="w-3 h-3" aria-hidden="true" />
-                      <span>{podAudit.database}</span>
-                    </span>
-                  </div>
-
-                  <h3 className="text-xl sm:text-2xl font-semibold text-[#FAFAFA] tracking-tight group-hover:text-[#C084FC] transition-colors">
-                    {productOfTheDay.name}
-                  </h3>
-
-                  <p className="text-sm text-[#A1A1A1] max-w-2xl leading-relaxed">
-                    {productOfTheDay.tagline}
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-[#737373] pt-1">
-                    <span>Price: <span className="font-mono text-[#FAFAFA] tabular-nums">{productOfTheDay.price_display}</span></span>
-                    <span>·</span>
-                    <span>Billing: <span className="font-mono text-[#FAFAFA]">{productOfTheDay.period_display}</span></span>
-                    <span>·</span>
-                    <span>Steward: <span className="font-mono text-[#894DEF]">{productOfTheDay.steward?.slice(0, 16)}...</span></span>
-                    <span>·</span>
-                    <span className="text-[#22C55E]">7-Day Misuse Protection</span>
-                  </div>
-                </div>
+            {/* 16:9 Cover Banner */}
+            {coverUrl ? (
+              <div className="relative aspect-[16/9] max-h-72 w-full overflow-hidden bg-spectr-surface border-b border-spectr-hairline rounded-none">
+                <img
+                  src={coverUrl}
+                  alt={productOfTheDay.name}
+                  className="w-full h-full object-cover object-center rounded-none"
+                />
               </div>
+            ) : (
+              <div className="relative aspect-[16/9] max-h-48 w-full overflow-hidden bg-gradient-to-br from-spectr-surface-raised via-spectr-surface to-spectr-canvas border-b border-spectr-hairline flex items-center justify-center rounded-none">
+                <AbstractLogo slug={(productOfTheDay as any).slug || productOfTheDay.id} name={productOfTheDay.name} size={64} />
+              </div>
+            )}
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
-                <button
-                  type="button"
-                  onClick={(e) => handleUpvote(e, productOfTheDay.id)}
-                  className={`flex flex-col items-center justify-center w-14 h-16 border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
-                    upvoteData.voted
-                      ? "bg-[#894DEF] text-white border-[#894DEF]"
-                      : "bg-[#181818] border-[#2A2A2A] hover:border-[#894DEF] text-[#A1A1A1] hover:text-[#FAFAFA]"
-                  }`}
-                  aria-label={`Upvote ${productOfTheDay.name}`}
-                  title="Upvote product"
-                >
-                  <ChevronUp className="w-4 h-4" aria-hidden="true" />
-                  <span className="font-mono text-xs font-semibold mt-0.5 tabular-nums">
-                    {upvoteData.count}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-wider font-sans opacity-70">
-                    {upvoteData.voted ? "Voted" : "Vote"}
-                  </span>
-                </button>
+            {/* Feature Content Body */}
+            <div className="p-5 sm:p-7">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex items-start gap-4 sm:gap-5">
+                  <AbstractLogo
+                    slug={(productOfTheDay as any).slug || productOfTheDay.id}
+                    name={productOfTheDay.name}
+                    size={48}
+                    className="shrink-0 hidden sm:inline-flex"
+                  />
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectProduct(productOfTheDay);
-                  }}
-                  className="px-5 py-3.5 bg-[#894DEF] hover:bg-[#7839DF] text-white text-xs sm:text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-                >
-                  Inspect Enclave & Subscribe
-                </button>
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="primary">
+                        <Trophy className="w-3 h-3 text-spectr-primary mr-1" aria-hidden="true" />
+                        <span>Product of the Day</span>
+                      </Badge>
+
+                      <ScoreBadge
+                        upvotes={upvoteData.count}
+                        isTeeVerified={Boolean(productOfTheDay.teeHardware)}
+                        streak={12}
+                        tvl={15}
+                      />
+
+                      <Badge variant="success" dot>
+                        {podAudit.frontend}
+                      </Badge>
+
+                      <Badge variant="default" className="hidden sm:inline-flex">
+                        {podAudit.backend}
+                      </Badge>
+                    </div>
+
+                    <h3 className="text-xl sm:text-2xl font-bold text-spectr-ink tracking-tight group-hover:text-spectr-primary transition-colors font-sans">
+                      {productOfTheDay.name}
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-spectr-body max-w-2xl leading-relaxed font-sans line-clamp-2">
+                      {productOfTheDay.tagline}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-spectr-muted pt-1 font-mono">
+                      <span>Price: <span className="font-mono text-spectr-ink font-bold tabular-nums">{productOfTheDay.price_display}</span></span>
+                      <span>·</span>
+                      <span>Billing: <span className="text-spectr-ink">{productOfTheDay.period_display}</span></span>
+                      <span>·</span>
+                      <span>Steward: <span className="text-spectr-primary">{productOfTheDay.steward?.slice(0, 16)}...</span></span>
+                      <span className="hidden sm:inline">·</span>
+                      <span className="text-spectr-success hidden sm:inline">7-Day Refund Escrow</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fixed Upvote Button (40x48) + Primary CTA */}
+                <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
+                  <button
+                    type="button"
+                    onClick={(e) => handleUpvote(e, productOfTheDay.id)}
+                    className={`flex flex-col items-center justify-center w-10 h-12 rounded-none border font-mono transition-colors focus:outline-none focus:ring-1 focus:ring-spectr-primary shrink-0 ${
+                      upvoteData.voted
+                        ? "bg-spectr-primary text-spectr-ink border-spectr-primary"
+                        : "bg-spectr-surface-raised border-spectr-hairline hover:border-spectr-primary text-spectr-body hover:text-spectr-ink"
+                    }`}
+                    aria-label={`Upvote ${productOfTheDay.name}`}
+                    title="Upvote product"
+                  >
+                    <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="font-mono text-xs font-bold mt-0.5 tabular-nums">
+                      {upvoteData.count}
+                    </span>
+                  </button>
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectProduct(productOfTheDay);
+                    }}
+                  >
+                    Inspect Enclave & Subscribe
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          </Card>
         );
       })()}
 
       {/* Filter and Controls Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Category Filters">
           {categories.map((cat) => (
             <button
               type="button"
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
+              className={`px-3 py-1.5 text-xs font-mono font-medium rounded-none transition-colors border ${
                 selectedCategory === cat
-                  ? "bg-[#1A1A1A] text-[#FAFAFA] border-[#894DEF]"
-                  : "bg-[#141414] text-[#737373] hover:text-[#FAFAFA] border-[#222222] hover:border-[#2A2A2A]"
+                  ? "bg-spectr-surface-raised text-spectr-ink border-spectr-primary font-bold"
+                  : "bg-spectr-surface text-spectr-muted hover:text-spectr-ink border-spectr-hairline"
               }`}
             >
               {cat}
@@ -202,14 +230,14 @@ export function ProductHuntLeaderboard({
           <button
             type="button"
             onClick={() => setShowScoringExplainer(!showScoringExplainer)}
-            className={`px-3 py-1.5 text-xs font-medium border transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
+            className={`px-3 py-1.5 text-xs font-mono font-medium border rounded-none transition-colors flex items-center gap-1.5 ${
               showScoringExplainer
-                ? "bg-[#1A1A1A] text-[#FAFAFA] border-[#894DEF]"
-                : "bg-[#141414] text-[#A1A1A1] hover:text-[#FAFAFA] border-[#222222] hover:border-[#2A2A2A]"
+                ? "bg-spectr-surface-raised text-spectr-ink border-spectr-primary"
+                : "bg-spectr-surface text-spectr-body hover:text-spectr-ink border-spectr-hairline"
             }`}
             aria-expanded={showScoringExplainer}
           >
-            <Layers className="w-3.5 h-3.5 text-[#894DEF]" aria-hidden="true" />
+            <Layers className="w-3.5 h-3.5 text-spectr-primary" aria-hidden="true" />
             <span>Scoring Engine</span>
             {showScoringExplainer ? (
               <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
@@ -218,16 +246,16 @@ export function ProductHuntLeaderboard({
             )}
           </button>
 
-          <div className="flex items-center gap-1 bg-[#141414] p-1 border border-[#222222]">
+          <div className="flex items-center gap-1 bg-spectr-surface p-1 border border-spectr-hairline rounded-none font-mono text-xs">
             {["Today", "This Week", "All Time"].map((tab) => (
               <button
                 type="button"
                 key={tab}
                 onClick={() => setTimeFilter(tab)}
-                className={`px-2.5 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
+                className={`px-2.5 py-1 text-xs rounded-none transition-colors ${
                   timeFilter === tab
-                    ? "bg-[#1E1E1E] text-[#FAFAFA] font-medium"
-                    : "text-[#737373] hover:text-[#FAFAFA]"
+                    ? "bg-spectr-surface-raised text-spectr-ink font-bold"
+                    : "text-spectr-muted hover:text-spectr-ink"
                 }`}
               >
                 {tab}
@@ -244,8 +272,8 @@ export function ProductHuntLeaderboard({
         </div>
       )}
 
-      {/* Leaderboard Product Feed */}
-      <div className="space-y-2.5">
+      {/* 2. Dense Ranked Feed Rows */}
+      <div className="space-y-2">
         {filteredProducts.map((p, idx) => {
           const rank = p.rank || idx + 1;
           const upvoteData = upvotesState[p.id] || { count: p.upvotes || 100, voted: false };
@@ -256,32 +284,34 @@ export function ProductHuntLeaderboard({
             <div
               key={p.id}
               onClick={() => onSelectProduct(p)}
-              className="group p-4 sm:p-5 bg-[#141414] border border-[#222222] hover:border-[#383838] hover:bg-[#181818] transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              className="group p-3 sm:p-4 bg-spectr-surface border border-spectr-hairline hover:border-spectr-muted hover:bg-spectr-surface-raised transition-all cursor-pointer flex items-center justify-between gap-3 sm:gap-4 rounded-none"
             >
-              <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
-                <div className="flex flex-col items-center justify-center w-6 shrink-0 pt-1 sm:pt-0">
-                  <span
-                    className={`font-mono text-sm font-semibold tabular-nums ${
-                      rank === 1
-                        ? "text-[#C084FC]"
-                        : rank === 2
-                        ? "text-[#FAFAFA]"
-                        : rank === 3
-                        ? "text-[#A1A1A1]"
-                        : "text-[#525252]"
-                    }`}
-                  >
-                    #{rank}
-                  </span>
-                </div>
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                {/* Rank Badge */}
+                <span
+                  className={`w-7 text-center font-mono text-xs font-bold tabular-nums shrink-0 ${
+                    rank === 1
+                      ? "text-spectr-primary"
+                      : rank === 2
+                      ? "text-spectr-ink"
+                      : "text-spectr-muted"
+                  }`}
+                >
+                  #{rank}
+                </span>
 
-                <div className="w-11 h-11 bg-[#1A1A1A] border border-[#2A2A2A] group-hover:border-[#894DEF] flex items-center justify-center font-bold text-base text-[#FAFAFA] shrink-0 transition-colors">
-                  {p.name.charAt(0)}
-                </div>
+                {/* 40-48px Logo */}
+                <AbstractLogo
+                  slug={(p as any).slug || p.id}
+                  name={p.name}
+                  size={44}
+                  className="shrink-0"
+                />
 
-                <div className="min-w-0 flex-1 space-y-1">
+                {/* Info Container */}
+                <div className="min-w-0 flex-1 space-y-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="text-base font-semibold text-[#FAFAFA] group-hover:text-[#C084FC] transition-colors truncate">
+                    <h4 className="text-sm sm:text-base font-bold text-spectr-ink group-hover:text-spectr-primary transition-colors truncate font-sans">
                       {p.name}
                     </h4>
 
@@ -292,54 +322,49 @@ export function ProductHuntLeaderboard({
                       tvl={tvl}
                     />
 
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] text-[#22C55E] bg-[#141F18] border border-[#22C55E]/30">
-                      <span className="w-1.5 h-1.5 bg-[#22C55E]" aria-hidden="true" />
-                      <span>{audit.frontend}</span>
-                    </span>
+                    <Badge variant="category" className="hidden sm:inline-flex">
+                      {p.category}
+                    </Badge>
 
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] text-[#FAFAFA] bg-[#181818] border border-[#2A2A2A] hidden sm:inline-flex">
-                      <span className="w-1.5 h-1.5 bg-[#894DEF]" aria-hidden="true" />
-                      <span>{audit.backend}</span>
-                    </span>
-
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#737373] bg-[#181818] border border-[#2A2A2A] hidden lg:inline-flex">
-                      <Database className="w-3 h-3" aria-hidden="true" />
-                      <span>{audit.database}</span>
-                    </span>
+                    <Badge variant="success" dot className="hidden md:inline-flex">
+                      {audit.frontend}
+                    </Badge>
                   </div>
 
-                  <p className="text-xs text-[#A1A1A1] truncate">
+                  {/* One-line Tagline (body-xs) */}
+                  <p className="text-xs text-spectr-body truncate font-sans">
                     {p.tagline}
                   </p>
 
-                  <div className="flex items-center gap-2 text-xs text-[#737373] flex-wrap pt-0.5">
-                    <span className="font-mono text-[#FAFAFA] font-medium tabular-nums">{p.price_display}</span>
+                  {/* Mono Price & Streak Line */}
+                  <div className="flex items-center gap-2 text-xs text-spectr-muted font-mono flex-wrap">
+                    <span className="font-mono text-xs text-spectr-ink font-bold tabular-nums">
+                      {p.price_display}
+                    </span>
                     <span>/ {p.period_display}</span>
                     <span>·</span>
-                    <span className="text-[#A1A1A1]">{p.category}</span>
-                    <span>·</span>
-                    <span>Streak: <span className="font-mono text-[#FAFAFA] tabular-nums">{streak}</span></span>
-                    <span>·</span>
-                    <span>Escrow TVL: <span className="font-mono text-[#FAFAFA] tabular-nums">{tvl} wNEAR</span></span>
+                    <span className="text-spectr-success">{streak}d streak</span>
+                    <span className="hidden sm:inline">·</span>
+                    <span className="hidden sm:inline text-spectr-muted">TVL {tvl} wNEAR</span>
                   </div>
                 </div>
               </div>
 
-              {/* Upvote Button */}
-              <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+              {/* Fixed 40x48 Upvote Button on Right */}
+              <div className="shrink-0 pl-1">
                 <button
                   type="button"
                   onClick={(e) => handleUpvote(e, p.id)}
-                  className={`flex flex-col items-center justify-center w-12 h-14 border transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
+                  className={`flex flex-col items-center justify-center w-10 h-12 rounded-none border font-mono transition-colors focus:outline-none focus:ring-1 focus:ring-spectr-primary ${
                     upvoteData.voted
-                      ? "bg-[#894DEF] text-white border-[#894DEF]"
-                      : "bg-[#181818] border-[#2A2A2A] hover:border-[#894DEF] text-[#A1A1A1] hover:text-[#FAFAFA]"
+                      ? "bg-spectr-primary text-spectr-ink border-spectr-primary"
+                      : "bg-spectr-surface-raised border-spectr-hairline hover:border-spectr-primary text-spectr-body hover:text-spectr-ink"
                   }`}
                   aria-label={`Upvote ${p.name}`}
                   title="Upvote product"
                 >
                   <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span className="font-mono text-xs font-semibold mt-0.5 tabular-nums">
+                  <span className="font-mono text-xs font-bold mt-0.5 tabular-nums">
                     {upvoteData.count}
                   </span>
                 </button>

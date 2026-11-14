@@ -105,7 +105,7 @@ export function PricingTable({ productName, onSelectTier }: PricingTableProps) {
             }`}
           >
             <span>Yearly</span>
-            <span className="text-[11px] px-1 py-0.2 bg-spectr-canvas text-spectr-success font-semibold border border-spectr-hairline">
+            <span className="text-xs px-1 py-0.2 bg-spectr-canvas text-spectr-success font-semibold border border-spectr-hairline">
               2 mo free (-16.7%)
             </span>
           </button>
