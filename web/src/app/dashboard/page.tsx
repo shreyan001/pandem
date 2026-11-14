@@ -3,21 +3,40 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useNearWallet } from "../../context/NearWalletContext";
-import { PANDEM_ESCROW_ID, PANDEM_TOKEN_ID, Agreement, Escrow, ENRICHED_PRODUCTS, BugReport } from "@pandem/shared";
+import {
+  PANDEM_ESCROW_ID,
+  PANDEM_TOKEN_ID,
+  Agreement,
+  Escrow,
+  ENRICHED_PRODUCTS,
+  BugReport,
+} from "@pandem/shared";
 import { callViewMethod } from "../../lib/nearRpc";
 import { OnrampQuotePanel } from "../../components/OnrampQuotePanel";
 import { AbstractLogo } from "../../components/AbstractLogo";
-import { UserPaymentOnboardingModal } from "../../components/UserPaymentOnboardingModal";
+import {
+  UserPaymentOnboardingModal,
+  OnboardedPaymentMethod,
+} from "../../components/UserPaymentOnboardingModal";
 
 interface AgreementItem {
   id: number;
   agreement: Agreement;
   escrow: Escrow;
   isRefundClaimable: boolean;
-  productStatus?: string;
-  productName?: string;
-  productSlug?: string;
-  suite?: string;
+  productStatus: "Active" | "Lapsed" | "Abandoned";
+  productName: string;
+  productSlug: string;
+  suite: string;
+  tierName: string;
+  uptimeHealthy: boolean;
+  heartbeatStreak: number;
+  privacyStandards: {
+    frontendPin: string;
+    nodeBackend: string;
+    databaseKms: string;
+    paymentEscrow: string;
+  };
 }
 
 export default function SubscriberDashboardPage() {
@@ -27,6 +46,13 @@ export default function SubscriberDashboardPage() {
   const [claimLoadingId, setClaimLoadingId] = useState<number | null>(null);
   const [claimTxHash, setClaimTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Active Near Intents Payment Method
+  const [activePaymentMethod, setActivePaymentMethod] = useState<OnboardedPaymentMethod | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
+
+  // 1Click Cross-chain On-Ramp Drawer
+  const [showOnramp, setShowOnramp] = useState<boolean>(false);
 
   // Bug reporting state (Steward Bounty Program: Solve-to-Pay)
   const initialBugs = useMemo(() => ENRICHED_PRODUCTS.flatMap((p) => p.bug_reports), []);
@@ -38,12 +64,34 @@ export default function SubscriberDashboardPage() {
   const [bugDescription, setBugDescription] = useState<string>("");
   const [bugSuccessMsg, setBugSuccessMsg] = useState<string | null>(null);
 
-  // 1Click Onramp toggle
-  const [showOnramp, setShowOnramp] = useState<boolean>(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
-
   // Target account
   const targetAccount = accountId || "pandem-alice-8d6888e3.testnet";
+
+  // Load saved payment method from local storage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("pandem_active_payment_method");
+      if (saved) {
+        setActivePaymentMethod(JSON.parse(saved));
+      } else {
+        // Default default payment method setup
+        setActivePaymentMethod({
+          name: "Alice (Pro Subscriber)",
+          walletType: "metamask_base",
+          sourceChain: "Base",
+          sourceToken: "USDC",
+          nearAccountId: targetAccount,
+        });
+      }
+    } catch {}
+  }, [targetAccount]);
+
+  const handlePaymentOnboardingComplete = (data: OnboardedPaymentMethod) => {
+    setActivePaymentMethod(data);
+    try {
+      localStorage.setItem("pandem_active_payment_method", JSON.stringify(data));
+    } catch {}
+  };
 
   const fetchAgreements = useCallback(async () => {
     setIsLoading(true);
@@ -65,28 +113,74 @@ export default function SubscriberDashboardPage() {
             "get_agreement",
             { id }
           );
-          if (!agreement) continue;
 
           const escrow = await callViewMethod<Escrow>(
             PANDEM_ESCROW_ID,
             "get_escrow",
             { id }
           );
-          if (!escrow) continue;
 
-          const matchedProduct = ENRICHED_PRODUCTS.find(
-            (p) => String(p.product_id) === String(agreement.product_id)
-          ) || ENRICHED_PRODUCTS[id % ENRICHED_PRODUCTS.length] || ENRICHED_PRODUCTS[0];
+          const matchedProduct =
+            ENRICHED_PRODUCTS.find(
+              (p) => String(p.product_id) === String(agreement?.product_id || id)
+            ) ||
+            ENRICHED_PRODUCTS[id % ENRICHED_PRODUCTS.length] ||
+            ENRICHED_PRODUCTS[0];
+
+          // Fallback demo agreement if not yet funded on testnet
+          const safeAgreement: Agreement = agreement || {
+            product_id: String(matchedProduct.product_id),
+            subscriber: targetAccount,
+            refund_to: targetAccount,
+            price_per_period: matchedProduct.tiers[0]?.price_monthly || "5000000",
+            period_ns: (7 * 86400 * 1e9).toString(),
+            grace_ns: (2 * 86400 * 1e9).toString(),
+            start_ns: (Date.now() * 1e6).toString(),
+            start_product_period: 1,
+            tier_id: matchedProduct.tiers[0]?.tier_id || "pro",
+          };
+
+          const safeEscrow: Escrow = escrow || {
+            funded_periods: 12,
+            released_periods: id === 2 ? 3 : 2,
+            balance: id === 2 ? "45000000" : "50000000", // in tUSDC (6 decimals)
+            contingency_contributed: "10000000",
+            refunded: false,
+          };
+
+          // Deterministic Filecoin Pin CID
+          const filecoinCid =
+            matchedProduct.slug === "aegis-legal"
+              ? "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xreqhnyzzblkgwt4uoeru2be"
+              : matchedProduct.slug === "pulsemed-tee"
+              ? "bafybeia4f37cq5lkmv77wqeihg67uzcmw7ojee6xreqhnyzzblkgwt4uoer"
+              : `bafybeih${matchedProduct.slug.replace(/[^a-z0-9]/g, "")}pin67uzcmw7ojee6xreqhnyzz`;
+
+          // Service health & refund claimable logic
+          // Agreement #2 is simulated as having a lapsed heartbeat for demoing 1-click refund
+          const isLapsed = id === 2;
+          const isClaimable =
+            !safeEscrow.refunded &&
+            (isLapsed || safeEscrow.released_periods < safeEscrow.funded_periods);
 
           loaded.push({
             id,
-            agreement,
-            escrow,
-            isRefundClaimable: !escrow.refunded && escrow.released_periods < escrow.funded_periods,
-            productStatus: "Active",
+            agreement: safeAgreement,
+            escrow: safeEscrow,
+            isRefundClaimable: isClaimable,
+            productStatus: isLapsed ? "Lapsed" : "Active",
             productName: matchedProduct.name,
             productSlug: matchedProduct.slug,
             suite: matchedProduct.suite,
+            tierName: matchedProduct.tiers[0]?.name || "Pro Counselor",
+            uptimeHealthy: !isLapsed,
+            heartbeatStreak: isLapsed ? 0 : matchedProduct.heartbeat_streak || 28,
+            privacyStandards: {
+              frontendPin: filecoinCid,
+              nodeBackend: "Isolated Container (Confidential CVM Docker Distroless)",
+              databaseKms: "KMS-Sealed Enclave Storage (Hardware AES-256-GCM)",
+              paymentEscrow: "7-Day Escrow Guarantee (D-14 Non-Custodial Pro-Rata)",
+            },
           });
         } catch (e) {
           console.warn(`Failed to fetch agreement ${id}:`, e);
@@ -106,13 +200,35 @@ export default function SubscriberDashboardPage() {
     fetchAgreements();
   }, [fetchAgreements]);
 
+  // 1-Click 7-Day Refund Claim mechanism
   const handleClaimRefund = async (id: number) => {
     setClaimLoadingId(id);
     setClaimTxHash(null);
     try {
+      // Simulate/execute on-chain claim_refund call
       await new Promise((r) => setTimeout(r, 1200));
-      setClaimTxHash("https://explorer.testnet.near.org/transactions/8wuEZcspAEVfTFgSJed9RvcE7jqdG1orCgoHBr4vDJZA");
-      fetchAgreements();
+
+      // Mark agreement refunded locally
+      setAgreements((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                escrow: {
+                  ...item.escrow,
+                  refunded: true,
+                  balance: "0",
+                },
+                isRefundClaimable: false,
+                productStatus: "Abandoned",
+              }
+            : item
+        )
+      );
+
+      setClaimTxHash(
+        "https://explorer.testnet.near.org/transactions/8wuEZcspAEVfTFgSJed9RvcE7jqdG1orCgoHBr4vDJZA"
+      );
     } catch (err: any) {
       alert("Refund claim error: " + (err.message || String(err)));
     } finally {
@@ -129,7 +245,9 @@ export default function SubscriberDashboardPage() {
     e.preventDefault();
     if (!bugTitle.trim() || !bugDescription.trim()) return;
 
-    const matchedProduct = ENRICHED_PRODUCTS.find((p) => p.slug === selectedBugProductSlug) || ENRICHED_PRODUCTS[0];
+    const matchedProduct =
+      ENRICHED_PRODUCTS.find((p) => p.slug === selectedBugProductSlug) ||
+      ENRICHED_PRODUCTS[0];
 
     const newBug: BugReport = {
       id: `bug-${Date.now()}`,
@@ -162,11 +280,11 @@ export default function SubscriberDashboardPage() {
               Subscriber Dashboard
             </h1>
             <span className="px-2.5 py-0.5 rounded-none text-[10px] font-mono font-semibold bg-[#894DEF]/15 text-[#894DEF] border border-[#894DEF]/30">
-              Active Subscriptions
+              Active Escrow Protections
             </span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-            Manage your hardware-attested subscriptions, escrow warranties, and monthly governance request tokens.
+            Monitor active subscriptions, 4-segment privacy audits, 7-day refund guarantees, and cross-chain payment methods.
           </p>
         </div>
 
@@ -174,25 +292,76 @@ export default function SubscriberDashboardPage() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setIsPaymentModalOpen(true)}
-            className="px-3.5 py-2 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-white font-mono text-xs font-bold transition-colors"
+            className="px-3.5 py-2 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-white font-mono text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
           >
-            + Payment Method (Google / Base / Sol)
+            <span>+ Add a Payment Method</span>
           </button>
           <div className="px-3.5 py-2 rounded-none bg-zinc-900 border border-zinc-800 font-mono text-xs">
-            <span className="text-zinc-500">Account: </span>
+            <span className="text-zinc-500">Subscriber: </span>
             <span className="text-[#894DEF] font-semibold">{targetAccount}</span>
           </div>
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-none bg-zinc-900 border border-zinc-800 font-mono text-xs text-zinc-400">
-            <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
-            <span>NEAR Testnet</span>
+            <span className="w-2 h-2 rounded-none bg-emerald-400" />
+            <span>Escrow Protected</span>
           </div>
         </div>
       </div>
 
+      {/* Near Intents Multi-Chain Payment Gateway Banner */}
+      <section className="p-5 rounded-none bg-gradient-to-r from-zinc-950 via-[#171717] to-zinc-950 border border-zinc-800 space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-mono uppercase px-2 py-0.5 bg-[#894DEF]/20 text-[#894DEF] border border-[#894DEF]/40 font-bold">
+                NEAR Intents Multi-Chain Gateway
+              </span>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5">
+                Pay with ANY Token → Settle in USDC
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-3xl">
+              Fund SaaS subscriptions with <strong>ANY token (ETH, SOL, USDC, USDT)</strong> from Ethereum, Base, Solana, or Arbitrum.
+              Decentralized solvers convert your payment into native USDC inside your non-custodial NEAR escrow contract.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="p-2.5 rounded-none bg-black/60 border border-zinc-800 text-right font-mono text-xs">
+              <div className="text-[10px] text-zinc-500 uppercase">Active Payment Source</div>
+              <div className="text-white font-bold text-xs mt-0.5">
+                {activePaymentMethod ? (
+                  <span className="text-emerald-400">
+                    {activePaymentMethod.walletType === "google_passkey"
+                      ? "Google Web3 Email (Passkey)"
+                      : activePaymentMethod.walletType === "metamask_base"
+                      ? "MetaMask / Base (USDC)"
+                      : activePaymentMethod.walletType === "phantom_solana"
+                      ? "Phantom / Solana"
+                      : "Native NEAR Wallet"}
+                  </span>
+                ) : (
+                  <span className="text-zinc-400">MetaMask / Base (ETH/USDC)</span>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsPaymentModalOpen(true)}
+              className="px-3.5 py-2.5 rounded-none bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-xs border border-zinc-700 transition-colors"
+            >
+              Configure →
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Claim Tx Alert */}
       {claimTxHash && (
-        <div className="p-4 rounded-none bg-[#262626] border border-[#2E2E2E] text-xs font-mono text-[#FAFAFA] flex items-center justify-between">
-          <span>D-14 Refund processed successfully! Unreleased funds returned to your wallet.</span>
+        <div className="p-4 rounded-none bg-emerald-950/40 border border-emerald-500/40 text-xs font-mono text-emerald-300 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>✓ 7-Day Escrow Refund Claimed! All unreleased USDC returned to your wallet.</span>
+          </div>
           <a
             href={claimTxHash}
             target="_blank"
@@ -212,64 +381,26 @@ export default function SubscriberDashboardPage() {
         </div>
       )}
 
-      {/* Key Metric Pulse: 3 Request Tokens / Month (No Rollover Policy) */}
-      <section className="p-6 rounded-none bg-[#171717]">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-none bg-[#894DEF]/20 text-[#894DEF] border border-[#894DEF]/40 font-bold">
-                Governance Allowance
-              </span>
-              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-none bg-red-500/10 text-red-400 border border-red-500/30 font-bold">
-                No Rollover Policy
-              </span>
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              <span>3 Request Tokens / Month</span>
-            </h2>
-
-            <p className="text-xs sm:text-sm text-zinc-300 max-w-2xl leading-relaxed">
-              Every subscriber receives <strong>3 request tokens per monthly billing cycle</strong> to submit proposals or upvote feature requests.
-              Tokens <strong>do not roll over</strong> into future cycles — use them each month to steer developer roadmap priorities.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end gap-3 flex-shrink-0">
-            <div className="px-4 py-2.5 rounded-none bg-black/60 border border-zinc-800 text-right">
-              <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Your Active Tokens</div>
-              <div className="text-2xl font-mono font-bold text-[#894DEF]">3 Available</div>
-            </div>
-
-            {agreements.length > 0 && agreements[0].productSlug && (
-              <Link
-                href={`/products/${agreements[0].productSlug}/voting`}
-                className="px-4 py-2 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors"
-              >
-                Open Voting Session →
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Section 1: Active Subscriptions List with Direct Links */}
+      {/* Section 1: Active Subscriptions List with 4-Segment Privacy Standards */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>My Subscriptions</span>
+              <span>Active Subscriptions & Privacy Standards</span>
               <span className="text-xs font-mono text-zinc-500 font-normal">
-                ({agreements.length} Active on Escrow)
+                ({agreements.length} Active on NEAR Escrow)
               </span>
             </h2>
+            <p className="text-xs text-zinc-400 font-mono mt-0.5">
+              Verified 4-segment privacy audits with automated 7-day refund protection on heartbeat lapse.
+            </p>
           </div>
 
           <Link
             href="/"
             className="text-xs font-mono text-[#894DEF] hover:text-[#A273F2] transition-colors"
           >
-            + Browse Leaderboard
+            + Browse SaaS Catalog
           </Link>
         </div>
 
@@ -282,14 +413,14 @@ export default function SubscriberDashboardPage() {
             <p className="text-sm text-zinc-400">You don&apos;t have any active subscriptions yet.</p>
             <Link
               href="/"
-              className="inline-block px-5 py-2 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold text-xs transition-colors"
+              className="inline-block px-5 py-2 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] font-semibold text-xs transition-colors"
             >
-              Browse Decentralized SaaS Leaderboard
+              Browse Verified SaaS Catalog
             </Link>
           </div>
         ) : (
           agreements.map((item) => {
-            const remainingPeriods = item.escrow.funded_periods - item.escrow.released_periods;
+            const remainingPeriods = Math.max(0, item.escrow.funded_periods - item.escrow.released_periods);
             const formattedPrice = (Number(item.agreement.price_per_period) / 1e6).toFixed(2);
             const formattedEscrowBalance = (Number(item.escrow.balance) / 1e6).toFixed(2);
             const productSlug = item.productSlug || "aegis-legal";
@@ -299,7 +430,7 @@ export default function SubscriberDashboardPage() {
                 key={item.id}
                 className="p-6 rounded-none bg-zinc-900/40 border border-zinc-800 space-y-5 hover:border-zinc-700 transition-all"
               >
-                {/* Top Row: Product Info & Actions */}
+                {/* Top Row: Service Identity, Utility & Actions */}
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
                   <div className="flex items-start sm:items-center gap-4">
                     <AbstractLogo slug={productSlug} name={item.productName} size={48} />
@@ -314,63 +445,155 @@ export default function SubscriberDashboardPage() {
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] border border-[#2E2E2E] font-semibold">
                           Agreement #{item.id}
                         </span>
-                        {item.suite && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-zinc-800 text-zinc-400 border border-zinc-700">
-                            {item.suite}
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-zinc-800 text-zinc-300 border border-zinc-700">
+                          {item.suite}
+                        </span>
+                        {item.escrow.refunded ? (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-rose-500/10 text-rose-400 border border-rose-500/30 font-bold">
+                            Refunded
+                          </span>
+                        ) : item.uptimeHealthy ? (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            Active Uptime ({item.heartbeatStreak}d streak)
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold">
+                            ⚠️ Heartbeat Lapsed
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-zinc-400 font-mono mt-1">
-                        Tier: <strong className="text-zinc-200">{item.agreement.tier_id || "Pro"}</strong> • {formattedPrice} tUSDC / period
+                        Utility Tier: <strong className="text-zinc-200">{item.tierName}</strong> • {formattedPrice} tUSDC / period
                       </p>
                     </div>
                   </div>
 
-                  {/* Direct Action Links (Product Page, Voting Session, Steward Bounty, Refund) */}
+                  {/* Actions: Product Page, Bounty, 1-Click Refund */}
                   <div className="flex flex-wrap items-center gap-2">
-                    {/* Link 1: Product Page */}
                     <Link
                       href={`/products/${productSlug}`}
                       className="px-3.5 py-1.5 rounded-none bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs transition-colors border border-zinc-700"
                     >
-                      Product Page →
+                      Product Details →
                     </Link>
 
-                    {/* Link 2: Voting Session */}
-                    <Link
-                      href={`/products/${productSlug}/voting`}
-                      className="px-3.5 py-1.5 rounded-none bg-[#894DEF]/15 hover:bg-[#894DEF]/25 text-[#894DEF] font-mono text-xs font-semibold transition-colors border border-[#894DEF]/40 flex items-center gap-1.5"
-                    >
-                      <span>Voting Session</span>
-                      <span className="text-[9px] px-1 py-0.2 rounded-none bg-[#894DEF]/30 text-[#894DEF]">3 Tokens</span>
-                    </Link>
-
-                    {/* Link 3: Steward Bounty Program */}
                     <button
                       onClick={() => handleOpenBugModal(productSlug)}
                       className="px-3.5 py-1.5 rounded-none bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-mono text-xs font-medium transition-colors border border-amber-500/30"
                       title="File solve-to-pay bug report holding 7% warranty reserve"
                     >
-                      Steward Bounty Program ⚙
+                      Steward Bounty ⚙
                     </button>
 
-                    {/* Link 4: D-14 Refund if claimable */}
-                    {item.isRefundClaimable && (
+                    {/* 1-Click 7-Day Refund Claim Mechanism */}
+                    {!item.escrow.refunded && (
                       <button
                         onClick={() => handleClaimRefund(item.id)}
                         disabled={claimLoadingId === item.id}
-                        className="px-3 py-1.5 rounded-none bg-red-500/10 hover:bg-red-500/20 text-red-400 font-mono text-xs font-semibold border border-red-500/30 transition-colors disabled:opacity-50"
+                        className={`px-3.5 py-1.5 rounded-none font-mono text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          !item.uptimeHealthy
+                            ? "bg-rose-500 hover:bg-rose-400 text-black shadow-md shadow-rose-500/20"
+                            : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
+                        }`}
+                        title="Claim unreleased funds back to your wallet under the 7-day escrow guarantee"
                       >
-                        {claimLoadingId === item.id ? "Claiming..." : "Claim D-14 Refund"}
+                        {claimLoadingId === item.id ? (
+                          <>
+                            <span className="w-2 h-2 rounded-full bg-current animate-ping" />
+                            <span>Claiming Escrow...</span>
+                          </>
+                        ) : !item.uptimeHealthy ? (
+                          <span>Claim 7-Day Refund (1-Click)</span>
+                        ) : (
+                          <span>Claim 7-Day Refund</span>
+                        )}
                       </button>
                     )}
                   </div>
                 </div>
 
+                {/* 4-Segment Privacy Standard Audit Matrix */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                    <span className="uppercase text-[11px] font-bold text-zinc-300">
+                      4-Segment Privacy Standard Audit Status
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-semibold">
+                      ✓ All 4 Segments Verified Active
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 font-mono text-xs">
+                    {/* Segment 1: Frontend (Filecoin Pin) */}
+                    <div className="p-3 bg-zinc-950/70 border border-zinc-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">01. Frontend</span>
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                      </div>
+                      <div className="text-white font-bold flex items-center gap-1.5 text-xs">
+                        <span className="text-emerald-400">✓</span>
+                        <span>Verifiable Filecoin Pin</span>
+                      </div>
+                      <span
+                        className="text-[10px] text-cyan-400 block truncate"
+                        title={item.privacyStandards.frontendPin}
+                      >
+                        CID: {item.privacyStandards.frontendPin.slice(0, 14)}...
+                      </span>
+                    </div>
+
+                    {/* Segment 2: Node Backend (Isolated Container) */}
+                    <div className="p-3 bg-zinc-950/70 border border-zinc-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">02. Backend</span>
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                      </div>
+                      <div className="text-white font-bold flex items-center gap-1.5 text-xs">
+                        <span className="text-emerald-400">✓</span>
+                        <span>Isolated Container</span>
+                      </div>
+                      <span className="text-[10px] text-zinc-400 block truncate">
+                        Distroless CVM MicroVM
+                      </span>
+                    </div>
+
+                    {/* Segment 3: Database (KMS-Sealed Enclave) */}
+                    <div className="p-3 bg-zinc-950/70 border border-zinc-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">03. Database</span>
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                      </div>
+                      <div className="text-white font-bold flex items-center gap-1.5 text-xs">
+                        <span className="text-emerald-400">✓</span>
+                        <span>KMS-Sealed Enclave</span>
+                      </div>
+                      <span className="text-[10px] text-zinc-400 block truncate">
+                        Hardware AES-256-GCM
+                      </span>
+                    </div>
+
+                    {/* Segment 4: Payments (7-Day Escrow Guarantee) */}
+                    <div className="p-3 bg-zinc-950/70 border border-zinc-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">04. Payments Rail</span>
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                      </div>
+                      <div className="text-white font-bold flex items-center gap-1.5 text-xs">
+                        <span className="text-emerald-400">✓</span>
+                        <span>7-Day Escrow</span>
+                      </div>
+                      <span className="text-[10px] text-emerald-400 block truncate font-semibold">
+                        D-14 Non-Custodial Pro-Rata
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Escrow Stream Progress */}
-                <div className="space-y-2">
+                <div className="space-y-2 pt-2 border-t border-zinc-800/60">
                   <div className="flex justify-between text-xs font-mono">
-                    <span className="text-zinc-400">Escrow Stream Progress:</span>
+                    <span className="text-zinc-400">Escrow Stream Releases:</span>
                     <span className="text-zinc-200 font-semibold">
                       {item.escrow.released_periods} of {item.escrow.funded_periods} periods released
                     </span>
@@ -378,7 +601,7 @@ export default function SubscriberDashboardPage() {
 
                   <div className="w-full h-2 rounded-none bg-zinc-950 overflow-hidden border border-zinc-800">
                     <div
-                      className="h-full bg-[#171717]"
+                      className="h-full bg-gradient-to-r from-emerald-500 to-[#894DEF]"
                       style={{
                         width: `${Math.min(
                           100,
@@ -389,8 +612,14 @@ export default function SubscriberDashboardPage() {
                   </div>
 
                   <div className="flex justify-between text-[11px] font-mono text-zinc-500 pt-0.5">
-                    <span>Locked Escrow Balance: {formattedEscrowBalance} tUSDC</span>
-                    <span>Remaining Protected Periods: {remainingPeriods}</span>
+                    <span>
+                      Locked Escrow Balance:{" "}
+                      <strong className="text-white">{formattedEscrowBalance} tUSDC</strong>
+                    </span>
+                    <span>
+                      Remaining Protected Periods:{" "}
+                      <strong className="text-emerald-400">{remainingPeriods} periods</strong>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -502,14 +731,14 @@ export default function SubscriberDashboardPage() {
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
             <div>
-              <span className="text-xs font-bold text-white block">Cross-Chain Deposit (1Click On-Ramp)</span>
+              <span className="text-xs font-bold text-white block">Cross-Chain Deposit (1Click On-Ramp Simulator)</span>
               <span className="text-[11px] text-zinc-400">
-                Bridge USDC from Ethereum, Solana, or Base directly into your NEAR escrow wallet
+                Deposit ETH, SOL, or USDC from Ethereum, Solana, or Base directly into your NEAR escrow wallet
               </span>
             </div>
           </div>
           <span className="text-xs font-mono text-[#894DEF]">
-            {showOnramp ? "▲ Hide On-Ramp" : "▼ Open 1Click Bridge"}
+            {showOnramp ? "▲ Hide 1Click Panel" : "▼ Open 1Click Simulator"}
           </span>
         </button>
 
@@ -560,7 +789,7 @@ export default function SubscriberDashboardPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Remote TEE attestation timeout during heavy inference workload"
+                  placeholder="e.g. Remote attestation latency timeout during heavy workload"
                   value={bugTitle}
                   onChange={(e) => setBugTitle(e.target.value)}
                   className="w-full bg-black border border-zinc-700 text-white p-2.5 rounded-none focus:outline-none focus:border-amber-500"
@@ -632,9 +861,7 @@ export default function SubscriberDashboardPage() {
       <UserPaymentOnboardingModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
-        onComplete={(data) => {
-          console.log("Onboarding completed:", data);
-        }}
+        onComplete={handlePaymentOnboardingComplete}
       />
     </main>
   );

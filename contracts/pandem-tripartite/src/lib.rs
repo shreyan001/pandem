@@ -116,6 +116,21 @@ pub struct BlindSubscription {
     pub active: bool,
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct DisputeProposal {
+    pub proposal_id: u64,
+    pub product_id: String,
+    pub tranche_id: u64,
+    pub developer_payout_pct: u8, // e.g. 20%
+    pub subscriber_refund_pct: u8, // e.g. 80%
+    pub description: String,
+    pub votes_for: u64,
+    pub votes_against: u64,
+    pub executed: bool,
+    pub created_at_sec: u64,
+}
+
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
 pub struct PandemTripartiteContract {
@@ -124,6 +139,8 @@ pub struct PandemTripartiteContract {
     pub products: UnorderedMap<String, TripartiteProduct>,
     pub tranches: Vector<DeveloperTranche>,
     pub blind_subscriptions: LookupMap<String, BlindSubscription>,
+    pub dispute_proposals: Vector<DisputeProposal>,
+    pub dispute_votes: LookupMap<(u64, AccountId), bool>,
 }
 
 #[near]
@@ -136,6 +153,8 @@ impl PandemTripartiteContract {
             products: UnorderedMap::new(b"p"),
             tranches: Vector::new(b"t"),
             blind_subscriptions: LookupMap::new(b"b"),
+            dispute_proposals: Vector::new(b"d"),
+            dispute_votes: LookupMap::new(b"v"),
         }
     }
 
@@ -404,6 +423,158 @@ impl PandemTripartiteContract {
     pub fn get_blind_subscription(&self, commitment_hash: String) -> Option<BlindSubscription> {
         self.blind_subscriptions.get(&commitment_hash)
     }
+
+    /// 6. Create Dispute Proposal (Community & Agentic Voting for partial fee payout)
+    pub fn create_dispute_proposal(
+        &mut self,
+        product_id: String,
+        tranche_id: u64,
+        developer_payout_pct: u8,
+        description: String,
+    ) -> u64 {
+        assert!(
+            developer_payout_pct <= 100,
+            "Developer payout percentage must be <= 100"
+        );
+        let subscriber_refund_pct = 100 - developer_payout_pct;
+
+        let tranche = self.tranches.get(tranche_id).expect("Tranche not found");
+        assert_eq!(tranche.product_id, product_id, "Product mismatch");
+        assert!(!tranche.claimed, "Tranche already claimed");
+        assert!(!tranche.clawed_back, "Tranche already clawed back");
+
+        let proposal_id = self.dispute_proposals.len();
+        let now_sec = env::block_timestamp_ms() / 1000;
+
+        let proposal = DisputeProposal {
+            proposal_id,
+            product_id,
+            tranche_id,
+            developer_payout_pct,
+            subscriber_refund_pct,
+            description,
+            votes_for: 0,
+            votes_against: 0,
+            executed: false,
+            created_at_sec: now_sec,
+        };
+
+        self.dispute_proposals.push(&proposal);
+        proposal_id
+    }
+
+    /// 7. Vote on Dispute Proposal
+    pub fn vote_dispute_proposal(&mut self, proposal_id: u64, support: bool) {
+        let mut proposal = self
+            .dispute_proposals
+            .get(proposal_id)
+            .expect("Dispute proposal not found");
+        assert!(!proposal.executed, "Proposal already executed");
+
+        let voter = env::predecessor_account_id();
+        let vote_key = (proposal_id, voter);
+        assert!(
+            !self.dispute_votes.contains_key(&vote_key),
+            "Account already voted on this proposal"
+        );
+        self.dispute_votes.insert(&vote_key, &support);
+
+        if support {
+            proposal.votes_for += 1;
+        } else {
+            proposal.votes_against += 1;
+        }
+
+        self.dispute_proposals.replace(proposal_id, &proposal);
+    }
+
+    /// 8. Execute Dispute Resolution
+    /// Enforces co-signing by self.enclave_keeper (agent key) or threshold votes,
+    /// splits the tranche according to developer_payout_pct (e.g. 20% to dev, 80% to ops/refund),
+    /// and marks executed.
+    pub fn execute_dispute_resolution(&mut self, proposal_id: u64) -> Promise {
+        let mut proposal = self
+            .dispute_proposals
+            .get(proposal_id)
+            .expect("Dispute proposal not found");
+        assert!(!proposal.executed, "Proposal already executed");
+
+        let caller = env::predecessor_account_id();
+        let is_keeper_cosigned = caller == self.enclave_keeper || caller == self.admin;
+        let threshold_met = proposal.votes_for > proposal.votes_against && proposal.votes_for >= 1;
+        assert!(
+            is_keeper_cosigned || threshold_met,
+            "Requires enclave keeper co-sign or community voting threshold approval"
+        );
+
+        let mut tranche = self
+            .tranches
+            .get(proposal.tranche_id)
+            .expect("Tranche not found");
+        assert!(!tranche.claimed, "Tranche already claimed");
+        assert!(!tranche.clawed_back, "Tranche already clawed back");
+
+        let total_amount = tranche.amount.0;
+        let dev_amount = (total_amount * (proposal.developer_payout_pct as u128)) / 100;
+        let refund_to_ops = total_amount.saturating_sub(dev_amount);
+
+        // Mark tranche resolved
+        tranche.claimed = true;
+        tranche.clawback_reason = Some(format!(
+            "Dispute resolution #{}: {}% dev payout, {}% refund to ops",
+            proposal_id, proposal.developer_payout_pct, proposal.subscriber_refund_pct
+        ));
+        self.tranches.replace(proposal.tranche_id, &tranche);
+
+        // Mark proposal executed
+        proposal.executed = true;
+        self.dispute_proposals.replace(proposal_id, &proposal);
+
+        // Update product balances
+        let mut product = self
+            .products
+            .get(&tranche.product_id)
+            .expect("Product not found");
+
+        match tranche.asset {
+            PaymentAsset::Usdc => {
+                product.dev_locked_usdc =
+                    U128(product.dev_locked_usdc.0.saturating_sub(total_amount));
+                product.ops_budget_usdc =
+                    U128(product.ops_budget_usdc.0 + refund_to_ops);
+                self.products.insert(&tranche.product_id, &product);
+
+                ext_fungible_token::ext(NEAR_USDC_CONTRACT.parse().unwrap())
+                    .with_attached_deposit(NearToken::from_yoctonear(1))
+                    .with_static_gas(Gas::from_tgas(30))
+                    .ft_transfer(
+                        tranche.developer,
+                        U128(dev_amount),
+                        Some(format!(
+                            "Pandem Dispute #{proposal_id} Partial Payout ({}%)",
+                            proposal.developer_payout_pct
+                        )),
+                    )
+            }
+            PaymentAsset::NativeNear => {
+                product.dev_locked_near =
+                    U128(product.dev_locked_near.0.saturating_sub(total_amount));
+                product.ops_budget_near =
+                    U128(product.ops_budget_near.0 + refund_to_ops);
+                self.products.insert(&tranche.product_id, &product);
+
+                Promise::new(tranche.developer).transfer(NearToken::from_yoctonear(dev_amount))
+            }
+        }
+    }
+
+    pub fn get_dispute_proposal(&self, proposal_id: u64) -> Option<DisputeProposal> {
+        self.dispute_proposals.get(proposal_id)
+    }
+
+    pub fn get_total_dispute_proposals(&self) -> u64 {
+        self.dispute_proposals.len()
+    }
 }
 
 #[cfg(test)]
@@ -534,5 +705,188 @@ mod tests {
         // Dev locked (5,000) was clawed back into ops budget (3,000 + 5,000 = 8,000)
         assert_eq!(prod.dev_locked_near.0, 0);
         assert_eq!(prod.ops_budget_near.0, 8_000);
+    }
+
+    #[test]
+    fn test_create_and_vote_dispute_proposal() {
+        let (mut contract, _admin, _keeper, _dev) = setup_contract();
+
+        // Subscribe to create tranche 0
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .attached_deposit(NearToken::from_yoctonear(10_000))
+            .block_timestamp(1_000_000_000_000)
+            .build());
+
+        contract.subscribe_with_near("postiz-private".to_string(), "blind_disp".to_string(), 2592000);
+
+        // Create dispute proposal for 20% dev payout, 80% refund
+        let prop_id = contract.create_dispute_proposal(
+            "postiz-private".to_string(),
+            0,
+            20,
+            "Developer stepped back due to risk model adjustment; completed 20% milestones".to_string(),
+        );
+
+        assert_eq!(prop_id, 0);
+        assert_eq!(contract.get_total_dispute_proposals(), 1);
+
+        let prop = contract.get_dispute_proposal(0).unwrap();
+        assert_eq!(prop.developer_payout_pct, 20);
+        assert_eq!(prop.subscriber_refund_pct, 80);
+        assert_eq!(prop.votes_for, 0);
+        assert_eq!(prop.votes_against, 0);
+        assert!(!prop.executed);
+
+        // Alice votes FOR
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .build());
+        contract.vote_dispute_proposal(0, true);
+
+        // Bob votes AGAINST
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("bob.near".parse().unwrap())
+            .build());
+        contract.vote_dispute_proposal(0, false);
+
+        let updated_prop = contract.get_dispute_proposal(0).unwrap();
+        assert_eq!(updated_prop.votes_for, 1);
+        assert_eq!(updated_prop.votes_against, 1);
+    }
+
+    #[test]
+    #[should_panic(expected = "Account already voted on this proposal")]
+    fn test_duplicate_vote_dispute_proposal_panics() {
+        let (mut contract, _admin, _keeper, _dev) = setup_contract();
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .attached_deposit(NearToken::from_yoctonear(10_000))
+            .block_timestamp(1_000_000_000_000)
+            .build());
+
+        contract.subscribe_with_near("postiz-private".to_string(), "blind_disp_dup".to_string(), 2592000);
+        contract.create_dispute_proposal("postiz-private".to_string(), 0, 20, "Partial payout".to_string());
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .build());
+        contract.vote_dispute_proposal(0, true);
+        contract.vote_dispute_proposal(0, true); // Panics
+    }
+
+    #[test]
+    fn test_execute_dispute_resolution_20pct_by_enclave_keeper() {
+        let (mut contract, _admin, keeper, _dev) = setup_contract();
+
+        // Total deposit = 10,000 yocto. 30% ops = 3,000; 17.5% update = 1,750; 50% dev = 5,000
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .attached_deposit(NearToken::from_yoctonear(10_000))
+            .block_timestamp(1_000_000_000_000)
+            .build());
+
+        contract.subscribe_with_near("postiz-private".to_string(), "blind_exec".to_string(), 2592000);
+        let prop_id = contract.create_dispute_proposal(
+            "postiz-private".to_string(),
+            0,
+            20,
+            "Resolution: 20% partial developer fee for completed core modules".to_string(),
+        );
+
+        // Enclave keeper agent co-signs and executes dispute resolution
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id(keeper)
+            .build());
+
+        let _ = contract.execute_dispute_resolution(prop_id);
+
+        let prop = contract.get_dispute_proposal(prop_id).unwrap();
+        assert!(prop.executed);
+
+        let tranche = contract.get_tranche(0).unwrap();
+        assert!(tranche.claimed);
+        assert!(tranche.clawback_reason.unwrap().contains("20% dev payout, 80% refund to ops"));
+
+        let prod = contract.get_product("postiz-private".to_string()).unwrap();
+        // Dev locked (5,000) reduced to 0
+        assert_eq!(prod.dev_locked_near.0, 0);
+        // 80% of 5,000 = 4,000 refunded into ops budget (3,000 + 4,000 = 7,000)
+        assert_eq!(prod.ops_budget_near.0, 7_000);
+    }
+
+    #[test]
+    fn test_execute_dispute_resolution_community_threshold() {
+        let (mut contract, _admin, _keeper, _dev) = setup_contract();
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .attached_deposit(NearToken::from_yoctonear(10_000))
+            .block_timestamp(1_000_000_000_000)
+            .build());
+
+        contract.subscribe_with_near("postiz-private".to_string(), "blind_thresh".to_string(), 2592000);
+        let prop_id = contract.create_dispute_proposal("postiz-private".to_string(), 0, 20, "20% dev fee".to_string());
+
+        // 2 Community votes in favor, 0 against -> threshold met
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("sub1.near".parse().unwrap())
+            .build());
+        contract.vote_dispute_proposal(prop_id, true);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("sub2.near".parse().unwrap())
+            .build());
+        contract.vote_dispute_proposal(prop_id, true);
+
+        // Any subscriber can finalize execution once threshold is met
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("anyone.near".parse().unwrap())
+            .build());
+
+        let _ = contract.execute_dispute_resolution(prop_id);
+
+        let prop = contract.get_dispute_proposal(prop_id).unwrap();
+        assert!(prop.executed);
+
+        let prod = contract.get_product("postiz-private".to_string()).unwrap();
+        assert_eq!(prod.dev_locked_near.0, 0);
+        assert_eq!(prod.ops_budget_near.0, 7_000);
+    }
+
+    #[test]
+    #[should_panic(expected = "Requires enclave keeper co-sign or community voting threshold approval")]
+    fn test_unauthorized_execute_dispute_resolution_panics() {
+        let (mut contract, _admin, _keeper, _dev) = setup_contract();
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .attached_deposit(NearToken::from_yoctonear(10_000))
+            .block_timestamp(1_000_000_000_000)
+            .build());
+
+        contract.subscribe_with_near("postiz-private".to_string(), "blind_unauth".to_string(), 2592000);
+        let prop_id = contract.create_dispute_proposal("postiz-private".to_string(), 0, 20, "20% dev fee".to_string());
+
+        // Zero votes cast, non-keeper attempts to execute -> panics
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pandem-tripartite.near".parse().unwrap())
+            .predecessor_account_id("stranger.near".parse().unwrap())
+            .build());
+
+        let _ = contract.execute_dispute_resolution(prop_id);
     }
 }

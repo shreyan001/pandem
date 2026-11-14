@@ -21,11 +21,15 @@ import {
   Scale,
   Sparkles,
   FileCode,
+  Lock,
+  Layers,
+  ShieldCheck,
+  Clock,
 } from "lucide-react";
 import { useNearWallet } from "../../../context/NearWalletContext";
 
 interface OnboardingFormState {
-  // Step 1: Product Profile
+  // Segment 1: Verifiable Frontend & Identity
   name: string;
   slug: string;
   tagline: string;
@@ -36,19 +40,25 @@ interface OnboardingFormState {
   monthlyNear: string;
   yearlyUsdc: string;
   yearlyNear: string;
-
-  // Step 2: Hardware Enclave & Privacy Constraints
-  enclaveRuntime: "phala_dstack" | "akash_sev_snp";
-  containerImage: string;
-  dbEngine: "pgvector_sealed";
-  dbKmsMode: "kms_attestation_bound";
-  aiModel: "deepseek-ai/DeepSeek-V3.1" | "Qwen/Qwen2.5-72B-Instruct" | "meta-llama/Llama-3.3-70B-Instruct";
   primaryFrontendUrl: string;
   filecoinCid: string;
   fastFsCid: string;
+  auditFrontendVerified: boolean;
 
-  // Step 3: Market Provider Settlement & Budget
+  // Segment 2: Isolated Node Backend
+  enclaveRuntime: "phala_dstack" | "akash_sev_snp";
+  containerImage: string;
+  auditBackendIsolated: boolean;
+
+  // Segment 3: KMS-Sealed Database
+  dbEngine: "pgvector_sealed";
+  dbKmsMode: "kms_attestation_bound";
+  auditDatabaseSealed: boolean;
+
+  // Segment 4: Private AI Inference & Autonomous Escrow
+  aiModel: "deepseek-ai/DeepSeek-V3.1" | "Qwen/Qwen2.5-72B-Instruct" | "meta-llama/Llama-3.3-70B-Instruct";
   simulatedSubscribers: number;
+  auditEscrowConfigured: boolean;
 }
 
 const NEAR_USDC_ORACLE_RATE = 5.20; // 1 NEAR ≈ 5.20 USDC testnet oracle
@@ -157,15 +167,22 @@ const DEFAULT_FORM: OnboardingFormState = {
   monthlyNear: "1.92",
   yearlyUsdc: "100",
   yearlyNear: "19.23",
-  enclaveRuntime: "phala_dstack",
-  containerImage: "docker.io/pandem/aegis-enclave:v1.4.0",
-  dbEngine: "pgvector_sealed",
-  dbKmsMode: "kms_attestation_bound",
-  aiModel: "deepseek-ai/DeepSeek-V3.1",
   primaryFrontendUrl: "https://aegis-privacy.pandem.app",
   filecoinCid: "bafybeic2h7g5y6r7w8x9z0q1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p",
   fastFsCid: "fastfs://bafk7y2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0",
+  auditFrontendVerified: true,
+
+  enclaveRuntime: "phala_dstack",
+  containerImage: "docker.io/pandem/aegis-enclave:v1.4.0",
+  auditBackendIsolated: true,
+
+  dbEngine: "pgvector_sealed",
+  dbKmsMode: "kms_attestation_bound",
+  auditDatabaseSealed: true,
+
+  aiModel: "deepseek-ai/DeepSeek-V3.1",
   simulatedSubscribers: 250,
+  auditEscrowConfigured: true,
 };
 
 export default function DevOnboardingPage() {
@@ -174,7 +191,7 @@ export default function DevOnboardingPage() {
 
   const [step, setStep] = useState<number>(1);
   const [form, setForm] = useState<OnboardingFormState>(DEFAULT_FORM);
-  const [previewTab, setPreviewTab] = useState<"compose" | "attestation" | "economics">("compose");
+  const [previewTab, setPreviewTab] = useState<"compose" | "tranches" | "attestation">("compose");
   const [composeHash, setComposeHash] = useState<string>("0x8f2a4c1e9b7d3a5f6e8c0b2d4f6a8c0e1b3d5f7a9c1e3b5d7f9a1c3e5b7d9f1a");
   const [isDeploying, setIsDeploying] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -188,6 +205,8 @@ export default function DevOnboardingPage() {
     composeManifest: string;
     deployedAt: string;
     liveUrl: string;
+    trancheDays: number;
+    clawbackDays: number;
   } | null>(null);
 
   // Sync connected account
@@ -305,6 +324,7 @@ export default function DevOnboardingPage() {
 # Enclave Target: ${form.enclaveRuntime === "phala_dstack" ? "Phala dstack Intel TDX" : "Akash AMD SEV-SNP"}
 # Measured Hash: ${composeHash}
 # Escrow Contract: escrow.${cleanSlug}.testnet
+# Tranche Release: 7-day milestone rolling stream
 
 version: "3.8"
 
@@ -365,7 +385,7 @@ secrets:
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleLaunch = async () => {
+  const handleDeployAndLaunch = async () => {
     setIsDeploying(true);
     try {
       await new Promise((r) => setTimeout(r, 1500));
@@ -424,9 +444,11 @@ secrets:
         composeManifest: generatedComposeManifest.replace("pk-pandem-tee-...-...", generatedApiKey),
         deployedAt: new Date().toISOString(),
         liveUrl: `/products/${cleanSlug}`,
+        trancheDays: 7,
+        clawbackDays: 14,
       });
 
-      setStep(4);
+      setStep(5); // Launch confirmation step
     } catch (err: any) {
       alert("Launchpad registration failed: " + (err?.message || String(err)));
     } finally {
@@ -454,7 +476,7 @@ secrets:
               Developer
             </Link>
             <span className="text-xs text-[#2E2E2E]">/</span>
-            <span className="text-xs font-mono text-[#894DEF] font-medium">Launchpad Studio</span>
+            <span className="text-xs font-mono text-[#894DEF] font-medium">Privacy Launchpad Studio</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -466,7 +488,7 @@ secrets:
               href="/dev/dashboard"
               className="text-xs font-mono text-[#B8B8B8] hover:text-white px-3 py-1 border border-[#2E2E2E] hover:border-[#737373] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
             >
-              Developer Portal
+              Developer Dashboard
             </Link>
           </div>
         </div>
@@ -478,20 +500,20 @@ secrets:
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#2E2E2E] pb-6">
           <div className="space-y-1.5">
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-              Sovereign Launchpad Studio
+              Sovereign Privacy Launchpad Studio
             </h1>
             <p className="text-sm text-[#B8B8B8] max-w-2xl">
-              Configure your confidential application stack. Smart contracts settle infrastructure cashflows to NEAR AI, Phala, and Filecoin without personal credit cards.
+              Onboard applications matching the 4-segment privacy standard: verifiable frontend, isolated node backend, KMS-sealed database, and autonomous escrow smart contracts.
             </p>
           </div>
 
-          {/* Stepper Indicator */}
-          <div className="flex items-center gap-2 font-mono text-xs" role="navigation" aria-label="Onboarding Progress">
+          {/* Stepper Indicator - 4 Privacy Segments */}
+          <div className="flex items-center gap-2 font-mono text-xs" role="navigation" aria-label="Privacy Segment Progress">
             {[
-              { num: 1, label: "Profile" },
-              { num: 2, label: "Architecture" },
-              { num: 3, label: "Economics" },
-              { num: 4, label: "Launch" },
+              { num: 1, label: "Frontend", title: "Segment 1: Verifiable Frontend" },
+              { num: 2, label: "Node CVM", title: "Segment 2: Isolated Node Backend" },
+              { num: 3, label: "Database", title: "Segment 3: KMS-Sealed Database" },
+              { num: 4, label: "AI & Escrow", title: "Segment 4: AI & Autonomous Escrow" },
             ].map((s) => {
               const isActive = step === s.num;
               const isPast = step > s.num;
@@ -502,6 +524,7 @@ secrets:
                   onClick={() => s.num < step && setStep(s.num)}
                   disabled={s.num > step}
                   aria-current={isActive ? "step" : undefined}
+                  title={s.title}
                   className={`flex items-center gap-1.5 px-3 py-1.5 border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
                     isActive
                       ? "border-[#894DEF] bg-[#894DEF]/10 text-white font-medium"
@@ -522,20 +545,20 @@ secrets:
           </div>
         </div>
 
-        {/* STEP 4 COMPLETE VIEW (FULL WIDTH) */}
-        {step === 4 && deploymentResult ? (
+        {/* STEP 5: DEPLOYED STATE (FULL WIDTH) */}
+        {step === 5 && deploymentResult ? (
           <section className="bg-[#171717] border border-[#2E2E2E] p-8 space-y-8" aria-label="Deployment Summary">
             <div className="flex items-start justify-between border-b border-[#2E2E2E] pb-6">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono text-[#4ADE80] bg-[#4ADE80]/10 border border-[#4ADE80]/20">
                   <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
-                  <span>Contract Suite Deployed and Live on Storefront</span>
+                  <span>Privacy Verification Passed & Smart Contracts Deployed</span>
                 </div>
                 <h2 className="text-2xl font-semibold text-white tracking-tight">
-                  {form.name} is Live on the Pandem Protocol
+                  {form.name} is Active on NEAR Testnet
                 </h2>
                 <p className="text-sm text-[#B8B8B8] max-w-2xl font-mono">
-                  Your project has been recorded in the Upstash Redis storefront catalog. Subscribers can discover, upvote, and fund your escrow stream.
+                  All 4 privacy segments verified. The project escrow contract has been compiled with a 7-day tranche configuration and registered in the Upstash Redis storefront catalog.
                 </p>
               </div>
 
@@ -544,23 +567,23 @@ secrets:
                   href={deploymentResult.liveUrl}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                 >
-                  <span>Test Product Storefront</span>
+                  <span>Test Storefront</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
 
-            {/* Tripartite Contract Registry */}
+            {/* Generated Contract & 7-Day Tranche Details */}
             <div className="space-y-3 font-mono text-xs">
               <span className="text-[#737373] text-[11px] uppercase tracking-wider block">
-                Tripartite Smart Contract Suite (NEAR Testnet)
+                Dedicated Per-Project Smart Contract Suite
               </span>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5">
-                  <span className="text-[10px] text-[#737373] block uppercase">Escrow Subscription Contract</span>
+                  <span className="text-[10px] text-[#737373] block uppercase">Dedicated Escrow Contract</span>
                   <div className="text-white font-medium break-all">{deploymentResult.escrowContract}</div>
-                  <span className="text-[10px] text-[#4ADE80] block tabular-nums">47.5% Dev / 15% Bug Warranty</span>
+                  <span className="text-[10px] text-[#4ADE80] block tabular-nums">7-Day Tranche Releases • D-14 Clawback</span>
                 </div>
 
                 <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5">
@@ -642,27 +665,28 @@ secrets:
                 <span>Product Overview Page</span>
               </Link>
               <Link
-                href={`${deploymentResult.liveUrl}/voting`}
+                href="/dev/dashboard"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#171717] hover:bg-[#262626] border border-[#894DEF]/40 text-[#894DEF] text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
               >
-                <span>Open Voting Session</span>
+                <span>Open Developer Dashboard</span>
               </Link>
             </div>
           </section>
         ) : (
-          /* SPLIT STUDIO LAYOUT (STEPS 1 - 3) */
+          /* SPLIT STUDIO LAYOUT (SEGMENTS 1 - 4) */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* LEFT COLUMN: FORM CONTROLS */}
+            {/* LEFT COLUMN: 4 PRIVACY SEGMENTS */}
             <div className="lg:col-span-7 space-y-6">
-              {/* STEP 1: Product Profile */}
+              {/* SEGMENT 1: Verifiable Frontend */}
               {step === 1 && (
                 <div className="bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6">
                   <div className="border-b border-[#2E2E2E] pb-3">
+                    <span className="text-[10px] font-mono text-[#894DEF] uppercase tracking-wider block">Privacy Standard · Segment 1</span>
                     <h2 className="text-base font-semibold text-white tracking-tight">
-                      Step 1: Product Profile & Pricing
+                      Verifiable Frontend & Identity
                     </h2>
                     <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
-                      Identify your sovereign application and establish dual-currency subscription rates in USDC and NEAR.
+                      Verify client code immutability using decentralized Filecoin IPFS and NEAR FastFS dual pinning.
                     </p>
                   </div>
 
@@ -723,101 +747,74 @@ secrets:
                       />
                     </div>
 
-                    {/* Category Selection Grid */}
-                    <fieldset className="space-y-2 pt-2 border-none p-0 m-0">
-                      <legend className="block text-[#B8B8B8] mb-1">Product Category</legend>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="radiogroup" aria-label="Product Category">
-                        {CATEGORIES.map((cat) => {
-                          const isSelected = form.category === cat.id;
-                          const IconComponent = cat.icon;
-                          return (
-                            <button
-                              key={cat.id}
-                              type="button"
-                              role="radio"
-                              aria-checked={isSelected}
-                              onClick={() => setForm({ ...form, category: cat.id as any })}
-                              className={`p-3 border text-left transition-colors flex items-start gap-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
-                                isSelected
-                                  ? "bg-[#894DEF]/10 border-[#894DEF] text-white"
-                                  : "bg-[#0D0D0D] border-[#2E2E2E] text-[#B8B8B8] hover:border-[#737373]"
-                              }`}
-                            >
-                              <IconComponent className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? "text-[#894DEF]" : "text-[#737373]"}`} />
-                              <div className="space-y-0.5">
-                                <div className="font-medium text-xs text-white">{cat.label}</div>
-                                <div className="text-[11px] text-[#737373] leading-snug">{cat.description}</div>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </fieldset>
-
-                    {/* Pricing Grid */}
-                    <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3 mt-2">
-                      <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2 text-[11px]">
-                        <span className="text-white font-medium">Subscription Tiers</span>
-                        <span className="text-[#737373] tabular-nums">Oracle: 1 NEAR ≈ {NEAR_USDC_ORACLE_RATE.toFixed(2)} USDC</span>
+                    {/* Verifiable Frontend CIDs */}
+                    <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2">
+                        <div className="flex items-center gap-2 text-white font-medium">
+                          <Globe className="w-4 h-4 text-[#4ADE80]" />
+                          <span>Decentralized Root Pinning CIDs</span>
+                        </div>
+                        <span className="text-[10px] text-[#4ADE80]">Immutable Mirrors</span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <span className="text-xs text-white font-medium block">Monthly Plan</span>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label htmlFor="pricing-monthly-usdc" className="block text-[10px] text-[#737373]">USDC / mo</label>
-                              <input
-                                id="pricing-monthly-usdc"
-                                type="number"
-                                min="1"
-                                value={form.monthlyUsdc}
-                                onChange={(e) => handleUsdcMonthlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="pricing-monthly-near" className="block text-[10px] text-[#737373]">NEAR / mo</label>
-                              <input
-                                id="pricing-monthly-near"
-                                type="number"
-                                step="0.01"
-                                value={form.monthlyNear}
-                                onChange={(e) => handleNearMonthlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                              />
-                            </div>
-                          </div>
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <label htmlFor="primary-frontend-url" className="block text-[11px] text-[#B8B8B8]">Primary Web URL</label>
+                          <input
+                            id="primary-frontend-url"
+                            type="text"
+                            value={form.primaryFrontendUrl}
+                            onChange={(e) => setForm({ ...form, primaryFrontendUrl: e.target.value })}
+                            className="w-full bg-[#171717] border border-[#2E2E2E] p-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
+                          />
                         </div>
 
-                        <div className="space-y-2">
-                          <span className="text-xs text-white font-medium block">Yearly Plan (Discounted)</span>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label htmlFor="pricing-yearly-usdc" className="block text-[10px] text-[#737373]">USDC / yr</label>
-                              <input
-                                id="pricing-yearly-usdc"
-                                type="number"
-                                min="10"
-                                value={form.yearlyUsdc}
-                                onChange={(e) => handleUsdcYearlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="pricing-yearly-near" className="block text-[10px] text-[#737373]">NEAR / yr</label>
-                              <input
-                                id="pricing-yearly-near"
-                                type="number"
-                                step="0.1"
-                                value={form.yearlyNear}
-                                onChange={(e) => handleNearYearlyChange(e.target.value)}
-                                className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                              />
-                            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label htmlFor="filecoin-cid" className="block text-[11px] text-[#B8B8B8]">Filecoin / Lighthouse IPFS CID</label>
+                            <input
+                              id="filecoin-cid"
+                              type="text"
+                              value={form.filecoinCid}
+                              onChange={(e) => setForm({ ...form, filecoinCid: e.target.value })}
+                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
+                            />
+                            <span className="text-[10px] text-[#737373] block">Lighthouse x402 recurring renewals</span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label htmlFor="fastfs-cid" className="block text-[11px] text-[#B8B8B8]">NEAR FastFS Mirror CID</label>
+                            <input
+                              id="fastfs-cid"
+                              type="text"
+                              value={form.fastFsCid}
+                              onChange={(e) => setForm({ ...form, fastFsCid: e.target.value })}
+                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
+                            />
+                            <span className="text-[10px] text-[#737373] block">Decentralized WebAssembly frontend</span>
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Segment 1 Audit Checkbox */}
+                    <div className="p-3.5 bg-[#0D0D0D] border border-[#894DEF]/40 space-y-1">
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form.auditFrontendVerified}
+                          onChange={(e) => setForm({ ...form, auditFrontendVerified: e.target.checked })}
+                          className="mt-0.5 accent-[#894DEF] w-4 h-4 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                        />
+                        <div className="space-y-0.5">
+                          <span className="text-white font-medium block">
+                            Segment 1 Audit Standard: Verifiable Client Code Verified
+                          </span>
+                          <span className="text-[#737373] text-[11px] leading-snug block">
+                            Frontend bundle is pinned to Filecoin and NEAR FastFS root CIDs. Ensures code cannot be modified by central DNS interception.
+                          </span>
+                        </div>
+                      </label>
                     </div>
                   </div>
 
@@ -825,24 +822,26 @@ secrets:
                     <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                      disabled={!form.auditFrontendVerified}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] disabled:opacity-50 text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
-                      <span>Continue to Architecture</span>
+                      <span>Proceed to Segment 2: Node Backend</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* STEP 2: Hardware Enclave & Privacy Constraints */}
+              {/* SEGMENT 2: Isolated Node Backend */}
               {step === 2 && (
                 <div className="bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6">
                   <div className="border-b border-[#2E2E2E] pb-3">
+                    <span className="text-[10px] font-mono text-[#894DEF] uppercase tracking-wider block">Privacy Standard · Segment 2</span>
                     <h2 className="text-base font-semibold text-white tracking-tight">
-                      Step 2: Hardware Enclave & Privacy Constraints
+                      Isolated Node Backend (No Host RAM Access)
                     </h2>
                     <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
-                      Configure your confidential CVM runtime, KMS-sealed database, NEAR AI Cloud endpoint, and verifiable frontend mirrors.
+                      Verify that backend execution is containerized inside a hardware-encrypted CVM enclave with silicon attestation quotes.
                     </p>
                   </div>
 
@@ -852,7 +851,7 @@ secrets:
                       <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2">
                         <div className="flex items-center gap-2 text-white font-medium">
                           <Cpu className="w-4 h-4 text-[#894DEF]" />
-                          <span>Confidential CVM Runtime</span>
+                          <span>Confidential CVM Runtime Engine</span>
                         </div>
                         <span className="text-[10px] text-[#4ADE80] border border-[#4ADE80]/30 px-2 py-0.5">
                           Hardware Attested
@@ -902,7 +901,7 @@ secrets:
 
                       <div className="p-3 bg-[#171717] border border-[#2E2E2E] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
-                          <span className="text-[10px] text-[#737373] block uppercase">SHA-256 Compose-Hash</span>
+                          <span className="text-[10px] text-[#737373] block uppercase">Auto-Measured SHA-256 Compose-Hash</span>
                           <code className="text-[#894DEF] text-xs break-all">{composeHash}</code>
                         </div>
                         <button
@@ -916,7 +915,63 @@ secrets:
                       </div>
                     </div>
 
-                    {/* Database Sealing */}
+                    {/* Segment 2 Audit Checkbox */}
+                    <div className="p-3.5 bg-[#0D0D0D] border border-[#894DEF]/40 space-y-1">
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form.auditBackendIsolated}
+                          onChange={(e) => setForm({ ...form, auditBackendIsolated: e.target.checked })}
+                          className="mt-0.5 accent-[#894DEF] w-4 h-4 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                        />
+                        <div className="space-y-0.5">
+                          <span className="text-white font-medium block">
+                            Segment 2 Audit Standard: Zero Host RAM Access Verified
+                          </span>
+                          <span className="text-[#737373] text-[11px] leading-snug block">
+                            CVM hardware memory encryption (Intel TDX / AMD SEV-SNP) protects runtime RAM against cloud operator dumps and hypervisor access.
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-2 border-t border-[#2E2E2E]">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back to Segment 1</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep(3)}
+                      disabled={!form.auditBackendIsolated}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] disabled:opacity-50 text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                    >
+                      <span>Proceed to Segment 3: Database Sealing</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* SEGMENT 3: KMS-Sealed Database */}
+              {step === 3 && (
+                <div className="bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6">
+                  <div className="border-b border-[#2E2E2E] pb-3">
+                    <span className="text-[10px] font-mono text-[#894DEF] uppercase tracking-wider block">Privacy Standard · Segment 3</span>
+                    <h2 className="text-base font-semibold text-white tracking-tight">
+                      KMS-Sealed Database (Hardware Measurement Bound)
+                    </h2>
+                    <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
+                      Verify that PostgreSQL encryption keys unseal only if the CVM runtime measurement matches the on-chain compose-hash.
+                    </p>
+                  </div>
+
+                  <div className="space-y-5 text-xs font-mono">
                     <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
                       <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2">
                         <div className="flex items-center gap-2 text-white font-medium">
@@ -942,9 +997,77 @@ secrets:
                           </p>
                         </div>
                       </div>
+
+                      <div className="p-3 bg-[#171717] border border-[#2E2E2E] text-[11px] text-[#737373] space-y-1">
+                        <div className="flex justify-between">
+                          <span>Unsealing Condition:</span>
+                          <code className="text-white">hash == {composeHash.slice(0, 18)}...</code>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Encryption Standard:</span>
+                          <span className="text-[#4ADE80]">AES-256-GCM Envelope Encryption</span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* NEAR AI Cloud Model */}
+                    {/* Segment 3 Audit Checkbox */}
+                    <div className="p-3.5 bg-[#0D0D0D] border border-[#894DEF]/40 space-y-1">
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form.auditDatabaseSealed}
+                          onChange={(e) => setForm({ ...form, auditDatabaseSealed: e.target.checked })}
+                          className="mt-0.5 accent-[#894DEF] w-4 h-4 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                        />
+                        <div className="space-y-0.5">
+                          <span className="text-white font-medium block">
+                            Segment 3 Audit Standard: Database Cryptographically Sealed
+                          </span>
+                          <span className="text-[#737373] text-[11px] leading-snug block">
+                            Disk volumes are locked at rest. Physical host theft or disk extraction yields only AES-256 ciphertext without the hardware-derived key.
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-2 border-t border-[#2E2E2E]">
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back to Segment 2</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep(4)}
+                      disabled={!form.auditDatabaseSealed}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] disabled:opacity-50 text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                    >
+                      <span>Proceed to Segment 4: AI & Escrow</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* SEGMENT 4: Private AI Inference & Autonomous Escrow */}
+              {step === 4 && (
+                <div className="bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6">
+                  <div className="border-b border-[#2E2E2E] pb-3">
+                    <span className="text-[10px] font-mono text-[#894DEF] uppercase tracking-wider block">Privacy Standard · Segment 4</span>
+                    <h2 className="text-base font-semibold text-white tracking-tight">
+                      Private AI Inference & Autonomous Escrow
+                    </h2>
+                    <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
+                      Configure NEAR AI Cloud private models and simulate the 7-day tranche escrow contract deployment.
+                    </p>
+                  </div>
+
+                  <div className="space-y-5 text-xs font-mono">
+                    {/* Model Selector */}
                     <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
                       <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2">
                         <div className="flex items-center gap-2 text-white font-medium">
@@ -989,249 +1112,90 @@ secrets:
                       </div>
                     </div>
 
-                    {/* Verifiable Frontend CIDs */}
+                    {/* Per-Project Escrow & 7-Day Tranche Simulator */}
                     <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
-                      <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2">
-                        <div className="flex items-center gap-2 text-white font-medium">
-                          <Globe className="w-4 h-4 text-[#4ADE80]" />
-                          <span>Verifiable Frontend & Decentralized Mirrors</span>
-                        </div>
-                        <span className="text-[10px] text-[#4ADE80]">Immutable Pinning</span>
+                      <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2 text-[11px]">
+                        <span className="text-white font-medium">Per-Project Contract & 7-Day Tranche Simulation</span>
+                        <span className="text-[#894DEF]">escrow.{form.slug}.testnet</span>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <label htmlFor="primary-frontend-url" className="block text-[11px] text-[#B8B8B8]">Primary Web URL</label>
-                          <input
-                            id="primary-frontend-url"
-                            type="text"
-                            value={form.primaryFrontendUrl}
-                            onChange={(e) => setForm({ ...form, primaryFrontendUrl: e.target.value })}
-                            className="w-full bg-[#171717] border border-[#2E2E2E] p-2.5 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                          />
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                        <div className="p-2.5 bg-[#171717] border border-[#2E2E2E]">
+                          <span className="text-[#737373] text-[10px] block">Tranche Release</span>
+                          <span className="font-semibold text-white tabular-nums">7 Days</span>
                         </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label htmlFor="filecoin-cid" className="block text-[11px] text-[#B8B8B8]">Filecoin / Lighthouse IPFS CID</label>
-                            <input
-                              id="filecoin-cid"
-                              type="text"
-                              value={form.filecoinCid}
-                              onChange={(e) => setForm({ ...form, filecoinCid: e.target.value })}
-                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                            />
-                            <span className="text-[10px] text-[#737373] block">Lighthouse x402 recurring renewals</span>
-                          </div>
-
-                          <div className="space-y-1">
-                            <label htmlFor="fastfs-cid" className="block text-[11px] text-[#B8B8B8]">NEAR FastFS Mirror CID</label>
-                            <input
-                              id="fastfs-cid"
-                              type="text"
-                              value={form.fastFsCid}
-                              onChange={(e) => setForm({ ...form, fastFsCid: e.target.value })}
-                              className="w-full bg-[#171717] border border-[#2E2E2E] p-2 text-white text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] focus-visible:border-[#894DEF]"
-                            />
-                            <span className="text-[10px] text-[#737373] block">Decentralized WebAssembly frontend</span>
-                          </div>
+                        <div className="p-2.5 bg-[#171717] border border-[#2E2E2E]">
+                          <span className="text-[#737373] text-[10px] block">Clawback Window</span>
+                          <span className="font-semibold text-white tabular-nums">D-14 Offset</span>
+                        </div>
+                        <div className="p-2.5 bg-[#171717] border border-[#2E2E2E]">
+                          <span className="text-[#737373] text-[10px] block">Developer Split</span>
+                          <span className="font-semibold text-[#4ADE80] tabular-nums">47.5%</span>
+                        </div>
+                        <div className="p-2.5 bg-[#171717] border border-[#2E2E2E]">
+                          <span className="text-[#737373] text-[10px] block">Market OpEx</span>
+                          <span className="font-semibold text-[#894DEF] tabular-nums">30.0%</span>
                         </div>
                       </div>
+
+                      {/* Cashflow Waterfall Bar */}
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex justify-between text-[10px] text-[#B8B8B8] tabular-nums">
+                          <span>Split: 47.5% Dev / 30% OpEx / 15% Warranty / 5% Contingency / 2.5% Fee</span>
+                          <span>Gross: ${economics.grossMrr.toLocaleString()} / mo</span>
+                        </div>
+
+                        <div className="h-2.5 w-full bg-[#171717] border border-[#2E2E2E] flex overflow-hidden">
+                          <div className="h-full bg-[#4ADE80]" style={{ width: "47.5%" }} title="47.5% Developer Net" />
+                          <div className="h-full bg-[#894DEF]" style={{ width: "30.0%" }} title="30.0% Market OpEx" />
+                          <div className="h-full bg-[#FBBF24]" style={{ width: "15.0%" }} title="15.0% Bug Warranty" />
+                          <div className="h-full bg-[#3B82F6]" style={{ width: "5.0%" }} title="5.0% Contingency" />
+                          <div className="h-full bg-[#737373]" style={{ width: "2.5%" }} title="2.5% Pandem Fee" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Segment 4 Audit Checkbox */}
+                    <div className="p-3.5 bg-[#0D0D0D] border border-[#894DEF]/40 space-y-1">
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form.auditEscrowConfigured}
+                          onChange={(e) => setForm({ ...form, auditEscrowConfigured: e.target.checked })}
+                          className="mt-0.5 accent-[#894DEF] w-4 h-4 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                        />
+                        <div className="space-y-0.5">
+                          <span className="text-white font-medium block">
+                            Segment 4 Audit Standard: Autonomous Escrow Deployment Verified
+                          </span>
+                          <span className="text-[#737373] text-[11px] leading-snug block">
+                            The smart contract autonomously streams 30% OpEx to market providers (NEAR AI, Phala, Filecoin) and enforces 7-day milestone releases without requiring developer credit cards.
+                          </span>
+                        </div>
+                      </label>
                     </div>
                   </div>
 
                   <div className="flex justify-between pt-2 border-t border-[#2E2E2E]">
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-                    >
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                      <span>Back to Profile</span>
-                    </button>
                     <button
                       type="button"
                       onClick={() => setStep(3)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-                    >
-                      <span>Continue to Economics</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3: Market Provider Settlement & Budget */}
-              {step === 3 && (
-                <div className="bg-[#171717] border border-[#2E2E2E] p-6 sm:p-8 space-y-6">
-                  <div className="border-b border-[#2E2E2E] pb-3">
-                    <h2 className="text-base font-semibold text-white tracking-tight">
-                      Step 3: Market Provider Settlement & OpEx Simulator
-                    </h2>
-                    <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
-                      Simulate subscriber revenue. The smart contract automatically routes 30% of cashflow to NEAR AI, Phala, and Filecoin.
-                    </p>
-                  </div>
-
-                  <div className="space-y-6 text-xs font-mono">
-                    {/* Subscriber Simulation Slider */}
-                    <div className="p-5 bg-[#0D0D0D] border border-[#2E2E2E] space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <label htmlFor="subscriber-slider" className="text-xs text-white font-medium block cursor-pointer">
-                            Simulated Subscriber Base
-                          </label>
-                          <span className="text-[11px] text-[#737373] tabular-nums">${form.monthlyUsdc} USDC / subscriber / month</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-lg font-mono font-semibold text-[#894DEF] tabular-nums">
-                            {form.simulatedSubscribers.toLocaleString()} Subscribers
-                          </span>
-                          <span className="text-[11px] text-[#B8B8B8] block tabular-nums">
-                            ${economics.grossMrr.toLocaleString()} / mo Gross MRR
-                          </span>
-                        </div>
-                      </div>
-
-                      <input
-                        id="subscriber-slider"
-                        type="range"
-                        min="25"
-                        max="5000"
-                        step="25"
-                        value={form.simulatedSubscribers}
-                        onChange={(e) => setForm({ ...form, simulatedSubscribers: parseInt(e.target.value) || 25 })}
-                        className="w-full accent-[#894DEF] bg-[#262626] h-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
-                      />
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-[#737373]">Presets:</span>
-                        {[50, 250, 1000, 2500].map((preset) => (
-                          <button
-                            key={preset}
-                            type="button"
-                            onClick={() => setForm({ ...form, simulatedSubscribers: preset })}
-                            className={`px-2.5 py-1 text-[10px] border transition-colors tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF] ${
-                              form.simulatedSubscribers === preset
-                                ? "bg-[#894DEF] border-[#894DEF] text-white"
-                                : "bg-[#171717] border-[#2E2E2E] text-[#B8B8B8] hover:border-[#737373]"
-                            }`}
-                          >
-                            {preset} subs
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Segmented Waterfall Bar */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] text-[#B8B8B8] tabular-nums">
-                        <span>Escrow Cashflow Distribution</span>
-                        <span>100% of Subscription Funds</span>
-                      </div>
-
-                      <div className="h-3 w-full bg-[#0D0D0D] border border-[#2E2E2E] flex overflow-hidden">
-                        <div className="h-full bg-[#4ADE80]" style={{ width: "47.5%" }} title="47.5% Developer Net" />
-                        <div className="h-full bg-[#894DEF]" style={{ width: "30.0%" }} title="30.0% Market OpEx" />
-                        <div className="h-full bg-[#FBBF24]" style={{ width: "15.0%" }} title="15.0% Bug Warranty" />
-                        <div className="h-full bg-[#3B82F6]" style={{ width: "5.0%" }} title="5.0% Contingency" />
-                        <div className="h-full bg-[#737373]" style={{ width: "2.5%" }} title="2.5% Pandem Fee" />
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 text-[11px]">
-                        <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block tabular-nums">47.5% Dev Net</span>
-                          <span className="font-semibold text-[#4ADE80] tabular-nums">${economics.devNet.toLocaleString()}</span>
-                        </div>
-                        <div className="p-2.5 bg-[#0D0D0D] border border-[#894DEF]/40">
-                          <span className="text-[#894DEF] text-[10px] block tabular-nums">30% Market OpEx</span>
-                          <span className="font-semibold text-white tabular-nums">${economics.opex.toLocaleString()}</span>
-                        </div>
-                        <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block tabular-nums">15% Warranty</span>
-                          <span className="font-semibold text-[#FBBF24] tabular-nums">${economics.bugWarranty.toLocaleString()}</span>
-                        </div>
-                        <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block tabular-nums">5% Contingency</span>
-                          <span className="font-semibold text-white tabular-nums">${economics.contingency.toLocaleString()}</span>
-                        </div>
-                        <div className="p-2.5 bg-[#0D0D0D] border border-[#2E2E2E]">
-                          <span className="text-[#737373] text-[10px] block tabular-nums">2.5% Protocol</span>
-                          <span className="font-semibold text-white tabular-nums">${economics.protocolFee.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 30% Market Provider OpEx Breakdown */}
-                    <div className="p-4 bg-[#0D0D0D] border border-[#2E2E2E] space-y-3">
-                      <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-2 text-[11px]">
-                        <span className="text-white font-medium tabular-nums">Market Provider Payments (${economics.opex.toLocaleString()} / mo)</span>
-                        <span className="text-[#894DEF]">Settle via budget.{form.slug}.testnet</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="p-3 bg-[#171717] border border-[#2E2E2E] space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-white font-medium">NEAR AI Cloud</span>
-                            <span className="text-[#894DEF] tabular-nums">50%</span>
-                          </div>
-                          <div className="text-sm font-semibold text-white tabular-nums">${economics.opexNearAi.toLocaleString()}</div>
-                          <span className="text-[10px] text-[#737373] block tabular-nums">
-                            ~{(economics.tokenTokensMonthly / 1000).toFixed(0)}k private tokens/mo
-                          </span>
-                        </div>
-
-                        <div className="p-3 bg-[#171717] border border-[#2E2E2E] space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-white font-medium">
-                              {form.enclaveRuntime === "phala_dstack" ? "Phala Cloud" : "Akash Network"}
-                            </span>
-                            <span className="text-[#894DEF] tabular-nums">33.3%</span>
-                          </div>
-                          <div className="text-sm font-semibold text-white tabular-nums">
-                            ${economics.opexCvm.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                          </div>
-                          <span className="text-[10px] text-[#737373] block">Hardware Enclave CVM upkeep</span>
-                        </div>
-
-                        <div className="p-3 bg-[#171717] border border-[#2E2E2E] space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-white font-medium">Filecoin Lighthouse</span>
-                            <span className="text-[#894DEF] tabular-nums">16.7%</span>
-                          </div>
-                          <div className="text-sm font-semibold text-white tabular-nums">
-                            ${economics.opexStorage.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                          </div>
-                          <span className="text-[10px] text-[#737373] block">IPFS and FastFS CID renewals</span>
-                        </div>
-                      </div>
-
-                      <p className="text-[11px] text-[#737373] leading-relaxed pt-1">
-                        Zero Personal Credit Cards: Smart contracts invoke direct cross-contract settlement promises on NEAR at the close of every verified billing period.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between pt-2 border-t border-[#2E2E2E]">
-                    <button
-                      type="button"
-                      onClick={() => setStep(2)}
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#262626] hover:bg-[#2E2E2E] text-white text-xs font-mono font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
-                      <span>Back to Architecture</span>
+                      <span>Back to Segment 3</span>
                     </button>
                     <button
                       type="button"
-                      onClick={handleLaunch}
-                      disabled={isDeploying}
+                      onClick={handleDeployAndLaunch}
+                      disabled={isDeploying || !form.auditEscrowConfigured}
                       className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#894DEF] hover:bg-[#A273F2] disabled:opacity-50 text-white text-xs font-mono font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
                     >
                       {isDeploying ? (
-                        <span>Deploying Contracts & Registering...</span>
+                        <span>Deploying Contract Suite...</span>
                       ) : (
                         <>
-                          <span>Deploy Contract Suite & Launch</span>
+                          <span>Verify & Deploy Product Suite</span>
                           <ArrowRight className="w-3.5 h-3.5" />
                         </>
                       )}
@@ -1254,8 +1218,8 @@ secrets:
                   <div className="flex items-center gap-1">
                     {[
                       { id: "compose", label: "Manifest" },
+                      { id: "tranches", label: "Tranches" },
                       { id: "attestation", label: "Attestation" },
-                      { id: "economics", label: "Economics" },
                     ].map((tab) => (
                       <button
                         key={tab.id}
@@ -1296,7 +1260,58 @@ secrets:
                   </div>
                 )}
 
-                {/* TAB 2: ATTESTATION MEASUREMENT */}
+                {/* TAB 2: 7-DAY TRANCHES & ECONOMICS */}
+                {previewTab === "tranches" && (
+                  <div className="space-y-3 text-[11px]" role="tabpanel" aria-label="7-Day Tranches Breakdown">
+                    <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
+                      <div className="flex justify-between text-[#737373]">
+                        <span>Projected Gross Revenue:</span>
+                        <span className="text-white font-semibold tabular-nums">${economics.grossMrr.toLocaleString()} / mo</span>
+                      </div>
+                      <div className="flex justify-between text-[#4ADE80] font-medium">
+                        <span>Developer Net (47.5%):</span>
+                        <span className="tabular-nums">${economics.devNet.toLocaleString()} / mo</span>
+                      </div>
+                      <div className="flex justify-between text-[#894DEF] font-medium">
+                        <span>Autonomous OpEx (30%):</span>
+                        <span className="tabular-nums">${economics.opex.toLocaleString()} / mo</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5 text-[10px] text-[#737373]">
+                      <div className="flex justify-between">
+                        <span>Contract Address:</span>
+                        <code className="text-[#894DEF]">escrow.{form.slug}.testnet</code>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tranche Period:</span>
+                        <span className="text-white">7 Days Continuous Release</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Subscriber Clawback Window:</span>
+                        <span className="text-white">D-14 Offset Protection</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1 text-[10px] text-[#737373]">
+                      <span className="text-white font-medium block">Market Provider Routing (30%):</span>
+                      <div className="flex justify-between tabular-nums">
+                        <span>NEAR AI Token Budget:</span>
+                        <span className="text-white">${economics.opexNearAi.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between tabular-nums">
+                        <span>Phala CVM Compute:</span>
+                        <span className="text-white">${economics.opexCvm.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                      </div>
+                      <div className="flex justify-between tabular-nums">
+                        <span>Filecoin Lighthouse Pinning:</span>
+                        <span className="text-white">${economics.opexStorage.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: ATTESTATION MEASUREMENT */}
                 {previewTab === "attestation" && (
                   <div className="space-y-3" role="tabpanel" aria-label="Attestation Measurement Preview">
                     <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
@@ -1323,41 +1338,6 @@ secrets:
                       <div className="flex justify-between">
                         <span className="text-[#737373]">Frontend CID:</span>
                         <span className="text-[#4ADE80] truncate max-w-[140px]">{form.filecoinCid}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* TAB 3: LIVE ECONOMICS */}
-                {previewTab === "economics" && (
-                  <div className="space-y-3 text-[11px]" role="tabpanel" aria-label="Live Economics Breakdown">
-                    <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1">
-                      <div className="flex justify-between text-[#737373]">
-                        <span>Projected Gross Revenue:</span>
-                        <span className="text-white font-semibold tabular-nums">${economics.grossMrr.toLocaleString()} / mo</span>
-                      </div>
-                      <div className="flex justify-between text-[#4ADE80] font-medium tabular-nums">
-                        <span>Developer Net (47.5%):</span>
-                        <span>${economics.devNet.toLocaleString()} / mo</span>
-                      </div>
-                      <div className="flex justify-between text-[#894DEF] font-medium tabular-nums">
-                        <span>Autonomous OpEx (30%):</span>
-                        <span>${economics.opex.toLocaleString()} / mo</span>
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-[#0D0D0D] border border-[#2E2E2E] space-y-1.5 text-[10px] text-[#737373]">
-                      <div className="flex justify-between tabular-nums">
-                        <span>NEAR AI Cloud Token Allocation:</span>
-                        <span className="text-white">${economics.opexNearAi.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between tabular-nums">
-                        <span>Enclave CVM Upkeep:</span>
-                        <span className="text-white">${economics.opexCvm.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                      </div>
-                      <div className="flex justify-between tabular-nums">
-                        <span>Lighthouse Decentralized Pinning:</span>
-                        <span className="text-white">${economics.opexStorage.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                       </div>
                     </div>
                   </div>

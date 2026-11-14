@@ -62,18 +62,19 @@ export function ProductHuntLeaderboard({
     };
   };
 
-  const getLaunchpadMeta = (p: CatalogItem, index: number) => {
-    const hardware = p.teeHardware || (index % 2 === 0 ? "Intel TDX Enclave" : "NVIDIA H100 TEE");
-    const model = p.teeModel || (index % 3 === 0 ? "DeepSeek V3 (671B)" : index % 3 === 1 ? "Qwen 2.5 (72B)" : "Llama 3.3 (70B)");
-    const storage = index % 2 === 0 ? "Filecoin x402 / FastFS" : "Phala dstack / KMS";
-    return { hardware, model, storage };
+  const getStackPrivacyAudit = (p: CatalogItem, index: number) => {
+    const frontend = index % 2 === 0 ? "Frontend: Filecoin Pin" : "Frontend: FastFS CID";
+    const backend = "Node: Isolated Runtime";
+    const database = "Database: KMS Sealed";
+    const escrow = "7-Day Refund Escrow";
+    return { frontend, backend, database, escrow };
   };
 
   return (
     <div className="space-y-6 font-sans">
       {/* Featured Product Spotlight Card */}
       {productOfTheDay && (() => {
-        const podMeta = getLaunchpadMeta(productOfTheDay, 0);
+        const podAudit = getStackPrivacyAudit(productOfTheDay, 0);
         const upvoteData = upvotesState[productOfTheDay.id] || {
           count: productOfTheDay.upvotes || 348,
           voted: false,
@@ -105,18 +106,18 @@ export function ProductHuntLeaderboard({
                     />
 
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#22C55E] bg-[#141F18] border border-[#22C55E]/30">
-                      <Cpu className="w-3 h-3" aria-hidden="true" />
-                      <span>{podMeta.hardware}</span>
+                      <span className="w-1.5 h-1.5 bg-[#22C55E]" aria-hidden="true" />
+                      <span>{podAudit.frontend}</span>
                     </span>
 
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#A1A1A1] bg-[#181818] border border-[#2A2A2A]">
-                      <Zap className="w-3 h-3 text-[#EAB308]" aria-hidden="true" />
-                      <span>{podMeta.model}</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#FAFAFA] bg-[#181818] border border-[#2A2A2A]">
+                      <span className="w-1.5 h-1.5 bg-[#894DEF]" aria-hidden="true" />
+                      <span>{podAudit.backend}</span>
                     </span>
 
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#737373] bg-[#181818] border border-[#2A2A2A] hidden sm:inline-flex">
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs text-[#A1A1A1] bg-[#181818] border border-[#2A2A2A] hidden sm:inline-flex">
                       <Database className="w-3 h-3" aria-hidden="true" />
-                      <span>{podMeta.storage}</span>
+                      <span>{podAudit.database}</span>
                     </span>
                   </div>
 
@@ -249,7 +250,7 @@ export function ProductHuntLeaderboard({
           const rank = p.rank || idx + 1;
           const upvoteData = upvotesState[p.id] || { count: p.upvotes || 100, voted: false };
           const { streak, tvl } = getProductMetrics(p.id, idx);
-          const meta = getLaunchpadMeta(p, idx);
+          const audit = getStackPrivacyAudit(p, idx);
 
           return (
             <div
@@ -291,19 +292,19 @@ export function ProductHuntLeaderboard({
                       tvl={tvl}
                     />
 
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#22C55E] bg-[#141F18] border border-[#22C55E]/30">
-                      <Cpu className="w-3 h-3" aria-hidden="true" />
-                      <span>{meta.hardware}</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] text-[#22C55E] bg-[#141F18] border border-[#22C55E]/30">
+                      <span className="w-1.5 h-1.5 bg-[#22C55E]" aria-hidden="true" />
+                      <span>{audit.frontend}</span>
                     </span>
 
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A1A1A1] bg-[#181818] border border-[#2A2A2A] hidden md:inline-flex">
-                      <Zap className="w-3 h-3 text-[#EAB308]" aria-hidden="true" />
-                      <span>{meta.model}</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] text-[#FAFAFA] bg-[#181818] border border-[#2A2A2A] hidden sm:inline-flex">
+                      <span className="w-1.5 h-1.5 bg-[#894DEF]" aria-hidden="true" />
+                      <span>{audit.backend}</span>
                     </span>
 
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#737373] bg-[#181818] border border-[#2A2A2A] hidden lg:inline-flex">
                       <Database className="w-3 h-3" aria-hidden="true" />
-                      <span>{meta.storage}</span>
+                      <span>{audit.database}</span>
                     </span>
                   </div>
 
