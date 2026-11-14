@@ -62,4 +62,10 @@ export interface CatalogItem {
   category: string;
   status: ProductStatus;
   features: string[];
+  upvotes?: number;
+  rank?: number;
+  isProductOfTheDay?: boolean;
+  steward?: string;
+  teeHardware?: string;
+  teeModel?: string;
 }

@@ -13,11 +13,10 @@ interface NavLink {
 }
 
 const NAV_LINKS: NavLink[] = [
-  { href: "/", label: "Catalog" },
-  { href: "/onramp", label: "On-Ramp" },
-  { href: "/me", label: "My Agreements" },
+  { href: "/", label: "Leaderboard" },
+  { href: "/me", label: "Dashboard" },
   { href: "/steward", label: "Steward" },
-  { href: "/agent", label: "Agent" },
+  { href: "/agent", label: "Agent Enclave" },
   { href: "/components", label: "Testbed", badge: "UI" },
 ];
 
@@ -29,7 +28,7 @@ const DEV_PERSONAS = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { accountId, isConnected, connect, disconnect, tokenBalance, setManualAccount } = useNearWallet();
+  const { accountId, isConnected, connect, disconnect, tokenBalance, setManualAccount, walletError, clearWalletError } = useNearWallet();
   const [showAccountInput, setShowAccountInput] = useState(false);
   const [inputAcc, setInputAcc] = useState("");
 
@@ -164,6 +163,22 @@ export function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Gentle Wallet Notice Banner */}
+      {walletError && (
+        <div className="bg-amber-500/10 border-t border-b border-amber-500/20 px-4 py-2 text-xs flex items-center justify-between gap-2 text-amber-300">
+          <div className="flex items-center gap-2">
+            <span className="font-bold font-mono">ℹ</span>
+            <span>{walletError}</span>
+          </div>
+          <button
+            onClick={clearWalletError}
+            className="text-amber-400 hover:text-amber-200 text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Mobile & Tablet Nav Row with horizontal overflow scrolling */}
       <div className="lg:hidden border-t border-zinc-850 bg-zinc-950/90 px-4 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none">

@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import { CatalogItem } from "@pandem/shared";
 import { PANDEM_ESCROW_ID } from "@pandem/shared";
+import { callViewMethod } from "../lib/nearRpc";
 
 interface CatalogCardProps {
   item: CatalogItem;
   onSubscribe: (item: CatalogItem) => void;
 }
-
-const TESTNET_RPC = "https://rpc.testnet.near.org";
 
 export function CatalogCard({ item, onSubscribe }: CatalogCardProps) {
   const [onChainState, setOnChainState] = useState<{
@@ -20,38 +19,28 @@ export function CatalogCard({ item, onSubscribe }: CatalogCardProps) {
   } | null>(null);
 
   useEffect(() => {
-    // Fetch live on-chain status from escrow contract
+    let isMounted = true;
     const fetchLiveState = async () => {
       try {
-        const res = await fetch(TESTNET_RPC, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: `prod-${item.id}`,
-            method: "query",
-            params: {
-              request_type: "call_function",
-              finality: "optimistic",
-              account_id: PANDEM_ESCROW_ID,
-              method_name: "get_product",
-              args_base64: btoa(JSON.stringify({ id: Number(item.id) })),
-            },
-          }),
-        });
-        const data = await res.json();
-        if (data?.result?.result) {
-          const parsed = JSON.parse(
-            new TextDecoder().decode(new Uint8Array(data.result.result))
-          );
+        const parsed = await callViewMethod<{
+          status: string;
+          last_heartbeat_period: number;
+          ops_reserve: string;
+          contingency_reserve: string;
+        }>(PANDEM_ESCROW_ID, "get_product", { id: Number(item.id) });
+
+        if (isMounted && parsed) {
           setOnChainState(parsed);
         }
-      } catch (err) {
+      } catch {
         // Fallback to static catalog item status
       }
     };
 
     fetchLiveState();
+    return () => {
+      isMounted = false;
+    };
   }, [item.id]);
 
   const displayStatus = onChainState?.status || item.status;

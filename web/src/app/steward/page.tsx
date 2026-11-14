@@ -3,13 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNearWallet } from "../../context/NearWalletContext";
 import { PANDEM_ESCROW_ID, PANDEM_STEWARD_ID, Product } from "@pandem/shared";
+import { callViewMethod } from "../../lib/nearRpc";
 
 interface ProductWithId {
   id: number;
   product: Product;
 }
-
-const TESTNET_RPC = "https://rpc.testnet.near.org";
 
 export default function StewardDashboardPage() {
   const { accountId, isConnected, connect } = useNearWallet();
@@ -27,32 +26,17 @@ export default function StewardDashboardPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(TESTNET_RPC, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: "list-prods",
-          method: "query",
-          params: {
-            request_type: "call_function",
-            finality: "optimistic",
-            account_id: PANDEM_ESCROW_ID,
-            method_name: "list_products",
-            args_base64: btoa(JSON.stringify({})),
-          },
-        }),
-      });
-      const data = await res.json();
-      if (data?.result?.result) {
-        const list: Array<[number, Product]> = JSON.parse(
-          new TextDecoder().decode(new Uint8Array(data.result.result))
-        );
+      const list = await callViewMethod<Array<[number, Product]>>(
+        PANDEM_ESCROW_ID,
+        "list_products",
+        {}
+      );
+      if (list) {
         const mapped = list.map(([id, product]) => ({ id, product }));
         setProducts(mapped);
       }
     } catch (err: any) {
-      setError(err.message || String(err));
+      setError(err?.message || String(err));
     } finally {
       setIsLoading(false);
     }

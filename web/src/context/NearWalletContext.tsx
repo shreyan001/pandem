@@ -10,6 +10,8 @@ interface NearWalletContextType {
   isLoading: boolean;
   tokenBalance: string;
   isStorageRegistered: boolean;
+  walletError: string | null;
+  clearWalletError: () => void;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   setManualAccount: (acc: string) => void;
@@ -20,7 +22,48 @@ interface NearWalletContextType {
 
 const NearWalletContext = createContext<NearWalletContextType | null>(null);
 
-const TESTNET_RPC = "https://rpc.testnet.near.org";
+// Resilient RPC query helper that uses our server-side proxy with fallback
+async function queryRpc(methodName: string, argsObj: Record<string, any>): Promise<any | null> {
+  const rpcPayload = {
+    jsonrpc: "2.0",
+    id: `pandem-${methodName}`,
+    method: "query",
+    params: {
+      request_type: "call_function",
+      finality: "optimistic",
+      account_id: PANDEM_TOKEN_ID,
+      method_name: methodName,
+      args_base64: typeof window !== "undefined" ? btoa(JSON.stringify(argsObj)) : Buffer.from(JSON.stringify(argsObj)).toString("base64"),
+    },
+  };
+
+  const endpoints = ["/api/rpc", "https://rpc.testnet.near.org", "https://testnet.neartransaction.com"];
+
+  for (const ep of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 4000);
+
+      const res = await fetch(ep, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rpcPayload),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (json?.result?.result) {
+        const decoded = JSON.parse(new TextDecoder().decode(new Uint8Array(json.result.result)));
+        return decoded;
+      }
+    } catch {
+      // Continue to next fallback
+    }
+  }
+  return null;
+}
 
 export function NearWalletProvider({ children }: { children: React.ReactNode }) {
   const [connector, setConnector] = useState<NearConnector | null>(null);
@@ -28,6 +71,11 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tokenBalance, setTokenBalance] = useState<string>("0");
   const [isStorageRegistered, setIsStorageRegistered] = useState<boolean>(true);
+  const [walletError, setWalletError] = useState<string | null>(null);
+
+  const clearWalletError = useCallback(() => {
+    setWalletError(null);
+  }, []);
 
   // Initialize NearConnector on mount (browser only)
   useEffect(() => {
@@ -42,9 +90,13 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
       // Check if already signed in
       nc.wallet()
         .then(async (w) => {
-          const accounts = await w.getAccounts();
-          if (accounts.length > 0 && accounts[0].accountId) {
-            setAccountId(accounts[0].accountId);
+          try {
+            const accounts = await w.getAccounts();
+            if (accounts.length > 0 && accounts[0].accountId) {
+              setAccountId(accounts[0].accountId);
+            }
+          } catch (e) {
+            console.warn("Could not retrieve accounts:", e);
           }
         })
         .catch(() => {})
@@ -53,6 +105,7 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
       nc.on("wallet:signIn", async (t: any) => {
         if (t?.accounts?.length > 0) {
           setAccountId(t.accounts[0].accountId);
+          setWalletError(null);
         }
       });
 
@@ -60,13 +113,13 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
         setAccountId(null);
         setTokenBalance("0");
       });
-    } catch (e) {
-      console.warn("NearConnector init error:", e);
+    } catch (e: any) {
+      console.warn("NearConnector init error (handled):", e?.message || e);
       setIsLoading(false);
     }
   }, []);
 
-  // Fetch token balance & storage registration status via public RPC
+  // Fetch token balance & storage registration status safely
   const refreshBalances = useCallback(async () => {
     if (!accountId) {
       setTokenBalance("0");
@@ -74,59 +127,18 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     }
 
     try {
-      // 1. Query ft_balance_of on token
-      const balRes = await fetch(TESTNET_RPC, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: "bal-check",
-          method: "query",
-          params: {
-            request_type: "call_function",
-            finality: "optimistic",
-            account_id: PANDEM_TOKEN_ID,
-            method_name: "ft_balance_of",
-            args_base64: btoa(JSON.stringify({ account_id: accountId })),
-          },
-        }),
-      });
-      const balJson = await balRes.json();
-      if (balJson?.result?.result) {
-        const decoded = JSON.parse(
-          new TextDecoder().decode(new Uint8Array(balJson.result.result))
-        );
-        setTokenBalance(decoded);
+      // 1. Query ft_balance_of
+      const bal = await queryRpc("ft_balance_of", { account_id: accountId });
+      if (bal !== null) {
+        setTokenBalance(String(bal));
       }
 
       // 2. Query storage_balance_of
-      const storageRes = await fetch(TESTNET_RPC, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: "storage-check",
-          method: "query",
-          params: {
-            request_type: "call_function",
-            finality: "optimistic",
-            account_id: PANDEM_TOKEN_ID,
-            method_name: "storage_balance_of",
-            args_base64: btoa(JSON.stringify({ account_id: accountId })),
-          },
-        }),
-      });
-      const storageJson = await storageRes.json();
-      if (storageJson?.result?.result) {
-        const decoded = JSON.parse(
-          new TextDecoder().decode(new Uint8Array(storageJson.result.result))
-        );
-        setIsStorageRegistered(decoded !== null);
-      } else {
-        setIsStorageRegistered(false);
-      }
-    } catch (e) {
-      console.error("Balance query error:", e);
+      const storage = await queryRpc("storage_balance_of", { account_id: accountId });
+      setIsStorageRegistered(storage !== null);
+    } catch (e: any) {
+      // Silently handle RPC issues, never blow up the UI
+      console.warn("Balance query warning (fallback engaged):", e?.message || e);
     }
   }, [accountId]);
 
@@ -140,13 +152,27 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     if (!connector) return;
     try {
       setIsLoading(true);
+      setWalletError(null);
       const wallet = await connector.connect();
       const accounts = await wallet.getAccounts();
       if (accounts.length > 0) {
         setAccountId(accounts[0].accountId);
       }
-    } catch (e) {
-      console.error("Connect failed:", e);
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      // Catch common wallet aborts/timeouts gracefully
+      if (
+        msg.includes("User closed the window") ||
+        msg.includes("closed") ||
+        msg.includes("Failed to connect to MetaMask") ||
+        msg.includes("timed out")
+      ) {
+        console.warn("Wallet action cancelled by user or timed out:", msg);
+        setWalletError("Wallet action cancelled or timed out. Please try again or switch testnet persona.");
+      } else {
+        console.warn("Connect notice:", msg);
+        setWalletError(msg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -158,18 +184,21 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
       await connector.disconnect();
       setAccountId(null);
       setTokenBalance("0");
-    } catch (e) {
-      console.error("Disconnect failed:", e);
+      setWalletError(null);
+    } catch (e: any) {
+      console.warn("Disconnect notice:", e?.message || e);
     }
   };
 
   const setManualAccount = (acc: string) => {
     setAccountId(acc.trim());
+    setWalletError(null);
   };
 
   const registerStorage = async (): Promise<string | null> => {
     if (!connector || !accountId) return null;
     try {
+      setWalletError(null);
       const wallet = await connector.wallet();
       const outcome: any = await wallet.signAndSendTransaction({
         receiverId: PANDEM_TOKEN_ID,
@@ -188,8 +217,10 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
       await refreshBalances();
       return outcome?.transaction?.hash ?? "submitted";
     } catch (e: any) {
-      console.error("Register storage error:", e);
-      throw e;
+      const msg = e?.message || String(e);
+      console.warn("Register storage notice:", msg);
+      setWalletError(`Storage deposit notice: ${msg}`);
+      return null;
     }
   };
 
@@ -207,6 +238,7 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     });
 
     try {
+      setWalletError(null);
       const wallet = await connector.wallet();
       const outcome: any = await wallet.signAndSendTransaction({
         receiverId: PANDEM_TOKEN_ID,
@@ -229,8 +261,10 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
       await refreshBalances();
       return outcome?.transaction?.hash ?? "submitted";
     } catch (e: any) {
-      console.error("Subscribe transaction error:", e);
-      throw e;
+      const msg = e?.message || String(e);
+      console.warn("Subscribe notice:", msg);
+      setWalletError(`Subscription notice: ${msg}`);
+      return null;
     }
   };
 
@@ -242,6 +276,8 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
         isLoading,
         tokenBalance,
         isStorageRegistered,
+        walletError,
+        clearWalletError,
         connect,
         disconnect,
         setManualAccount,
