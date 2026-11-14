@@ -24,6 +24,8 @@ coverage/
 Thumbs.db
 *.log
 .gemini/tmp/
+.lavish/
+reports/
 # hackathon submission payload holds personal data (HACKATHON.md says do not commit it)
 submission-payload.json
 
