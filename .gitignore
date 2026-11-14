@@ -45,3 +45,5 @@ target/
 **/target/
 .near-credentials/
 neardev/
+.vercel
+.env*

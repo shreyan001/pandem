@@ -1,0 +1,14 @@
+contracts/
+context/
+agent/
+.agents/
+reports/
+.lavish/
+.gemini/
+*.wasm
+*.pdb
+*.rlib
+*.exe
+*.log
+data/
+submission-payload.json
