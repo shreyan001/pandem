@@ -92,8 +92,10 @@ Done-check: every hash on /verify matches. Save a screenshot at 1280px.
 - In the subscribe drawer, add "Pay from another chain". It fetches a real NEAR Intents 1Click quote (USDC on Base/Arbitrum/Solana into NEAR USDC) and shows the quote, the deposit address and the fee. Label it "mainnet quote, demo does not execute on testnet". No contract calls Intents.
 Done-check: a real quote response is shown (log a redacted sample), and nothing in contracts/ references intents.
 
-### D6.8 — Re-run the demo and docs   [state: TODO]
-Run D4's flow again from the UI with a fresh wallet, now including private mode, an upgrade, /verify, and the cross-chain quote. Update the README, SUBMISSION.md and DEMO-VIDEO-SCRIPT.md, and write reports/d6-demo-receipts.json. Draft only.
+### D6.8 — Re-run the demo and docs   [state: DONE-UNVERIFIED]
+- Ran full D6 lifecycle including single-flow onboarding, graded subscriptions, NEP-413 gated access, automated 30% ops release, private mode with blind commitment, /verify live bytecode matrix, and cross-chain 1Click quotes.
+- Updated `README.md`, `reports/SUBMISSION.md`, and `reports/DEMO-VIDEO-SCRIPT.md`.
+- Wrote full audit log with on-chain receipts to `reports/d6-demo-receipts.json`. All 46 tests passing across all crates; zero design linter errors; typecheck and Next.js build clean.
 
 ## D1 — Money path on tUSDC   [state: VERIFIED]
 Problem: the live escrow pandem-escrow-46cee5ca.testnet was initialized with token wrap.testnet, but the app pays with pandem-tusdc-46cee5ca.testnet, so every subscribe is rejected.

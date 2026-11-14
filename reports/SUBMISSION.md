@@ -6,7 +6,7 @@
 **Primary Track**: Real-World Money  
 **Secondary Track**: Privacy & Private AI  
 **Deployed Testnet Contracts**:
-- Escrow: [`pandem-escrow-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet)
+- Escrow (V2 Live): [`escrow-d64-40ba.test-pandem-alice-1.testnet`](https://explorer.testnet.near.org/accounts/escrow-d64-40ba.test-pandem-alice-1.testnet)
 - Budget: [`pandem-budget-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-d1-8f199e48.testnet)
 - Registry: [`pandem-registry-v2-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-v2-46cee5ca.testnet)
 - Token (tUSDC): [`pandem-tusdc-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-tusdc-46cee5ca.testnet)

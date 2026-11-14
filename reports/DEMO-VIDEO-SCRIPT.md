@@ -11,12 +11,12 @@
 
 | Scene | Time | Focus Area | Visual on Screen |
 |---|---|---|---|
-| **Scene 1** | 0:00 - 0:45 | Problem Pitch | Spectr landing page (`http://localhost:3000`), Developer Launchpad, Security Matrix |
-| **Scene 2** | 0:45 - 1:30 | Product Catalog & 4-Way Escrow Split | Product detail page (`/products/open-webui`), 6-decimal tUSDC pricing, Yearly Pro/Max tiers, Subscribe Modal |
-| **Scene 3** | 1:30 - 2:15 | Access Link & Off-Chain Email Credential | Subscribe success state, Enclave Access Link, off-chain email storage, `/dashboard` agreement station |
-| **Scene 4** | 2:15 - 3:00 | Developer Telemetry & Ops Budget Draw | `/dev/dashboard`, On-chain MRR stream, 30% ops reserve, Agent drawing inference compute via `draw_ops_funds` |
-| **Scene 5** | 3:00 - 3:45 | Steward Killswitch & 1-Click Refund | `/dev/dashboard` Killswitch Panel (`declare_abandoned`), `/dashboard` refund station, 1-click `claim_refund` returning 100% of funds |
-| **Scene 6** | 3:45 - 4:15 | Multi-Contract Architecture & Receipts | Testnet Explorer receipts (`pandem-escrow-d1-8f199e48.testnet`, `pandem-budget-d1-8f199e48.testnet`, `pandem-tusdc-46cee5ca.testnet`) |
+| **Scene 1** | 0:00 - 0:45 | Problem Pitch & 1-Flow Onboarding | Spectr landing page (`http://localhost:3000`), Onboarding Drawer (1-click account, storage, testnet faucet) |
+| **Scene 2** | 0:45 - 1:30 | Product Catalog, Graded Tiers & Private Blind Mode | Product detail page (`/products/open-webui`), Pricing table (Free/Pro/Max), Private Mode toggle (`sha256(secret:product_id)` commitment), What's Public disclosure |
+| **Scene 3** | 1:30 - 2:15 | NEP-413 Gated Access & Verify-It-Yourself Bytecode Matrix | Access link (`/access/open-webui`), NEP-413 Ed25519 signature gate, Verify page (`/verify`) comparing live FastNEAR RPC code hash matrix with build artifacts |
+| **Scene 4** | 2:15 - 3:00 | Automated 30% Ops Share Flow & Cross-Chain 1Click Quotes | Automated cross-contract release forwarding 30% tUSDC directly to Budget (`pandem-budget-d1-8f199e48.testnet`), Cross-Chain Quote Drawer (Base, Arbitrum, Solana USDC -> NEAR USDC) |
+| **Scene 5** | 3:00 - 3:45 | Upgrades, Renewals, Killswitch & 1-Click Instant Refunds | Subscription Card actions (Prorated Upgrade, Renew, Cancel with immediate future period refund, or Killswitch refund) |
+| **Scene 6** | 3:45 - 4:15 | Multi-Contract Architecture & Testnet Receipts | Testnet Explorer receipts (`escrow-d64-40ba.test-pandem-alice-1.testnet`, `pandem-budget-d1-8f199e48.testnet`, `pandem-tusdc-46cee5ca.testnet`) |
 
 ---
 

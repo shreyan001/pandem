@@ -2,9 +2,9 @@
 
 **Decentralized SaaS & AI Agent Subscription Escrow on NEAR Protocol**
 
-[![NEAR Testnet](https://img.shields.io/badge/NEAR-Testnet-blue?logo=near)](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet)
+[![NEAR Testnet](https://img.shields.io/badge/NEAR-Testnet-blue?logo=near)](https://explorer.testnet.near.org/accounts/escrow-d64-40ba.test-pandem-alice-1.testnet)
 [![Contracts](https://img.shields.io/badge/Contracts-Rust%20near--sdk%205.30.1-orange?logo=rust)](contracts/)
-[![Tests](https://img.shields.io/badge/Tests-39%2F39%20Passed-brightgreen)](contracts/)
+[![Tests](https://img.shields.io/badge/Tests-46%2F46%20Passed-brightgreen)](contracts/)
 [![Next.js](https://img.shields.io/badge/Next.js-16%20(React%2019)-black?logo=next.js)](web/)
 [![Design System](https://img.shields.io/badge/Spectr-Sharp%20Corners-purple)](design.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -14,7 +14,7 @@
 - **Primary Track**: Real-World Money (`realworld`)
 - **Secondary Track**: Privacy & Private AI (`privacy`)
 - **Deployed Contracts (NEAR Testnet)**:
-  - Escrow: [`pandem-escrow-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet)
+  - Escrow (V2 Live): [`escrow-d64-40ba.test-pandem-alice-1.testnet`](https://explorer.testnet.near.org/accounts/escrow-d64-40ba.test-pandem-alice-1.testnet)
   - Budget: [`pandem-budget-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-d1-8f199e48.testnet)
   - Registry: [`pandem-registry-v2-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-v2-46cee5ca.testnet)
   - Testnet Token (tUSDC): [`pandem-tusdc-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-tusdc-46cee5ca.testnet)
