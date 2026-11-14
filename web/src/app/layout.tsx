@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { NearWalletProvider } from "../context/NearWalletContext";
 import { Navbar } from "../components/Navbar";
 import { ExtensionErrorGuard } from "../components/ExtensionErrorGuard";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Pandem | Decentralized SaaS Subscription Escrow on NEAR",
+  title: "Pandem | Sovereign SaaS & AI Launchpad on NEAR",
   description:
-    "Native NEAR subscription escrow with periodic heartbeat liveness verification, split payouts, and automated non-custodial refunds.",
+    "The sovereign launchpad for confidential SaaS and autonomous AI agents on NEAR. Deploy hardware-isolated enclaves, invisible subscription payments, and self-funding smart contracts.",
 };
 
 const EARLY_EXTENSION_FILTER = `
@@ -55,7 +68,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-[#0D0D0D] text-[#FAFAFA]" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`dark bg-[#0D0D0D] text-[#FAFAFA] ${inter.variable} ${jetbrainsMono.variable} font-sans`}
+      suppressHydrationWarning
+    >
       <head>
         <Script
           id="early-extension-filter"
@@ -64,7 +81,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="antialiased min-h-screen flex flex-col bg-[#0D0D0D] text-[#FAFAFA] selection:bg-[#894DEF] selection:text-[#FAFAFA]"
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased min-h-screen flex flex-col bg-[#0D0D0D] text-[#FAFAFA] selection:bg-[#894DEF] selection:text-[#FAFAFA]`}
         suppressHydrationWarning
       >
         <ExtensionErrorGuard>

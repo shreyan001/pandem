@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
         contingency_reserve_usd: "$0.00",
         average_budget_per_sub_usd: "$50.00 / yr",
         mrr_growth_pct: 0,
-        escrow_warranty_days: 70,
+        escrow_warranty_days: 7,
         dynamic_allocation_status: "Streaming",
       },
       proposals: [],

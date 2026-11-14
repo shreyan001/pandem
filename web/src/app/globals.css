@@ -17,11 +17,22 @@
 body {
   color: #FAFAFA;
   background-color: #0D0D0D;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle Technical Launchpad Grid Canvas */
+.bg-grid {
+  background-image: radial-gradient(circle at 1px 1px, #262626 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.bg-grid-dense {
+  background-image: radial-gradient(circle at 1px 1px, #262626 1px, transparent 0);
+  background-size: 16px 16px;
 }
 
 /* Enforce Spectr 0px border-radius everywhere */

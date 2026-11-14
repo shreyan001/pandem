@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ProductHuntLeaderboard } from "../components/ProductHuntLeaderboard";
 import { ProductDetailModal } from "../components/ProductDetailModal";
@@ -14,7 +14,44 @@ export default function Home() {
   const [detailProduct, setDetailProduct] = useState<CatalogItem | null>(null);
   const [subscribeProduct, setSubscribeProduct] = useState<CatalogItem | null>(null);
   const [activeXrayStep, setActiveXrayStep] = useState<number>(0);
-  const catalog = catalogData as unknown as CatalogItem[];
+  const [catalog, setCatalog] = useState<CatalogItem[]>(() => catalogData as unknown as CatalogItem[]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped: CatalogItem[] = data.map((item: any, idx: number) => {
+            const monthlyPrice = item.tiers?.[0]?.price_monthly
+              ? `$${(Number(item.tiers[0].price_monthly) / 1000000).toFixed(0)}/mo`
+              : item.price_display || "$5.00/mo";
+            return {
+              id: String(item.id || item.slug || idx + 1),
+              name: item.name,
+              tagline: item.tagline,
+              description: item.description,
+              price_per_period: item.price_per_period || item.tiers?.[0]?.price_monthly || "5000000",
+              price_display: monthlyPrice,
+              period_seconds: item.period_seconds || 2592000,
+              period_display: item.period_display || "30 days",
+              grace_seconds: item.grace_seconds || 604800,
+              grace_display: item.grace_display || "7 days",
+              category: item.category || "Confidential AI",
+              status: item.status || "Active",
+              features: item.features || ["Intel TDX Hardware Enclave", "Confidential Intent Settlement", "KMS-Sealed DB"],
+              upvotes: typeof item.upvotes === "number" ? item.upvotes : 100,
+              rank: item.rank || idx + 1,
+              isProductOfTheDay: idx === 0,
+              steward: item.steward || item.developer?.steward_address || "developer.testnet",
+              teeHardware: item.tee_hardware || item.teeHardware || "Intel TDX Enclave",
+              teeModel: item.tee_model || item.teeModel || "DeepSeek V3 (671B)",
+            };
+          });
+          setCatalog(mapped);
+        }
+      })
+      .catch((err) => console.warn("Dynamic catalog load failed:", err));
+  }, []);
 
   const handleSelectProduct = (product: CatalogItem) => {
     setDetailProduct(product);
@@ -28,40 +65,39 @@ export default function Home() {
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-20 bg-[#0D0D0D] text-[#FAFAFA] font-sans">
       {/* 2.1 Above-the-Fold Hero Section */}
-      <section className="text-center pt-8 pb-12 border-b border-[#2E2E2E] space-y-8">
+      <section className="text-center pt-8 pb-14 border-b border-[#2E2E2E] space-y-8 relative">
+        <div className="absolute inset-0 bg-grid opacity-25 pointer-events-none" />
+
         {/* Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-[#171717] border border-[#2E2E2E] text-xs font-mono tracking-wider">
-          <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
-          <span className="text-[#894DEF] font-bold">PANDEM PROTOCOL</span>
+        <div className="relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-[#171717] border border-[#2E2E2E] text-xs font-mono tracking-wider shadow-sm">
+          <span className="w-2 h-2 rounded-none bg-[#4ADE80] animate-pulse" />
+          <span className="text-[#894DEF] font-bold">PANDEM LAUNCHPAD</span>
           <span className="text-[#6B6B6B]">·</span>
-          <span className="text-[#B8B8B8]">NEAR CONFIDENTIAL INTENTS</span>
+          <span className="text-[#FAFAFA]">SOVEREIGN SAAS & TEE INFRASTRUCTURE ON NEAR</span>
           <span className="text-[#6B6B6B]">·</span>
-          <span className="text-[#B8B8B8]">INTEL TDX</span>
-          <span className="text-[#6B6B6B]">·</span>
-          <span className="text-[#B8B8B8]">NEAR AI CLOUD</span>
+          <span className="text-[#4ADE80] font-bold">INTEL TDX & H100</span>
         </div>
 
         {/* Hero Headline (H1) */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#FAFAFA] tracking-tight max-w-5xl mx-auto leading-tight sm:leading-none uppercase">
+        <h1 className="relative text-3xl sm:text-5xl lg:text-6xl font-black text-[#FAFAFA] tracking-tight max-w-5xl mx-auto leading-tight sm:leading-none uppercase">
           Subscribe in Complete Secrecy. <br className="hidden sm:inline" />
           <span className="text-[#894DEF]">Run Inside Hardware Enclaves.</span> <br className="hidden sm:inline" />
-          Own Your Agentic Stack.
+          The Launchpad for Sovereign AI.
         </h1>
 
         {/* Hero Sub-headline */}
-        <p className="text-sm sm:text-base lg:text-lg text-[#B8B8B8] max-w-3xl mx-auto leading-relaxed">
-          Standard SaaS asks you to trust a privacy policy while exposing your LangGraph state, user database, and payment trail.
-          Pandem is the sovereign software storefront where subscriptions settle invisibly via NEAR Confidential Intents, apps self-fund
-          their own AI and database enclaves through a Tripartite Smart Contract, and neither the developer nor the cloud host can ever inspect your data.
+        <p className="relative text-sm sm:text-base lg:text-lg text-[#B8B8B8] max-w-3xl mx-auto leading-relaxed">
+          Standard SaaS asks you to trust a marketing privacy policy while exposing your LangGraph state, user database, and payment trail.
+          Pandem is the sovereign launchpad where confidential software products launch with hardware-enforced privacy: subscriptions settle invisibly via NEAR Confidential Intents, applications self-fund their own AI and database enclaves through a Tripartite Smart Contract, and neither developers nor cloud hosts can ever inspect user data.
         </p>
 
         {/* Primary Call-to-Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+        <div className="relative flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
           <a
             href="#storefront"
-            className="w-full sm:w-auto px-8 py-4 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-bold text-sm font-mono tracking-wide transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-bold text-sm font-mono tracking-wide transition-colors flex items-center justify-center gap-2 shadow-md"
           >
-            <span>Explore Pandem Storefront</span>
+            <span>Explore Launchpad Storefront</span>
             <span>↓</span>
           </a>
 
@@ -69,19 +105,20 @@ export default function Home() {
             href="/dev/onboarding"
             className="w-full sm:w-auto px-8 py-4 rounded-none bg-[#171717] hover:bg-[#262626] text-[#FAFAFA] border border-[#2E2E2E] hover:border-[#894DEF] font-bold text-sm font-mono tracking-wide transition-colors flex items-center justify-center gap-2"
           >
-            <span>Launch a Product (Get Instant AI & DB Credits)</span>
+            <span>Deploy on Launchpad (Instant AI & DB Credits)</span>
             <span>→</span>
           </Link>
         </div>
 
         {/* Role Routing Selector */}
-        <div className="pt-4 max-w-2xl mx-auto">
+        <div className="relative pt-4 max-w-2xl mx-auto">
           {isConnected && accountId ? (
-            <div className="p-4 rounded-none bg-[#171717] border border-[#894DEF] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-left">
+            <div className="p-4 rounded-none bg-[#171717] border border-[#894DEF] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-left shadow-sm">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
+                <span className="w-2 h-2 rounded-none bg-[#4ADE80] animate-pulse" />
                 <span className="text-[#B8B8B8]">Connected as:</span>
                 <strong className="text-[#FAFAFA]">{accountId}</strong>
+                <span className="px-1.5 py-0.5 text-[10px] bg-[#262626] text-[#4ADE80] border border-[#4ADE80]/40">Active</span>
               </div>
               <div className="flex items-center gap-2">
                 <Link
@@ -104,11 +141,14 @@ export default function Home() {
                 href="#storefront"
                 className="p-4 rounded-none bg-[#171717] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors group"
               >
-                <div className="text-[10px] text-[#894DEF] font-bold uppercase">Browse as Subscriber</div>
+                <div className="text-[10px] text-[#4ADE80] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-none bg-[#4ADE80]" />
+                  <span>Subscriber Track · Invisible Subscriptions</span>
+                </div>
                 <div className="text-sm font-bold text-[#FAFAFA] mt-1 group-hover:text-[#894DEF] transition-colors">
                   Explore Zero-Knowledge Apps
                 </div>
-                <p className="text-[11px] text-[#B8B8B8] mt-1">
+                <p className="text-[11px] text-[#B8B8B8] mt-1 leading-relaxed">
                   View TEE hardware proofs, anonymous intent subscription quotes, and walkaway exports.
                 </p>
               </a>
@@ -117,11 +157,14 @@ export default function Home() {
                 href="/dev/onboarding"
                 className="p-4 rounded-none bg-[#171717] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors group"
               >
-                <div className="text-[10px] text-[#894DEF] font-bold uppercase">Browse as Developer</div>
+                <div className="text-[10px] text-[#894DEF] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-none bg-[#894DEF]" />
+                  <span>Developer Track · Launchpad Onboarding</span>
+                </div>
                 <div className="text-sm font-bold text-[#FAFAFA] mt-1 group-hover:text-[#894DEF] transition-colors">
                   Deploy Enclave SaaS & Get Credits
                 </div>
-                <p className="text-[11px] text-[#B8B8B8] mt-1">
+                <p className="text-[11px] text-[#B8B8B8] mt-1 leading-relaxed">
                   Connect LangGraph & Postgres. Contract automatically provisions scoped AI inference keys.
                 </p>
               </Link>
@@ -130,14 +173,15 @@ export default function Home() {
         </div>
 
         {/* Interactive Hero Visual ("Pandem Live Privacy & Escrow X-Ray") */}
-        <div className="pt-6 text-left">
+        <div className="relative pt-6 text-left">
           <div className="flex items-center justify-between pb-3 border-b border-[#2E2E2E] mb-4">
             <span className="text-xs font-mono font-bold text-[#FAFAFA] uppercase tracking-wider flex items-center gap-2">
               <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
               <span>Interactive Privacy & Escrow X-Ray Architecture</span>
             </span>
-            <span className="text-[11px] font-mono text-[#6B6B6B]">
-              3-Layer Physical Enclave Isolation
+            <span className="text-[11px] font-mono text-[#4ADE80] flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-none bg-[#4ADE80]" />
+              <span>3-Layer Physical Enclave Isolation</span>
             </span>
           </div>
 
@@ -146,21 +190,21 @@ export default function Home() {
             <div
               onClick={() => setActiveXrayStep(0)}
               className={`p-6 rounded-none bg-[#171717] border transition-colors cursor-pointer space-y-3 ${
-                activeXrayStep === 0 ? "border-[#894DEF]" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
+                activeXrayStep === 0 ? "border-[#894DEF] shadow-md" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
               }`}
             >
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] font-bold border border-[#2E2E2E]">
-                  01 · PAYMENT
+                <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#4ADE80] font-bold border border-[#2E2E2E]">
+                  01 · INVISIBLE PAYMENT
                 </span>
-                <span className="text-[#6B6B6B]">Confidential Intent</span>
+                <span className="text-[#4ADE80] text-[11px]">Shielded Shard</span>
               </div>
-              <h3 className="text-base font-bold text-[#FAFAFA]">Invisible Payment Routing</h3>
+              <h3 className="text-base font-bold text-[#FAFAFA] tracking-tight">Confidential Intent Routing</h3>
               <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-xs text-[#B8B8B8] space-y-1">
                 <div>Subscriber Wallet (Shielded Shard)</div>
                 <div className="text-[#894DEF]">↓ intents.near (Private Shard)</div>
                 <div>↓ pandem-tripartite.near</div>
-                <div className="text-[10px] text-[#FAFAFA] pt-1 font-bold">
+                <div className="text-[10px] text-[#4ADE80] pt-1 font-bold">
                   ✓ 0 Public Wallet Links Recorded
                 </div>
               </div>
@@ -173,21 +217,21 @@ export default function Home() {
             <div
               onClick={() => setActiveXrayStep(1)}
               className={`p-6 rounded-none bg-[#171717] border transition-colors cursor-pointer space-y-3 ${
-                activeXrayStep === 1 ? "border-[#894DEF]" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
+                activeXrayStep === 1 ? "border-[#894DEF] shadow-md" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
               }`}
             >
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] font-bold border border-[#2E2E2E]">
-                  02 · COMPUTE
+                  02 · TRIPARTITE OPEX
                 </span>
-                <span className="text-[#6B6B6B]">Tripartite OpEx</span>
+                <span className="text-[#894DEF] text-[11px]">30% Scoped Key</span>
               </div>
-              <h3 className="text-base font-bold text-[#FAFAFA]">Autonomous 30% OpEx & Scoped Key</h3>
+              <h3 className="text-base font-bold text-[#FAFAFA] tracking-tight">Autonomous 30% OpEx & Scoped Key</h3>
               <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-xs text-[#B8B8B8] space-y-1">
                 <div>Contract mints pk-pandem-tee-...</div>
                 <div className="text-[#894DEF]">↓ cloud-api.near.ai (H100 TEE)</div>
                 <div>↓ Phala dstack Postgres Enclave</div>
-                <div className="text-[10px] text-[#FAFAFA] pt-1 font-bold">
+                <div className="text-[10px] text-[#894DEF] pt-1 font-bold">
                   ✓ Hardware Sealed RAM & Disk
                 </div>
               </div>
@@ -200,21 +244,21 @@ export default function Home() {
             <div
               onClick={() => setActiveXrayStep(2)}
               className={`p-6 rounded-none bg-[#171717] border transition-colors cursor-pointer space-y-3 ${
-                activeXrayStep === 2 ? "border-[#894DEF]" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
+                activeXrayStep === 2 ? "border-[#894DEF] shadow-md" : "border-[#2E2E2E] hover:border-[#6B6B6B]"
               }`}
             >
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] font-bold border border-[#2E2E2E]">
-                  03 · ESCROW
+                <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#FBBF24] font-bold border border-[#2E2E2E]">
+                  03 · 7-DAY SHIELD
                 </span>
-                <span className="text-[#6B6B6B]">7-Day Shield</span>
+                <span className="text-[#FBBF24] text-[11px]">compose-hash Lock</span>
               </div>
-              <h3 className="text-base font-bold text-[#FAFAFA]">7-Day Credit Misuse Shield</h3>
+              <h3 className="text-base font-bold text-[#FAFAFA] tracking-tight">7-Day Credit Misuse Shield</h3>
               <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] font-mono text-xs text-[#B8B8B8] space-y-1">
                 <div>50% Dev Payout: 7-Day Timelock</div>
                 <div className="text-[#894DEF]">↓ Hardware Telemetry Monitor</div>
                 <div>↓ compose-hash verification</div>
-                <div className="text-[10px] text-[#FAFAFA] pt-1 font-bold">
+                <div className="text-[10px] text-[#FBBF24] pt-1 font-bold">
                   ✓ Auto-Clawback if Container Altered
                 </div>
               </div>
@@ -256,42 +300,42 @@ export default function Home() {
             <tbody className="divide-y divide-[#2E2E2E] text-[#B8B8B8]">
               <tr className="hover:bg-[#262626]/30 transition-colors">
                 <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">LLM Inference</td>
-                <td className="py-3.5 px-4 text-[#6B6B6B]">Plaintext API logs & retention</td>
-                <td className="py-3.5 px-4 text-[#B8B8B8]">Private API only (stateless)</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/30 flex items-center gap-1.5">
-                  <span className="text-[#894DEF]">✓</span> NEAR AI Cloud H100 TEE
+                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Plaintext API logs & retention</td>
+                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Private API only (stateless)</td>
+                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40 flex items-center gap-1.5">
+                  <span className="text-[#4ADE80] font-bold">✓</span> NEAR AI Cloud H100 TEE
                 </td>
               </tr>
               <tr className="hover:bg-[#262626]/30 transition-colors">
                 <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">LangGraph Node</td>
-                <td className="py-3.5 px-4 text-[#6B6B6B]">Plaintext cloud RAM</td>
-                <td className="py-3.5 px-4 text-[#B8B8B8]">Leaked on founder VPS</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/30">
-                  <span className="text-[#894DEF]">✓</span> Intel TDX Enclave CVM
+                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Plaintext cloud RAM</td>
+                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Leaked on founder VPS</td>
+                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
+                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> Intel TDX Enclave CVM
                 </td>
               </tr>
               <tr className="hover:bg-[#262626]/30 transition-colors">
                 <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">User Database</td>
-                <td className="py-3.5 px-4 text-[#6B6B6B]">Host datacenter can dump DB</td>
-                <td className="py-3.5 px-4 text-[#B8B8B8]">Plaintext Postgres disk</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/30">
-                  <span className="text-[#894DEF]">✓</span> KMS-Sealed Enclave DB (dstack)
+                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Host datacenter can dump DB</td>
+                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Plaintext Postgres disk</td>
+                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
+                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> KMS-Sealed Enclave DB (dstack)
                 </td>
               </tr>
               <tr className="hover:bg-[#262626]/30 transition-colors">
                 <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">Frontend Host</td>
-                <td className="py-3.5 px-4 text-[#6B6B6B]">Mutable Vercel / Cloudflare DNS</td>
-                <td className="py-3.5 px-4 text-[#B8B8B8]">Centralized domain endpoint</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/30">
-                  <span className="text-[#894DEF]">✓</span> Filecoin + FastFS Pinning
+                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Mutable Vercel / Cloudflare DNS</td>
+                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Centralized domain endpoint</td>
+                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
+                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> Filecoin + FastFS Pinning
                 </td>
               </tr>
               <tr className="hover:bg-[#262626]/30 transition-colors">
                 <td className="py-3.5 px-4 font-bold text-[#FAFAFA]">Payment Trail</td>
-                <td className="py-3.5 px-4 text-[#6B6B6B]">Stripe KYC tracks identity</td>
-                <td className="py-3.5 px-4 text-[#B8B8B8]">Public wallet history indexed</td>
-                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/30">
-                  <span className="text-[#894DEF]">✓</span> NEAR Confidential Intents
+                <td className="py-3.5 px-4 text-[#EF4444] font-medium"><span className="text-[#EF4444] mr-1.5 font-bold">✕</span>Stripe KYC tracks identity</td>
+                <td className="py-3.5 px-4 text-[#FBBF24]"><span className="text-[#FBBF24] mr-1.5 font-bold">⚠</span>Public wallet history indexed</td>
+                <td className="py-3.5 px-4 font-bold text-[#FAFAFA] bg-[#262626]/40">
+                  <span className="text-[#4ADE80] font-bold mr-1.5">✓</span> NEAR Confidential Intents
                 </td>
               </tr>
             </tbody>
@@ -407,18 +451,24 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2E2E2E]">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-none bg-[#894DEF]" />
+              <span className="w-2.5 h-2.5 rounded-none bg-[#4ADE80] animate-pulse" />
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#FAFAFA] tracking-tight">
-                Sovereign Software Storefront
+                Sovereign SaaS & AI Launchpad Directory
               </h2>
             </div>
             <p className="text-xs text-[#B8B8B8] font-mono mt-1">
-              Vote for products, inspect cryptographic hardware TEE attestation, and subscribe via native tripartite escrow.
+              Curated hardware-attested services. Vote for launches, verify cryptographic TEE proofs, and subscribe via native tripartite escrow.
             </p>
           </div>
-          <span className="text-xs font-mono text-[#6B6B6B] hidden sm:inline">
-            {catalog.length} Verified Services Live
-          </span>
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className="px-2.5 py-1 bg-[#171717] border border-[#2E2E2E] text-[#4ADE80] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-none bg-[#4ADE80]" />
+              <span>{catalog.length} Enclaves Active</span>
+            </span>
+            <span className="px-2.5 py-1 bg-[#171717] border border-[#2E2E2E] text-[#894DEF]">
+              NEAR Testnet Verified
+            </span>
+          </div>
         </div>
 
         <ProductHuntLeaderboard
