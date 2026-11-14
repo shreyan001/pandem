@@ -68,13 +68,17 @@ pub struct EscrowState {
 }
 
 #[near(serializers = [json])]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct RawSubscribeMsg {
-    pub product_id: String,
-    pub periods: u64,
+    pub action: Option<String>,
+    pub agreement_id: Option<u64>,
+    pub tier: Option<String>,
     pub tier_id: Option<String>,
+    pub product_id: Option<String>,
+    pub periods: Option<u64>,
     pub subscriber: Option<AccountId>,
     pub refund_to: Option<AccountId>,
+    pub yearly: Option<bool>,
 }
 
 #[near(serializers = [json])]
@@ -142,9 +146,15 @@ impl EscrowContract {
         let id = self.next_product_id;
         self.next_product_id += 1;
 
+        let default_free = U128(0);
         let default_pro = price_per_period;
         let default_max = U128(price_per_period.0.checked_mul(3).unwrap_or(price_per_period.0));
         let tiers = vec![
+            ProductTier {
+                tier_id: "free".to_string(),
+                name: "Free".to_string(),
+                price_per_period: default_free,
+            },
             ProductTier {
                 tier_id: "pro".to_string(),
                 name: "Pro".to_string(),
@@ -195,7 +205,9 @@ impl EscrowContract {
             caller == product.steward || caller == self.owner,
             "Only steward or owner can add tier"
         );
-        require!(price_per_period.0 > 0, "Price must be positive");
+        if tier_id.to_lowercase() != "free" {
+            require!(price_per_period.0 > 0, "Price must be positive");
+        }
         if let Some(existing) = product
             .tiers
             .iter_mut()
@@ -226,7 +238,7 @@ impl EscrowContract {
         product.status = ProductStatus::Active;
     }
 
-    /// NEP-141 token receiver: processes subscription deposit.
+    /// NEP-141 token receiver: processes subscription deposit, upgrade, or renew.
     /// Never panics on bad token or invalid message; returns unused amount to sender.
     pub fn ft_on_transfer(
         &mut self,
@@ -245,16 +257,159 @@ impl EscrowContract {
             Err(_) => return PromiseOrValue::Value(amount),
         };
 
-        let product_id: u64 = match raw_msg.product_id.parse() {
+        // 3. Handle Upgrade: {"action":"upgrade","agreement_id": u64, "tier": String}
+        if let Some("upgrade") = raw_msg.action.as_deref() {
+            let agreement_id = match raw_msg.agreement_id {
+                Some(id) => id,
+                None => return PromiseOrValue::Value(amount),
+            };
+            let target_tier_id = match raw_msg.tier.or(raw_msg.tier_id) {
+                Some(t) => t,
+                None => return PromiseOrValue::Value(amount),
+            };
+
+            let mut agreement = match self.agreements.get(&agreement_id).cloned() {
+                Some(a) => a,
+                None => return PromiseOrValue::Value(amount),
+            };
+            let mut escrow = match self.escrows.get(&agreement_id).cloned() {
+                Some(e) => e,
+                None => return PromiseOrValue::Value(amount),
+            };
+
+            if escrow.refunded {
+                return PromiseOrValue::Value(amount);
+            }
+            if agreement.subscriber != sender_id && agreement.refund_to != sender_id {
+                return PromiseOrValue::Value(amount);
+            }
+
+            let product = match self.products.get(&agreement.product_id) {
+                Some(p) => p,
+                None => return PromiseOrValue::Value(amount),
+            };
+            if product.status != ProductStatus::Active {
+                return PromiseOrValue::Value(amount);
+            }
+
+            let new_tier = match product
+                .tiers
+                .iter()
+                .find(|t| t.tier_id.to_lowercase() == target_tier_id.to_lowercase())
+            {
+                Some(t) => t,
+                None => return PromiseOrValue::Value(amount),
+            };
+
+            let new_price = new_tier.price_per_period.0;
+            let curr_price = agreement.price_per_period.0;
+            if new_price <= curr_price {
+                return PromiseOrValue::Value(amount);
+            }
+
+            let remaining_periods = escrow.funded_periods.saturating_sub(escrow.released_periods);
+            if remaining_periods == 0 {
+                return PromiseOrValue::Value(amount);
+            }
+
+            let diff_per_period = new_price - curr_price;
+            let required_diff = match diff_per_period.checked_mul(remaining_periods as u128) {
+                Some(d) => d,
+                None => return PromiseOrValue::Value(amount),
+            };
+
+            if amount.0 < required_diff {
+                return PromiseOrValue::Value(amount);
+            }
+
+            let unused = amount.0 - required_diff;
+            agreement.tier_id = new_tier.tier_id.clone();
+            agreement.price_per_period = U128(new_price);
+            escrow.balance = U128(escrow.balance.0 + required_diff);
+
+            self.agreements.insert(agreement_id, agreement);
+            self.escrows.insert(agreement_id, escrow);
+
+            env::log_str(&format!(
+                r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"upgraded","data":[{{"agreement_id":{agreement_id},"new_tier":"{target_tier_id}","paid":"{required_diff}"}}]}}"#
+            ));
+
+            return PromiseOrValue::Value(U128(unused));
+        }
+
+        // 4. Handle Renew: {"action":"renew","agreement_id": u64, "periods": u64}
+        if let Some("renew") = raw_msg.action.as_deref() {
+            let agreement_id = match raw_msg.agreement_id {
+                Some(id) => id,
+                None => return PromiseOrValue::Value(amount),
+            };
+            let add_periods = match raw_msg.periods {
+                Some(p) if p > 0 => p,
+                _ => return PromiseOrValue::Value(amount),
+            };
+
+            let agreement = match self.agreements.get(&agreement_id).cloned() {
+                Some(a) => a,
+                None => return PromiseOrValue::Value(amount),
+            };
+            let mut escrow = match self.escrows.get(&agreement_id).cloned() {
+                Some(e) => e,
+                None => return PromiseOrValue::Value(amount),
+            };
+
+            if escrow.refunded {
+                return PromiseOrValue::Value(amount);
+            }
+
+            let product = match self.products.get(&agreement.product_id) {
+                Some(p) => p,
+                None => return PromiseOrValue::Value(amount),
+            };
+            if product.status != ProductStatus::Active {
+                return PromiseOrValue::Value(amount);
+            }
+
+            // Yearly discount: 12 months billed as 10
+            let billable_periods = if add_periods == 12 || raw_msg.yearly.unwrap_or(false) {
+                10
+            } else {
+                add_periods
+            };
+
+            let renew_cost = match agreement.price_per_period.0.checked_mul(billable_periods as u128) {
+                Some(c) => c,
+                None => return PromiseOrValue::Value(amount),
+            };
+
+            if amount.0 < renew_cost {
+                return PromiseOrValue::Value(amount);
+            }
+
+            let unused = amount.0 - renew_cost;
+            escrow.funded_periods += add_periods;
+            escrow.balance = U128(escrow.balance.0 + renew_cost);
+
+            self.escrows.insert(agreement_id, escrow);
+
+            env::log_str(&format!(
+                r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"renewed","data":[{{"agreement_id":{agreement_id},"periods_added":{add_periods},"paid":"{renew_cost}"}}]}}"#
+            ));
+
+            return PromiseOrValue::Value(U128(unused));
+        }
+
+        // 5. Default: Initial Subscribe
+        let product_id: u64 = match raw_msg.product_id.as_deref().unwrap_or("").parse() {
             Ok(n) => n,
             Err(_) => return PromiseOrValue::Value(amount),
         };
 
-        if raw_msg.periods == 0 {
-            return PromiseOrValue::Value(amount);
-        }
+        let periods = match raw_msg.periods {
+            Some(p) if p > 0 => p,
+            _ => return PromiseOrValue::Value(amount),
+        };
 
-        // 3. Validate product
+        // Validate product
         let product = match self.products.get(&product_id) {
             Some(p) => p,
             None => return PromiseOrValue::Value(amount),
@@ -264,10 +419,10 @@ impl EscrowContract {
             return PromiseOrValue::Value(amount);
         }
 
-        // 4. Resolve tier & price
+        // Resolve tier & price
         let tier_id = raw_msg
             .tier_id
-            .clone()
+            .or(raw_msg.tier)
             .unwrap_or_else(|| "pro".to_string());
         let price = if let Some(tier) = product
             .tiers
@@ -279,7 +434,14 @@ impl EscrowContract {
             product.price_per_period.0
         };
 
-        let total_cost = match price.checked_mul(raw_msg.periods as u128) {
+        // Yearly discount: 12 months billed as 10
+        let billable_periods = if periods == 12 || raw_msg.yearly.unwrap_or(false) {
+            10
+        } else {
+            periods
+        };
+
+        let total_cost = match price.checked_mul(billable_periods as u128) {
             Some(c) => c,
             None => return PromiseOrValue::Value(amount),
         };
@@ -311,7 +473,7 @@ impl EscrowContract {
         };
 
         let escrow = EscrowState {
-            funded_periods: raw_msg.periods,
+            funded_periods: periods,
             released_periods: 0,
             balance: U128(total_cost),
             contingency_contributed: U128(0),
@@ -322,11 +484,88 @@ impl EscrowContract {
         self.escrows.insert(agreement_id, escrow);
 
         env::log_str(&format!(
-            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"subscribed","data":[{{"id":{agreement_id},"subscriber":"{subscriber}","product_id":{product_id},"periods":{},"tier_id":"{tier_id}","amount":"{total_cost}"}}]}}"#,
-            raw_msg.periods
+            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"subscribed","data":[{{"id":{agreement_id},"subscriber":"{subscriber}","product_id":{product_id},"periods":{periods},"tier_id":"{tier_id}","amount":"{total_cost}"}}]}}"#
         ));
 
         PromiseOrValue::Value(U128(unused))
+    }
+
+    /// Cancel agreement: stops at the end of the current period and refunds unreleased future periods right away.
+    pub fn cancel(&mut self, agreement_id: u64) -> PromiseOrValue<U128> {
+        let agreement = self.agreements.get(&agreement_id).expect("Agreement not found").clone();
+        let escrow = self.escrows.get_mut(&agreement_id).expect("Escrow not found");
+
+        let caller = env::predecessor_account_id();
+        require!(
+            caller == agreement.subscriber || caller == agreement.refund_to || caller == self.owner,
+            "Only subscriber or owner can cancel agreement"
+        );
+        require!(!escrow.refunded, "Agreement already refunded or cancelled");
+
+        // Stops at the end of the current period:
+        // Current active period is released_periods + 1.
+        let current_period = escrow.released_periods + 1;
+        let future_periods = escrow.funded_periods.saturating_sub(current_period);
+
+        let price_per_period = agreement.price_per_period.0;
+        let refund_amount = std::cmp::min(
+            (future_periods as u128).saturating_mul(price_per_period),
+            escrow.balance.0,
+        );
+
+        let prev_funded = escrow.funded_periods;
+        let prev_balance = escrow.balance.0;
+        escrow.funded_periods = std::cmp::min(escrow.funded_periods, current_period);
+        escrow.balance = U128(escrow.balance.0.saturating_sub(refund_amount));
+
+        let refund_to = agreement.refund_to.clone();
+
+        if refund_amount > 0 {
+            PromiseOrValue::Promise(
+                ext_ft::ext(self.token_id.clone())
+                    .with_attached_deposit(NearToken::from_yoctonear(1))
+                    .with_static_gas(GAS_FOR_FT_TRANSFER)
+                    .ft_transfer(
+                        refund_to,
+                        U128(refund_amount),
+                        Some(format!("pandem cancel refund {agreement_id}")),
+                    )
+                    .then(
+                        Self::ext(env::current_account_id())
+                            .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                            .on_cancel(agreement_id, prev_funded, prev_balance, refund_amount),
+                    ),
+            )
+        } else {
+            env::log_str(&format!(
+                r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"cancelled","data":[{{"agreement_id":{agreement_id},"refunded_amount":"0"}}]}}"#
+            ));
+            PromiseOrValue::Value(U128(0))
+        }
+    }
+
+    #[private]
+    pub fn on_cancel(
+        &mut self,
+        agreement_id: u64,
+        prev_funded: u64,
+        prev_balance: u128,
+        refund_amount: u128,
+        #[callback_result] r: Result<(), PromiseError>,
+    ) -> U128 {
+        if r.is_err() {
+            if let Some(escrow) = self.escrows.get_mut(&agreement_id) {
+                escrow.funded_periods = prev_funded;
+                escrow.balance = U128(prev_balance);
+            }
+            env::log_str("cancel refund failed, rolled back state");
+            return U128(0);
+        }
+
+        env::log_str(&format!(
+            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"cancelled","data":[{{"agreement_id":{agreement_id},"refunded_amount":"{refund_amount}"}}]}}"#
+        ));
+        U128(refund_amount)
     }
 
     /// Product heartbeat posted by authorized heartbeat signer.
@@ -942,5 +1181,137 @@ mod tests {
         let escrow = contract.get_escrow(1).unwrap();
         assert_eq!(escrow.balance.0, 6_000);
         assert_eq!(escrow.funded_periods, 2);
+    }
+
+    // 8. Upgrade tier with prorated difference math
+    #[test]
+    fn test_upgrade_tier_prorated_math() {
+        let (mut contract, _owner, token, _treasury, _steward, agent) = setup_contract();
+
+        // Alice subscribes to Pro (1_000 per period) for 3 periods = 3_000
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token.clone()).build());
+        let msg_sub = r#"{"product_id":"1","periods":3,"tier_id":"pro"}"#;
+        let _ = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(3_000), msg_sub.to_string());
+
+        // Period 1 is heartbeated & released
+        testing_env!(VMContextBuilder::new().predecessor_account_id(agent).build());
+        contract.heartbeat(1, 1, None);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("escrow.testnet".parse().unwrap())
+            .predecessor_account_id("anyone.testnet".parse().unwrap())
+            .build());
+        let _ = contract.release_period(1);
+
+        // Escrow after release: 1 released, 2 remaining periods left. Balance = 2_000
+        let escrow_before = contract.get_escrow(1).unwrap();
+        assert_eq!(escrow_before.released_periods, 1);
+        assert_eq!(escrow_before.balance.0, 2_000);
+
+        // Alice upgrades to Max (3_000 per period).
+        // Diff = 3_000 - 1_000 = 2_000 per period.
+        // Remaining = 2 periods => Prorated required = 2 * 2_000 = 4_000.
+        // Alice attaches 4_500 tUSDC => 500 should be returned as unused.
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token.clone()).build());
+        let msg_upgrade = r#"{"action":"upgrade","agreement_id":1,"tier":"max"}"#;
+        let res = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(4_500), msg_upgrade.to_string());
+        if let PromiseOrValue::Value(unused) = res {
+            assert_eq!(unused.0, 500); // 4500 - 4000 = 500 returned
+        } else {
+            panic!("Expected Value");
+        }
+
+        let agreement = contract.get_agreement(1).unwrap();
+        assert_eq!(agreement.tier_id, "max");
+        assert_eq!(agreement.price_per_period.0, 3_000);
+
+        let escrow_after = contract.get_escrow(1).unwrap();
+        assert_eq!(escrow_after.balance.0, 6_000); // 2_000 + 4_000 = 6_000 (2 periods * 3_000)
+    }
+
+    // 9. Renew agreement with period addition & yearly discount
+    #[test]
+    fn test_renew_agreement() {
+        let (mut contract, _owner, token, _treasury, _steward, _agent) = setup_contract();
+
+        // Initial subscribe: 1 period Pro (1_000)
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token.clone()).build());
+        let msg_sub = r#"{"product_id":"1","periods":1,"tier_id":"pro"}"#;
+        let _ = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(1_000), msg_sub.to_string());
+
+        // Renew 2 months: 2 * 1_000 = 2_000
+        let msg_renew = r#"{"action":"renew","agreement_id":1,"periods":2}"#;
+        let res = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(2_500), msg_renew.to_string());
+        if let PromiseOrValue::Value(unused) = res {
+            assert_eq!(unused.0, 500); // 2500 - 2000 = 500
+        } else {
+            panic!("Expected Value");
+        }
+
+        let escrow = contract.get_escrow(1).unwrap();
+        assert_eq!(escrow.funded_periods, 3);
+        assert_eq!(escrow.balance.0, 3_000);
+
+        // Renew yearly: 12 months billed as 10 (10 * 1_000 = 10_000)
+        let msg_yearly = r#"{"action":"renew","agreement_id":1,"periods":12}"#;
+        let res_y = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(10_000), msg_yearly.to_string());
+        if let PromiseOrValue::Value(unused) = res_y {
+            assert_eq!(unused.0, 0);
+        } else {
+            panic!("Expected Value");
+        }
+
+        let escrow_y = contract.get_escrow(1).unwrap();
+        assert_eq!(escrow_y.funded_periods, 15); // 3 + 12
+        assert_eq!(escrow_y.balance.0, 13_000); // 3_000 + 10_000
+    }
+
+    // 10. Cancel agreement: stops at end of current period and refunds future periods
+    #[test]
+    fn test_cancel_agreement_immediate_refund() {
+        let (mut contract, _owner, token, _treasury, _steward, _agent) = setup_contract();
+
+        // Subscribe for 4 periods Pro (1_000) = 4_000
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token.clone()).build());
+        let msg_sub = r#"{"product_id":"1","periods":4,"tier_id":"pro"}"#;
+        let _ = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(4_000), msg_sub.to_string());
+
+        // Cancel during period 1 (0 periods released).
+        // Current active period is 1. Future periods = 4 - 1 = 3 periods.
+        // Refund amount = 3 * 1_000 = 3_000.
+        // Balance retained for period 1 = 1_000.
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("escrow.testnet".parse().unwrap())
+            .predecessor_account_id("alice.testnet".parse().unwrap())
+            .build());
+
+        let cancel_res = contract.cancel(1);
+        match cancel_res {
+            PromiseOrValue::Promise(_) => {},
+            _ => panic!("Expected Promise for refund transfer"),
+        }
+
+        let escrow = contract.get_escrow(1).unwrap();
+        assert_eq!(escrow.funded_periods, 1);
+        assert_eq!(escrow.balance.0, 1_000);
+
+        // Simulate cancel rollback on transfer failure
+        let failed_res: Result<(), PromiseError> = Err(PromiseError::Failed);
+        let ret = contract.on_cancel(1, 4, 4_000, 3_000, failed_res);
+        assert_eq!(ret.0, 0);
+
+        let escrow_rolled = contract.get_escrow(1).unwrap();
+        assert_eq!(escrow_rolled.funded_periods, 4);
+        assert_eq!(escrow_rolled.balance.0, 4_000);
+    }
+
+    // 11. Free tier configuration
+    #[test]
+    fn test_free_tier_present() {
+        let (contract, _owner, _token, _treasury, _steward, _agent) = setup_contract();
+        let product = contract.get_product(1).unwrap();
+        let free_tier = product.tiers.iter().find(|t| t.tier_id == "free").expect("Free tier must exist");
+        assert_eq!(free_tier.price_per_period.0, 0);
+        assert_eq!(free_tier.name, "Free");
     }
 }

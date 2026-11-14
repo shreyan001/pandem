@@ -15,10 +15,17 @@ interface SubscribeModalProps {
     grace_display: string;
     slug?: string;
   };
+  initialTier?: "free" | "pro" | "max";
+  initialYearly?: boolean;
   onClose: () => void;
 }
 
-export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
+export function SubscribeModal({
+  product,
+  initialTier = "pro",
+  initialYearly = true,
+  onClose,
+}: SubscribeModalProps) {
   const {
     accountId,
     isConnected,
@@ -29,7 +36,9 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
     tokenBalance,
   } = useNearWallet();
 
-  const [periods, setPeriods] = useState<number>(12); // default to 12 (yearly)
+  const [tier, setTier] = useState<"free" | "pro" | "max">(initialTier);
+  const [isYearly, setIsYearly] = useState<boolean>(initialYearly);
+  const [periods, setPeriods] = useState<number>(initialYearly ? 12 : 1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -40,8 +49,12 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
   const [emailSaved, setEmailSaved] = useState<boolean>(false);
 
   // Price calculations in 6-decimal tUSDC (BigInt safe)
-  const pricePerPeriodBigInt = BigInt(product.price_per_period || "5000000");
-  const totalAmountBigInt = pricePerPeriodBigInt * BigInt(periods);
+  const basePricePro = BigInt(product.price_per_period || "5000000");
+  const pricePerPeriodBigInt =
+    tier === "free" ? 0n : tier === "max" ? basePricePro * 3n : basePricePro;
+  const billablePeriods = isYearly ? 10n : BigInt(periods);
+  const totalAmountBigInt =
+    tier === "free" ? 0n : pricePerPeriodBigInt * billablePeriods;
   const totalAmountStr = totalAmountBigInt.toString();
 
   // Split calculations per period (2.5% fee, 30% ops, 20% contingency, 47.5% steward)
@@ -59,7 +72,7 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
   };
 
   const productSlug = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
-  const accessUrl = `https://${productSlug}.pandem.testnet/session?subscriber=${accountId || "wallet"}`;
+  const accessUrl = `https://${productSlug}.pandem.testnet/session?subscriber=${accountId || "wallet"}&tier=${tier}`;
 
   const handleRegisterStorage = async () => {
     try {
@@ -74,6 +87,10 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
   };
 
   const handleSubscribe = async () => {
+    if (tier === "free") {
+      setTxHash("free_access_activated");
+      return;
+    }
     if (!isConnected) {
       await connect();
       return;
@@ -82,7 +99,7 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
     try {
       setIsSubmitting(true);
       setError(null);
-      const hash = await sendSubscribe(product.id, periods, totalAmountStr);
+      const hash = await sendSubscribe(product.id, periods, totalAmountStr, tier);
       setTxHash(hash || "confirmed");
     } catch (e: any) {
       console.error(e);
@@ -255,36 +272,80 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
               </div>
             )}
 
-            {/* Period Selector (Including 12 periods = 1 Year) */}
+            {/* Tier Selector */}
             <div>
               <label className="block text-xs font-mono uppercase text-spectr-muted mb-2 font-medium">
-                Select Pre-Funded Escrow Periods
+                Select Service Tier
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {[
-                  { p: 1, label: "1 Month" },
-                  { p: 3, label: "3 Months" },
-                  { p: 6, label: "6 Months" },
-                  { p: 12, label: "1 Year (Yearly)" },
-                ].map(({ p, label }) => (
+                  { id: "free" as const, label: "Free", price: "$0" },
+                  { id: "pro" as const, label: "Pro", price: "$5/mo" },
+                  { id: "max" as const, label: "Max", price: "$15/mo" },
+                ].map((t) => (
                   <button
-                    key={p}
+                    key={t.id}
                     type="button"
-                    onClick={() => setPeriods(p)}
-                    className={`py-2.5 px-2 rounded-none text-center font-mono text-xs border transition-colors ${
-                      periods === p
+                    onClick={() => setTier(t.id)}
+                    className={`py-2 px-2 text-center font-mono text-xs border transition-colors ${
+                      tier === t.id
                         ? "bg-spectr-surface-raised border-spectr-primary text-spectr-ink font-bold"
-                        : "bg-spectr-canvas border-spectr-hairline text-spectr-body hover:text-spectr-ink hover:border-spectr-hairline"
+                        : "bg-spectr-canvas border-spectr-hairline text-spectr-body hover:text-spectr-ink"
                     }`}
                   >
-                    <div>{label}</div>
-                    <div className="text-xs text-spectr-muted mt-0.5">
-                      {formatTUsdc(pricePerPeriodBigInt * BigInt(p))} tUSDC
-                    </div>
+                    <div>{t.label}</div>
+                    <div className="text-xs text-spectr-muted mt-0.5">{t.price}</div>
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Billing Cycle Toggle */}
+            {tier !== "free" && (
+              <div>
+                <label className="block text-xs font-mono uppercase text-spectr-muted mb-2 font-medium">
+                  Billing Cycle
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsYearly(false);
+                      setPeriods(1);
+                    }}
+                    className={`py-2 px-3 text-center font-mono text-xs border transition-colors ${
+                      !isYearly
+                        ? "bg-spectr-surface-raised border-spectr-primary text-spectr-ink font-bold"
+                        : "bg-spectr-canvas border-spectr-hairline text-spectr-body hover:text-spectr-ink"
+                    }`}
+                  >
+                    <div>Monthly (1 Month)</div>
+                    <div className="text-xs text-spectr-muted mt-0.5">
+                      {formatTUsdc(pricePerPeriodBigInt)} tUSDC
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsYearly(true);
+                      setPeriods(12);
+                    }}
+                    className={`py-2 px-3 text-center font-mono text-xs border transition-colors ${
+                      isYearly
+                        ? "bg-spectr-surface-raised border-spectr-primary text-spectr-ink font-bold"
+                        : "bg-spectr-canvas border-spectr-hairline text-spectr-body hover:text-spectr-ink"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Yearly (12 Months)</span>
+                    </div>
+                    <div className="text-xs text-spectr-success mt-0.5">
+                      Billed as 10 mo ({formatTUsdc(pricePerPeriodBigInt * 10n)} tUSDC)
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Cost & Split Breakdown */}
             <div className="bg-spectr-canvas rounded-none p-4 border border-spectr-hairline space-y-2.5 font-mono">
@@ -368,6 +429,8 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
               >
                 {isSubmitting
                   ? "Submitting to NEAR..."
+                  : tier === "free"
+                  ? "Claim Free Enclave Access"
                   : !isConnected
                   ? "Connect Wallet & Subscribe"
                   : `Subscribe for ${formatTUsdc(totalAmountBigInt)} tUSDC`}

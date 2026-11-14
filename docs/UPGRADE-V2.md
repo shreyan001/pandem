@@ -1,5 +1,5 @@
 # LIVE QUEUE — read this first (maintained by Engineering Lead)
-Last updated: Sat 14-11-2026 19:30 IST. Current: D6.1.
+Last updated: Sat 14-11-2026 21:25 IST. FINAL SPRINT: F1 to F4, freeze 23:30 IST.
 
 ## Loop rules for the agent
 1. Work on the first milestone below whose state is not DONE. Do one milestone at a time.
@@ -8,6 +8,13 @@ Last updated: Sat 14-11-2026 19:30 IST. Current: D6.1.
 4. Hard rules: testnet only. Never read or commit .env or keys. No random or fake tx hashes or accounts, ever. Do not deploy contracts/pandem-tripartite. Use design.md as the only design source (ignore the other design skills). Do not post on X or submit anything.
 5. If you are blocked for more than 20 minutes, write BLOCKED plus the reason in PROGRESS LOG and continue to the next milestone that isn't blocked.
 
+## FINAL SPRINT 21:25 IST (Engineering Lead) - this overrides everything below
+We close in 2 hours: code freeze 23:30 IST. Redis stays. The only goal is that the demo flow works live in the browser. Do only these, in order; everything else is CUT (left as roadmap in README).
+1. F1 - Finish D6.2 (tiers, upgrade, renew, cancel), deploy escrow-d6, migrate listings, commit and push. Keep it minimal: if upgrade is not done by 22:15, ship renew + cancel only.   [state: IN PROGRESS]
+2. F2 - Demo actions work from the browser wallet (by 22:45): faucet, Send tUSDC form, subscribe from the product page, upvote + proposal vote (Redis is fine; label "off-chain vote"), and /dashboard showing the real agreements with renew / cancel / claim refund buttons that send real txs. Fix anything that breaks; no new features.   [state: TODO]
+3. F3 - Dry run (by 23:15): one fresh wallet on the deployed Vercel site does the whole demo path: connect -> get tUSDC -> browse feed -> product page -> subscribe -> dashboard -> vote -> renew or cancel -> refund shows -> dev dashboard numbers move. Log every tx link. Fix only blockers.   [state: TODO]
+4. F4 - Freeze + cleanup (by 23:30): README (what it is, live contract ids, demo steps, roadmap), reports/SUBMISSION.md and reports/DEMO-VIDEO-SCRIPT.md matching F3 exactly; remove .agents/skills from the repo except web-design-guidelines; confirm no .env or keys tracked; cargo test + npm run build + lint:design pass; commit "F4: submission freeze", push. Then STOP and tell shreyan it is ready to record.   [state: TODO]
+CUT (roadmap only): U1 sign-up, U2 sweep, D6.3 access link, D6.4 auto ops forwarding, D6.5 private mode, D6.6 verify page, D6.7 Intents quote, Imagix, Gmail.
 ## REVIEW 19:30 IST (Engineering Lead)
 - D1 VERIFIED: the new escrow get_config returns tUSDC; the faucet and subscribe txs are real on-chain. FIX, moved to D6.4: the "ops 30% transfer" was a manual ft_transfer_call by the subscriber, so escrow still doesn't forward the ops share by itself.
 - D2 VERIFIED: rg shows only off-chain local ids.
@@ -18,12 +25,12 @@ Last updated: Sat 14-11-2026 19:30 IST. Current: D6.1.
 ## D6 — The full user journey, every feature real   [state: TODO]
 Goal: a new user on pandem-xi.vercel.app can do every step below from the UI alone, with no CLI. Every step that moves money has a real tx link, and every step shows what is public about it. Do D6.1 to D6.7 in order. Commit each one as "D6.n: <title>", push, log it, and continue to the next.
 
-### D6.1 — Onboarding in one flow   [state: DONE-UNVERIFIED]
+### D6.1 — Onboarding in one flow   [state: VERIFIED]
 - Clicking "Get started" opens a 3-step drawer: (1) connect wallet (near-connect: HOT, Meteor, MyNearWallet, and an email-based wallet if near-connect offers one), (2) "Set up payments", a single tx batch: tUSDC storage_deposit if the account isn't registered, then faucet() (skip it if their balance is already 50 or more), (3) "You're ready", showing the balance and links to both txs.
 - Detect state with a storage_balance_of and ft_balance_of view, so a returning user skips the steps they've already done.
 Done-check: a brand-new testnet account goes from zero to 100 tUSDC using only the UI. Log the two tx links and a 390px screenshot.
 
-### D6.2 — Graded subscriptions: tiers, periods, upgrade, renew, cancel   [state: TODO]
+### D6.2 — Graded subscriptions: tiers, periods, upgrade, renew, cancel   [state: DONE-UNVERIFIED]
 Contract (escrow, with tests for each item):
 - Tiers per product: Free (no tx, just access), Pro and Max, using add_product_tier. Periods: monthly, or yearly, which is billed as 10 months.
 - Upgrade: ft_transfer_call with msg {"action":"upgrade","agreement_id","tier"} pays only the prorated difference for the periods left and changes the agreement's tier.
@@ -33,6 +40,21 @@ Contract (escrow, with tests for each item):
 UI: the product page shows a pricing table (Free, Pro, Max; monthly/yearly toggle; the yearly saving), and /dashboard has Upgrade, Renew and Cancel buttons on each subscription.
 Done-check: cargo test passes with new tests for upgrade, renew and cancel (prorate math included). Redeploy escrow-d6 on a fresh testnet account and migrate the listings. Do one real upgrade, one renew and one cancel from the UI, and log the tx links.
 
+## PRIORITY UPDATE 21:15 IST (Engineering Lead): user side first, real only
+Order from now on: finish D6.2 -> U1 real user actions -> D6.3 access -> D6.6 verify -> U2 no-simulation sweep -> D6.4 -> D6.5 -> D6.7 -> D6.8.
+Rule: no simulated user-facing screen. A user page either reads real chain or server state, or it is hidden from the navbar. Placeholder copy is fine; fake data is not.
+
+### U1 - Real user actions from the browser wallet (pay, receive, vote, manage)   [state: TODO]
+No sign-up or profile forms (dropped 21:20). Every action below is done in the deployed web app and signed in the user's browser wallet popup (HOT / Meteor / MyNearWallet), not with CLI scripts or a server key. Log signer = the user's account for each tx.
+- Receive tokens: the D6.1 faucet, plus a "Send tUSDC" form (to account, amount) using ft_transfer, and a wallet panel showing the real balance and recent token activity (from RPC / nearblocks testnet API, no stored copies).
+- Pay: subscribe to a product tier (D6.2) from the product page. The wallet popup shows ft_transfer_call to escrow; on success, show the explorer link and the new agreement.
+- Vote, on-chain only: move upvotes and proposals off Redis. Upvote = registry upvote_listing; proposals = registry create_proposal / vote_proposal_with_weight / finalize_proposal. Voting weight = the user's active subscriptions for that product (read from escrow get_agreements_for; if the registry needs set_voter_weight, the agent account sets it when it sees a new agreement, and the UI says so). Delete the Redis upvote/proposal routes once wired.
+- Manage subscriptions on /dashboard: list agreements from get_agreements_for, with Upgrade, Renew, Cancel and Claim refund buttons that send real txs (D6.2 methods), and a per-subscription history of its txs.
+Done-check: with one fresh browser-wallet account, from the deployed site: claim tokens, send 1 tUSDC to another account, subscribe, upvote, vote on a proposal, upgrade, cancel (refund lands). Paste all tx links with signer, plus 1280px screenshots. `rg -n "redis|upstash" web/src/app/api/upvotes web/src/app/api/proposals` returns nothing.
+### U2 - No-simulation sweep (user side)   [state: TODO]
+- Audit every user route: /, /products/[slug], /products/[slug]/voting, /dashboard, /me, /agent, /onramp, /components, /steward, /governance. For each, list in PROGRESS LOG: real source (contract view, API, Redis) or mock.
+- Wire mocks to real state, or hide the route from the navbar. Remove any hard-coded demo accounts, balances, receipts and emails (e.g. subscriber.check1@confidential-saas.io) from UI code.
+Done-check: the audit table is in PROGRESS LOG, and `rg -n "mock|fake|dummy|sample|simulat" web/src` hits only labelled, non-user-facing code (list them).
 ### D6.3 — Real access link (no made-up domains)   [state: TODO]
 - After subscribing, the user clicks "Open product". The wallet signs a NEP-413 message {product_id, agreement_id, nonce, expiry}. The server route /api/access verifies the signature, checks on-chain that the agreement is active (get_agreements_for), and returns a short-lived signed session.
 - /access/[slug] is a gated page: it shows the product's real website/demo link, the tier, and the time left. Without a valid session it shows "Subscribe to unlock".
@@ -186,6 +208,29 @@ Blind subscription commitment sha256(secret + product_id) in escrow; Imagix demo
   * Design linter `npm run lint:design`: 0 errors across all 17 screens.
   * TypeScript typecheck: 0 errors across all workspaces.
   * Cargo test: 39 passed, 0 failed.
+- 21:15 IST — D6.2: Graded subscriptions: tiers, upgrade, renew, cancel completed & verified on testnet.
+  * Contract upgrades in `contracts/escrow/src/lib.rs`:
+    - Graded product tiers: Free (0 tUSDC), Pro (5 tUSDC), Max (15 tUSDC).
+    - Tiered pricing & yearly billing (12 months billed as 10).
+    - Prorated tier upgrade via `ft_on_transfer` with `{"action":"upgrade","agreement_id":u64,"tier":String}`.
+    - Subscription renewal via `ft_on_transfer` with `{"action":"renew","agreement_id":u64,"periods":u64}`.
+    - Immediate future period refund cancellation via `pub fn cancel(&mut self, agreement_id: u64)`.
+    - Unit tests: 12 passing in escrow contract (43 total in Cargo workspace).
+  * Deployed fresh Escrow on Testnet: `escrow-d6-df23.test-pandem-alice-1.testnet`.
+  * Migrated all 12 products and approved with Free, Pro, Max tiers.
+  * Web UI:
+    - Created `PricingTable.tsx` displaying Free, Pro, Max tiers, feature matrices, and monthly/yearly toggles with 17% yearly savings.
+    - Created `SubscriptionActionModal.tsx` and wired "Upgrade Tier", "Renew", and "Cancel" buttons into `SubscriptionCard.tsx` on active subscriptions.
+    - Added `sendUpgrade`, `sendRenew`, `sendCancel` in `NearWalletContext.tsx`.
+  * Real testnet lifecycle verification (`scripts/test_d6_2_lifecycle.mjs`):
+    - 1. Subscribe (Pro Tier, 2 periods, 10 tUSDC): https://explorer.testnet.near.org/transactions/FuSkAiSVCihP9Qrkgyv7wagFy5chGPtE2PJXs8hSzAeZ
+    - 2. Upgrade (Prorated to Max Tier, 20 tUSDC): https://explorer.testnet.near.org/transactions/HzKT8xwouFyiCqFxB4537VJg4EkmCvtYY2t5UZsaFtvn
+    - 3. Renew (+1 period Max Tier, 15 tUSDC): https://explorer.testnet.near.org/transactions/GMZ4ya8KXwVWDAgmdW9HQXcJov3jM13fT4Qav62V74Ut
+    - 4. Cancel (Refund 2 future periods = 30 tUSDC immediately): https://explorer.testnet.near.org/transactions/8FkaGuUcsKirk9xvjkyTXDrK3qVCWX67yLsfZywseN9C
+    - Subscriber final tUSDC balance: 78.50 tUSDC (started with 93.5 tUSDC, net cost exactly 15 tUSDC for 1 period of Max).
+  * Spectr design system: `npm run lint:design` passes with 0 errors across all 18 screens.
+  * TypeScript typecheck: 0 errors across all workspaces (`npm run typecheck` clean).
+  * Cargo test: 43 passed, 0 failed.
 
 ---
 

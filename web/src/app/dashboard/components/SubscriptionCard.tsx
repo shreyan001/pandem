@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Agreement, Escrow } from "@pandem/shared";
 import { AbstractLogo } from "../../../components/AbstractLogo";
 import { Badge, Button, Card } from "../../../ui";
+import { SubscriptionActionModal, ActionType } from "./SubscriptionActionModal";
 
 export interface AgreementItem {
   id: number;
@@ -31,6 +32,7 @@ export interface SubscriptionCardProps {
   claimLoadingId: number | null;
   onClaimRefund: (id: number) => void;
   onOpenBugModal: (slug: string) => void;
+  onActionComplete?: () => void;
 }
 
 export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
@@ -38,7 +40,9 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
   claimLoadingId,
   onClaimRefund,
   onOpenBugModal,
+  onActionComplete,
 }) => {
+  const [activeAction, setActiveAction] = useState<ActionType | null>(null);
   const remainingPeriods = Math.max(0, item.escrow.funded_periods - item.escrow.released_periods);
   const formattedPrice = (Number(item.agreement.price_per_period) / 1e6).toFixed(2);
   const formattedEscrowBalance = (Number(item.escrow.balance) / 1e6).toFixed(2);
@@ -76,7 +80,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
           </div>
         </div>
 
-        {/* Actions: Product Page, Bounty, 1-Click Refund */}
+        {/* Actions: Product Details, Bug Bounty, Upgrade, Renew, Cancel, Refund */}
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={`/products/${productSlug}`}
@@ -93,6 +97,41 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
           >
             Steward Bounty ⚙
           </button>
+
+          {!item.escrow.refunded && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveAction("upgrade")}
+                title="Upgrade to Max tier with prorated billing"
+              >
+                Upgrade Tier
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveAction("renew")}
+                title="Renew subscription period"
+              >
+                Renew
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-spectr-danger hover:text-spectr-danger border border-spectr-danger/40"
+                onClick={() => setActiveAction("cancel")}
+                title="Cancel subscription and refund remaining unreleased periods"
+              >
+                Cancel
+              </Button>
+            </>
+          )}
 
           {/* 1-Click 7-Day Refund Claim Mechanism */}
           {!item.escrow.refunded && (
@@ -222,6 +261,21 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
           </span>
         </div>
       </div>
+
+      <SubscriptionActionModal
+        isOpen={activeAction !== null}
+        action={activeAction}
+        agreementId={item.id}
+        productName={item.productName}
+        currentTier={item.agreement.tier_id || item.tierName || "pro"}
+        pricePerPeriodYocto={item.agreement.price_per_period}
+        remainingPeriods={remainingPeriods}
+        onClose={() => setActiveAction(null)}
+        onActionComplete={() => {
+          setActiveAction(null);
+          if (onActionComplete) onActionComplete();
+        }}
+      />
     </Card>
   );
 };

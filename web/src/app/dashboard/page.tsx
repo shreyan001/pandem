@@ -327,6 +327,7 @@ export default function SubscriberDashboardPage() {
               claimLoadingId={claimLoadingId}
               onClaimRefund={handleClaimRefund}
               onOpenBugModal={handleOpenBugModal}
+              onActionComplete={fetchAgreements}
             />
           ))
         )}

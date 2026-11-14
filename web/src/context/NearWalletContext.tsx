@@ -19,7 +19,10 @@ interface NearWalletContextType {
   registerStorage: () => Promise<string | null>;
   claimFaucet: () => Promise<string | null>;
   setupPaymentsBatch: () => Promise<{ batchTx: string | null; storageTx: string | null; faucetTx: string | null }>;
-  sendSubscribe: (productId: string, periods: number, amountYocto: string) => Promise<string | null>;
+  sendSubscribe: (productId: string, periods: number, amountYocto: string, tierId?: string) => Promise<string | null>;
+  sendUpgrade: (agreementId: number, targetTier: string, amountUnits: string) => Promise<string | null>;
+  sendRenew: (agreementId: number, periods: number, amountUnits: string) => Promise<string | null>;
+  sendCancel: (agreementId: number) => Promise<string | null>;
 }
 
 const NearWalletContext = createContext<NearWalletContextType | null>(null);
@@ -329,12 +332,14 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
   const sendSubscribe = async (
     productId: string,
     periods: number,
-    amountYocto: string
+    amountYocto: string,
+    tierId?: string
   ): Promise<string | null> => {
     if (!connector || !accountId) return null;
     const msg = JSON.stringify({
       product_id: productId,
       periods,
+      tier_id: tierId || "pro",
       subscriber: accountId,
       refund_to: accountId,
     });
@@ -370,6 +375,123 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const sendUpgrade = async (
+    agreementId: number,
+    targetTier: string,
+    amountUnits: string
+  ): Promise<string | null> => {
+    if (!connector || !accountId) return null;
+    const msg = JSON.stringify({
+      action: "upgrade",
+      agreement_id: agreementId,
+      tier: targetTier,
+    });
+
+    try {
+      setWalletError(null);
+      const wallet = await connector.wallet();
+      const outcome: any = await wallet.signAndSendTransaction({
+        receiverId: PANDEM_TOKEN_ID,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "ft_transfer_call",
+              args: {
+                receiver_id: PANDEM_ESCROW_ID,
+                amount: amountUnits,
+                msg,
+              },
+              gas: "100000000000000",
+              deposit: "1",
+            },
+          },
+        ],
+      });
+      await refreshBalances();
+      return outcome?.transaction?.hash ?? "submitted";
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      console.warn("Upgrade notice:", msg);
+      setWalletError(`Upgrade notice: ${msg}`);
+      return null;
+    }
+  };
+
+  const sendRenew = async (
+    agreementId: number,
+    periods: number,
+    amountUnits: string
+  ): Promise<string | null> => {
+    if (!connector || !accountId) return null;
+    const msg = JSON.stringify({
+      action: "renew",
+      agreement_id: agreementId,
+      periods,
+    });
+
+    try {
+      setWalletError(null);
+      const wallet = await connector.wallet();
+      const outcome: any = await wallet.signAndSendTransaction({
+        receiverId: PANDEM_TOKEN_ID,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "ft_transfer_call",
+              args: {
+                receiver_id: PANDEM_ESCROW_ID,
+                amount: amountUnits,
+                msg,
+              },
+              gas: "100000000000000",
+              deposit: "1",
+            },
+          },
+        ],
+      });
+      await refreshBalances();
+      return outcome?.transaction?.hash ?? "submitted";
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      console.warn("Renew notice:", msg);
+      setWalletError(`Renew notice: ${msg}`);
+      return null;
+    }
+  };
+
+  const sendCancel = async (agreementId: number): Promise<string | null> => {
+    if (!connector || !accountId) return null;
+    try {
+      setWalletError(null);
+      const wallet = await connector.wallet();
+      const outcome: any = await wallet.signAndSendTransaction({
+        receiverId: PANDEM_ESCROW_ID,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "cancel",
+              args: {
+                agreement_id: agreementId,
+              },
+              gas: "100000000000000",
+              deposit: "0",
+            },
+          },
+        ],
+      });
+      await refreshBalances();
+      return outcome?.transaction?.hash ?? "submitted";
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      console.warn("Cancel notice:", msg);
+      setWalletError(`Cancel notice: ${msg}`);
+      return null;
+    }
+  };
+
   return (
     <NearWalletContext.Provider
       value={{
@@ -388,6 +510,9 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
         claimFaucet,
         setupPaymentsBatch,
         sendSubscribe,
+        sendUpgrade,
+        sendRenew,
+        sendCancel,
       }}
     >
       {children}

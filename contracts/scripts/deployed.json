@@ -1,6 +1,6 @@
 {
   "token_id": "pandem-tusdc-46cee5ca.testnet",
-  "escrow_id": "pandem-escrow-d1-8f199e48.testnet",
+  "escrow_id": "escrow-d6-df23.test-pandem-alice-1.testnet",
   "budget_id": "pandem-budget-d1-8f199e48.testnet",
   "registry_id": "pandem-registry-v2-46cee5ca.testnet",
   "steward_id": "pandem-steward-46cee5ca.testnet",
@@ -8,5 +8,5 @@
   "agent_id": "pandem-agent-46cee5ca.testnet",
   "product_id": 1,
   "price_per_period": "5000000",
-  "deployed_at": "2026-11-14T10:37:20.112Z"
+  "deployed_at": "2026-11-14T14:52:54.463Z"
 }

@@ -8,6 +8,7 @@ import { TreasuryAutopaymentCard } from "../../../components/product/TreasuryAut
 import { DeveloperActivityCard } from "../../../components/product/DeveloperActivityCard";
 import { SubscriberRequestsCard } from "../../../components/product/SubscriberRequestsCard";
 import { SubscriberBugCenterCard } from "../../../components/product/SubscriberBugCenterCard";
+import { PricingTable } from "../../../components/product/PricingTable";
 import { SubscribeModal } from "../../../components/SubscribeModal";
 import { Badge, Card, CardHeader, CardTitle, CardContent } from "../../../ui";
 
@@ -17,6 +18,14 @@ export interface ProductDetailClientProps {
 
 export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product }) => {
   const [isSubscribeOpen, setIsSubscribeOpen] = useState<boolean>(false);
+  const [selectedTier, setSelectedTier] = useState<"free" | "pro" | "max">("pro");
+  const [selectedYearly, setSelectedYearly] = useState<boolean>(true);
+
+  const handleSelectTier = (tier: "free" | "pro" | "max", yearly: boolean) => {
+    setSelectedTier(tier);
+    setSelectedYearly(yearly);
+    setIsSubscribeOpen(true);
+  };
 
   // Convert to CatalogItem format for SubscribeModal
   const catalogItem: CatalogItem = {
@@ -77,6 +86,12 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
         </p>
       </Card>
 
+      {/* Graded Subscription Pricing Table */}
+      <PricingTable
+        productName={product.name}
+        onSelectTier={handleSelectTier}
+      />
+
       {/* On-Chain Treasury & Autopayment System Card */}
       <TreasuryAutopaymentCard product={product} />
 
@@ -100,6 +115,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       {isSubscribeOpen && (
         <SubscribeModal
           product={catalogItem}
+          initialTier={selectedTier}
+          initialYearly={selectedYearly}
           onClose={() => setIsSubscribeOpen(false)}
         />
       )}

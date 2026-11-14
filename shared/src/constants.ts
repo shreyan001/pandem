@@ -1,5 +1,5 @@
 export const PANDEM_ESCROW_ID =
-  process.env["PANDEM_ESCROW_ID"] ?? "pandem-escrow-d1-8f199e48.testnet";
+  process.env["PANDEM_ESCROW_ID"] ?? "escrow-d6-df23.test-pandem-alice-1.testnet";
 
 export const PANDEM_TOKEN_ID =
   process.env["PANDEM_TOKEN_ID"] ?? "pandem-tusdc-46cee5ca.testnet";
