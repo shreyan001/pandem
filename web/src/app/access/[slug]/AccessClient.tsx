@@ -187,6 +187,38 @@ export const AccessClient: React.FC<AccessClientProps> = ({ slug }) => {
     }
   };
 
+  // 4. Unlock with Private Client Secret
+  const handleUnlockWithSecret = async (secret: string) => {
+    try {
+      setIsSigning(true);
+      setError(null);
+
+      const res = await fetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: secret.trim(), slug }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.token) {
+        throw new Error(data.error || "Invalid secret or no active private subscription found");
+      }
+
+      sessionStorage.setItem(`pandem_access_token_${slug}`, data.token);
+      setActiveSession({
+        session: data.session,
+        product: data.product,
+        token: data.token,
+      });
+      setChallengeData(null);
+    } catch (err: any) {
+      console.warn("Secret unlock error:", err);
+      setError(err?.message || "Failed to unlock with private secret");
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
   const handleClearSession = () => {
     sessionStorage.removeItem(`pandem_access_token_${slug}`);
     setActiveSession(null);
@@ -264,11 +296,13 @@ export const AccessClient: React.FC<AccessClientProps> = ({ slug }) => {
       {/* Challenge Signing View */}
       {!isLoading && !activeSession && challengeData && accountId && (
         <AccessChallengeView
+          slug={slug}
           productName={product?.name || slug}
           accountId={accountId}
           agreement={challengeData.agreements[0]}
           challenge={challengeData.challenge}
           onSignChallenge={handleSignChallenge}
+          onUnlockWithSecret={handleUnlockWithSecret}
           isSigning={isSigning}
           error={error}
         />
@@ -280,6 +314,9 @@ export const AccessClient: React.FC<AccessClientProps> = ({ slug }) => {
           product={product}
           accountId={accountId}
           onConnectWallet={connect}
+          onUnlockWithSecret={handleUnlockWithSecret}
+          isVerifyingSecret={isSigning}
+          secretError={error}
           reason={lockedReason}
         />
       )}

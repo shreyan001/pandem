@@ -19,7 +19,7 @@ interface NearWalletContextType {
   registerStorage: () => Promise<string | null>;
   claimFaucet: () => Promise<string | null>;
   setupPaymentsBatch: () => Promise<{ batchTx: string | null; storageTx: string | null; faucetTx: string | null }>;
-  sendSubscribe: (productId: string, periods: number, amountYocto: string, tierId?: string) => Promise<string | null>;
+  sendSubscribe: (productId: string, periods: number, amountYocto: string, tierId?: string, commitment?: string) => Promise<string | null>;
   sendUpgrade: (agreementId: number, targetTier: string, amountUnits: string) => Promise<string | null>;
   sendRenew: (agreementId: number, periods: number, amountUnits: string) => Promise<string | null>;
   sendCancel: (agreementId: number) => Promise<string | null>;
@@ -334,16 +334,26 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     productId: string,
     periods: number,
     amountYocto: string,
-    tierId?: string
+    tierId?: string,
+    commitment?: string
   ): Promise<string | null> => {
     if (!connector || !accountId) return null;
-    const msg = JSON.stringify({
-      product_id: productId,
-      periods,
-      tier_id: tierId || "pro",
-      subscriber: accountId,
-      refund_to: accountId,
-    });
+    const msg = commitment
+      ? JSON.stringify({
+          action: "subscribe",
+          product_id: productId.toString(),
+          commitment,
+          tier: tierId || "pro",
+          tier_id: tierId || "pro",
+          periods,
+        })
+      : JSON.stringify({
+          product_id: productId,
+          periods,
+          tier_id: tierId || "pro",
+          subscriber: accountId,
+          refund_to: accountId,
+        });
 
     try {
       setWalletError(null);

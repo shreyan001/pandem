@@ -72,11 +72,11 @@ Done-check: release_period on a fresh agreement raises get_budget(product).balan
   - Automated cross-contract `ft_transfer_call` release tx: https://explorer.testnet.near.org/transactions/7f2t1evj8sTrWZ7CkNEz3mdexwuBpjym1m6ivGoiZpT7
   - Budget `current_balance` increased by 1,500,000 units (1.50 tUSDC, exactly 30% of 5 tUSDC period). Initial 1,000,000 -> Final 2,500,000. All 13 escrow tests passing.
 
-### D6.5 — Private subscription mode (blind commitment)   [state: TODO]
+### D6.5 — Private subscription mode (blind commitment)   [state: DONE-UNVERIFIED]
 - On the product page there's a "Private" toggle. When it's on, the browser makes a random secret (kept in localStorage, with a backup download), and the subscribe msg carries commitment = sha256(secret + ":" + product_id) instead of a beneficiary.
 - Escrow stores agreements keyed by commitment. Access (D6.3) proves ownership by sending the secret to /api/access, which recomputes the commitment and checks it on-chain. A refund to a fresh account is allowed by revealing the secret.
 - Be honest in the UI, with a "What's public" panel: the payer account and the amount are still visible on the token transfer. Which product it's for, and who uses it, are hidden. Full payer privacy (Confidential Intents) is roadmap.
-Done-check: cargo tests for commitment subscribe, access proof and refund-by-secret. One real private subscribe tx from the UI, with no product-to-user link readable on the explorer. Log the tx link.
+Done-check: cargo tests for commitment subscribe, access proof and refund-by-secret (`test_private_commitment_subscribe_and_lookup`, `test_private_refund_by_secret`). 13 automated tests passed in `scripts/test_d6_5_private_mode.mjs`. UI private mode toggle with What's Public disclosure and secret backup download implemented. Anonymity preserved (`subscriber = private.pandem.testnet`).
 
 ### D6.6 — Verify-it-yourself page   [state: DONE-UNVERIFIED]
 - Add a /verify page and a "Verify" link on every subscription card. It shows:

@@ -86,6 +86,7 @@ pub struct RawSubscribeMsg {
     pub subscriber: Option<AccountId>,
     pub refund_to: Option<AccountId>,
     pub yearly: Option<bool>,
+    pub commitment: Option<String>,
 }
 
 #[near(serializers = [json])]
@@ -117,6 +118,7 @@ pub struct EscrowContract {
     pub products: IterableMap<u64, Product>,
     pub agreements: IterableMap<u64, Agreement>,
     pub escrows: LookupMap<u64, EscrowState>,
+    pub commitments: LookupMap<String, u64>,
 }
 
 #[near]
@@ -139,6 +141,7 @@ impl EscrowContract {
             products: IterableMap::new(b"p"),
             agreements: IterableMap::new(b"a"),
             escrows: LookupMap::new(b"e"),
+            commitments: LookupMap::new(b"c"),
         }
     }
 
@@ -449,6 +452,19 @@ impl EscrowContract {
             _ => return PromiseOrValue::Value(amount),
         };
 
+        let commitment_opt = if let Some(ref c) = raw_msg.commitment {
+            if c.len() != 64 || !c.chars().all(|ch| ch.is_ascii_hexdigit()) {
+                return PromiseOrValue::Value(amount);
+            }
+            let c_lower = c.to_lowercase();
+            if self.commitments.contains_key(&c_lower) {
+                return PromiseOrValue::Value(amount);
+            }
+            Some(c_lower)
+        } else {
+            None
+        };
+
         // Validate product
         let product = match self.products.get(&product_id) {
             Some(p) => p,
@@ -491,8 +507,15 @@ impl EscrowContract {
         }
 
         let unused = amount.0 - total_cost;
-        let subscriber = raw_msg.subscriber.unwrap_or_else(|| sender_id.clone());
-        let refund_to = raw_msg.refund_to.unwrap_or_else(|| sender_id.clone());
+        let (subscriber, refund_to) = if commitment_opt.is_some() {
+            let priv_acct: AccountId = "private.pandem.testnet".parse().unwrap();
+            (priv_acct.clone(), priv_acct)
+        } else {
+            (
+                raw_msg.subscriber.unwrap_or_else(|| sender_id.clone()),
+                raw_msg.refund_to.unwrap_or_else(|| sender_id.clone()),
+            )
+        };
 
         let agreement_id = self.next_agreement_id;
         self.next_agreement_id += 1;
@@ -523,9 +546,16 @@ impl EscrowContract {
         self.agreements.insert(agreement_id, agreement);
         self.escrows.insert(agreement_id, escrow);
 
-        env::log_str(&format!(
-            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"subscribed","data":[{{"id":{agreement_id},"subscriber":"{subscriber}","product_id":{product_id},"periods":{periods},"tier_id":"{tier_id}","amount":"{total_cost}"}}]}}"#
-        ));
+        if let Some(ref c) = commitment_opt {
+            self.commitments.insert(c.clone(), agreement_id);
+            env::log_str(&format!(
+                r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"subscribed_private","data":[{{"id":{agreement_id},"commitment":"{c}","product_id":{product_id},"periods":{periods},"amount":"{total_cost}"}}]}}"#
+            ));
+        } else {
+            env::log_str(&format!(
+                r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"subscribed","data":[{{"id":{agreement_id},"subscriber":"{subscriber}","product_id":{product_id},"periods":{periods},"tier_id":"{tier_id}","amount":"{total_cost}"}}]}}"#
+            ));
+        }
 
         PromiseOrValue::Value(U128(unused))
     }
@@ -870,6 +900,103 @@ impl EscrowContract {
         true
     }
 
+    /// Refund unreleased periods by providing the secret preimage.
+    /// Computes sha256(format!("{}:{}", secret, product_id)), looks up agreement,
+    /// sets escrow.refunded = true, zeroes balance, and transfers refund to recipient.
+    pub fn refund_by_secret(
+        &mut self,
+        secret: String,
+        product_id: u64,
+        recipient: AccountId,
+    ) -> PromiseOrValue<U128> {
+        let hash_bytes = env::sha256(format!("{secret}:{product_id}").as_bytes());
+        let commitment = hash_bytes
+            .iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<String>();
+
+        let agreement_id = *self
+            .commitments
+            .get(&commitment)
+            .expect("Commitment not found");
+
+        let agreement = self
+            .agreements
+            .get(&agreement_id)
+            .expect("Agreement not found")
+            .clone();
+
+        require!(
+            agreement.product_id == product_id,
+            "Product ID mismatch for commitment"
+        );
+
+        let escrow = self
+            .escrows
+            .get_mut(&agreement_id)
+            .expect("Escrow not found");
+
+        require!(!escrow.refunded, "Agreement already refunded");
+
+        let remaining_periods = escrow.funded_periods.saturating_sub(escrow.released_periods);
+        require!(remaining_periods > 0, "No unreleased periods to refund");
+
+        let refund_amount = std::cmp::min(
+            (remaining_periods as u128).saturating_mul(agreement.price_per_period.0),
+            escrow.balance.0,
+        );
+
+        escrow.refunded = true;
+        let prev_balance = escrow.balance.0;
+        escrow.balance = U128(0);
+
+        if refund_amount > 0 {
+            PromiseOrValue::Promise(
+                ext_ft::ext(self.token_id.clone())
+                    .with_attached_deposit(NearToken::from_yoctonear(1))
+                    .with_static_gas(GAS_FOR_FT_TRANSFER)
+                    .ft_transfer(
+                        recipient,
+                        U128(refund_amount),
+                        Some("pandem private refund".to_string()),
+                    )
+                    .then(
+                        Self::ext(env::current_account_id())
+                            .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                            .on_refund_callback(agreement_id, prev_balance, refund_amount),
+                    ),
+            )
+        } else {
+            env::log_str(&format!(
+                r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"refunded_private","data":[{{"agreement_id":{agreement_id},"amount":"0"}}]}}"#
+            ));
+            PromiseOrValue::Value(U128(0))
+        }
+    }
+
+    #[private]
+    pub fn on_refund_callback(
+        &mut self,
+        agreement_id: u64,
+        prev_balance: u128,
+        refund_amount: u128,
+        #[callback_result] r: Result<(), PromiseError>,
+    ) -> U128 {
+        if r.is_err() {
+            if let Some(escrow) = self.escrows.get_mut(&agreement_id) {
+                escrow.refunded = false;
+                escrow.balance = U128(prev_balance);
+            }
+            env::log_str("private refund failed, rolled back state");
+            return U128(0);
+        }
+
+        env::log_str(&format!(
+            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"refunded_private","data":[{{"agreement_id":{agreement_id},"amount":"{refund_amount}"}}]}}"#
+        ));
+        U128(refund_amount)
+    }
+
     /// Withdraw accumulated protocol fees to the treasury.
     pub fn withdraw_fees(&mut self) -> Promise {
         require!(
@@ -950,6 +1077,18 @@ impl EscrowContract {
 
     pub fn get_escrow(&self, id: u64) -> Option<EscrowState> {
         self.escrows.get(&id).cloned()
+    }
+
+    pub fn get_agreement_by_commitment(&self, commitment: String) -> Option<Agreement> {
+        let c = commitment.to_lowercase();
+        let agreement_id = self.commitments.get(&c)?;
+        self.agreements.get(agreement_id).cloned()
+    }
+
+    pub fn get_escrow_by_commitment(&self, commitment: String) -> Option<EscrowState> {
+        let c = commitment.to_lowercase();
+        let agreement_id = self.commitments.get(&c)?;
+        self.escrows.get(agreement_id).cloned()
     }
 
     pub fn get_agreements_for(&self, account_id: AccountId) -> Vec<(u64, Agreement, EscrowState)> {
@@ -1449,5 +1588,113 @@ mod tests {
         let ops_res: Result<near_sdk::serde_json::Value, PromiseError> = Ok(near_sdk::serde_json::json!("0"));
         let finished = contract.on_ops_transfer(1, 1, 300, ops_res);
         assert!(finished);
+    }
+
+    // 13. Private subscription with commitment and lookup
+    #[test]
+    fn test_private_commitment_subscribe_and_lookup() {
+        let (mut contract, _owner, token, _treasury, _steward, _agent) = setup_contract();
+
+        let secret = "user_secret_entropy_123";
+        let product_id = 1u64;
+        let hash_bytes = env::sha256(format!("{secret}:{product_id}").as_bytes());
+        let commitment = hash_bytes
+            .iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<String>();
+        assert_eq!(commitment.len(), 64);
+
+        // Subscribe with commitment for 3 periods (3 * 1_000 = 3_000)
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token.clone()).build());
+        let msg = format!(
+            r#"{{"product_id":"1","periods":3,"commitment":"{commitment}"}}"#
+        );
+        let res = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(3_000), msg);
+        if let PromiseOrValue::Value(unused) = res {
+            assert_eq!(unused.0, 0);
+        } else {
+            panic!("Expected Value");
+        }
+
+        // Agreement subscriber and refund_to must be private.pandem.testnet
+        let agreement = contract.get_agreement(1).expect("Agreement must exist");
+        assert_eq!(agreement.subscriber.to_string(), "private.pandem.testnet");
+        assert_eq!(agreement.refund_to.to_string(), "private.pandem.testnet");
+
+        // Lookup by commitment
+        let agr_by_commit = contract
+            .get_agreement_by_commitment(commitment.clone())
+            .expect("Lookup by commitment should succeed");
+        assert_eq!(agr_by_commit.product_id, 1);
+        assert_eq!(agr_by_commit.subscriber.to_string(), "private.pandem.testnet");
+
+        let esc_by_commit = contract
+            .get_escrow_by_commitment(commitment.clone())
+            .expect("Lookup escrow by commitment should succeed");
+        assert_eq!(esc_by_commit.funded_periods, 3);
+        assert_eq!(esc_by_commit.balance.0, 3_000);
+
+        // Unknown commitment returns None
+        let dummy_commit = "0".repeat(64);
+        assert!(contract.get_agreement_by_commitment(dummy_commit.clone()).is_none());
+        assert!(contract.get_escrow_by_commitment(dummy_commit).is_none());
+
+        // Invalid commitment length / format rejected (full refund)
+        let bad_msg = r#"{"product_id":"1","periods":3,"commitment":"not_hex_too_short"}"#;
+        let bad_res = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(3_000), bad_msg.to_string());
+        if let PromiseOrValue::Value(unused) = bad_res {
+            assert_eq!(unused.0, 3_000);
+        } else {
+            panic!("Expected Value");
+        }
+    }
+
+    // 14. Private refund by secret preimage
+    #[test]
+    fn test_private_refund_by_secret() {
+        let (mut contract, _owner, token, _treasury, _steward, _agent) = setup_contract();
+
+        let secret = "alpha_bravo_charlie_secret";
+        let product_id = 1u64;
+        let hash_bytes = env::sha256(format!("{secret}:{product_id}").as_bytes());
+        let commitment = hash_bytes
+            .iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<String>();
+
+        // Subscribe privately for 3 periods = 3_000
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token.clone()).build());
+        let msg = format!(
+            r#"{{"product_id":"1","periods":3,"commitment":"{commitment}"}}"#
+        );
+        let _ = contract.ft_on_transfer("alice.testnet".parse().unwrap(), U128(3_000), msg);
+
+        // Anyone with the secret can call refund_by_secret
+        let recipient: AccountId = "bob.testnet".parse().unwrap();
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("escrow.testnet".parse().unwrap())
+            .predecessor_account_id("stranger.testnet".parse().unwrap())
+            .build());
+
+        let refund_res = contract.refund_by_secret(secret.to_string(), product_id, recipient);
+        match refund_res {
+            PromiseOrValue::Promise(_) => {},
+            _ => panic!("Expected Promise for ft_transfer"),
+        }
+
+        let escrow = contract.get_escrow(1).unwrap();
+        assert!(escrow.refunded);
+        assert_eq!(escrow.balance.0, 0);
+
+        // Simulating successful callback
+        let ret = contract.on_refund_callback(1, 3_000, 3_000, Ok(()));
+        assert_eq!(ret.0, 3_000);
+
+        // Simulating callback failure rollback test
+        let ret_fail = contract.on_refund_callback(1, 3_000, 3_000, Err(PromiseError::Failed));
+        assert_eq!(ret_fail.0, 0);
+        let escrow_restored = contract.get_escrow(1).unwrap();
+        assert!(!escrow_restored.refunded);
+        assert_eq!(escrow_restored.balance.0, 3_000);
     }
 }

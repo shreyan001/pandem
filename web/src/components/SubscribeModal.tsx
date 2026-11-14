@@ -50,6 +50,11 @@ export function SubscribeModal({
   const [email, setEmail] = useState<string>("");
   const [emailSaved, setEmailSaved] = useState<boolean>(false);
 
+  // Private Subscription Mode (Blind Commitment)
+  const [isPrivateMode, setIsPrivateMode] = useState<boolean>(false);
+  const [privateSecret, setPrivateSecret] = useState<string>("");
+  const [commitmentHash, setCommitmentHash] = useState<string>("");
+
   // Price calculations in 6-decimal tUSDC (BigInt safe)
   const basePricePro = BigInt(product.price_per_period || "5000000");
   const pricePerPeriodBigInt =
@@ -76,6 +81,69 @@ export function SubscribeModal({
   const productSlug = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
   const accessUrl = `/access/${productSlug}`;
 
+  const computeSha256 = async (input: string): Promise<string> => {
+    if (typeof window !== "undefined" && window.crypto && window.crypto.subtle) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(input);
+      const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+    return "";
+  };
+
+  const handleTogglePrivateMode = async (enabled: boolean) => {
+    setIsPrivateMode(enabled);
+    if (enabled) {
+      let secret = "";
+      try {
+        const bytes = new Uint8Array(32);
+        window.crypto.getRandomValues(bytes);
+        secret = Array.from(bytes)
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      } catch {
+        secret = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+      }
+      setPrivateSecret(secret);
+      const commitment = await computeSha256(`${secret}:${product.id}`);
+      setCommitmentHash(commitment);
+
+      try {
+        localStorage.setItem(`pandem:secret:${productSlug}`, secret);
+        localStorage.setItem(`pandem:commitment:${productSlug}`, commitment);
+      } catch {
+        // ignore
+      }
+    } else {
+      setPrivateSecret("");
+      setCommitmentHash("");
+    }
+  };
+
+  const handleDownloadBackup = () => {
+    if (!privateSecret) return;
+    const backupData = {
+      standard: "pandem-d6-blind-commitment",
+      product_name: product.name,
+      product_id: product.id,
+      slug: productSlug,
+      secret: privateSecret,
+      commitment: commitmentHash,
+      beneficiary: "private.pandem.testnet",
+      created_at: new Date().toISOString(),
+      instructions:
+        "Store this secret securely. You will need this secret to prove subscription ownership and unlock your enclave service.",
+    };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${productSlug}-private-secret-backup.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleRegisterStorage = async () => {
     try {
       setIsRegistering(true);
@@ -101,7 +169,13 @@ export function SubscribeModal({
     try {
       setIsSubmitting(true);
       setError(null);
-      const hash = await sendSubscribe(product.id, periods, totalAmountStr, tier);
+      const hash = await sendSubscribe(
+        product.id,
+        periods,
+        totalAmountStr,
+        tier,
+        isPrivateMode ? commitmentHash : undefined
+      );
       setTxHash(hash || "confirmed");
     } catch (e: any) {
       console.error(e);
@@ -360,6 +434,82 @@ export function SubscribeModal({
               </div>
             )}
 
+            {/* Private Subscription Mode (Blind Commitment) */}
+            <div className="p-4 bg-spectr-canvas border border-spectr-hairline space-y-3 font-mono">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="private-mode-toggle"
+                    checked={isPrivateMode}
+                    onChange={(e) => handleTogglePrivateMode(e.target.checked)}
+                    className="h-4 w-4 rounded-none accent-spectr-primary cursor-pointer"
+                  />
+                  <label htmlFor="private-mode-toggle" className="text-xs font-bold text-spectr-ink uppercase cursor-pointer flex items-center gap-2">
+                    <span>Private Subscription Mode</span>
+                    <span className="text-xs px-1.5 py-0.5 bg-spectr-surface border border-spectr-primary text-spectr-primary">
+                      Blind Mode
+                    </span>
+                  </label>
+                </div>
+                <span className="text-xs text-spectr-muted">Zero Link</span>
+              </div>
+
+              <p className="text-xs text-spectr-body font-sans">
+                When enabled, your subscription is secured with a random client secret. Your wallet account is never linked to this product on-chain.
+              </p>
+
+              {isPrivateMode && (
+                <div className="space-y-3 pt-2 border-t border-spectr-hairline">
+                  {/* Generated Secret & Commitment */}
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-spectr-muted uppercase font-semibold">Client Secret (keep safe):</span>
+                      <button
+                        type="button"
+                        onClick={handleDownloadBackup}
+                        className="px-2.5 py-1 bg-spectr-surface hover:bg-spectr-surface-raised border border-spectr-hairline text-spectr-primary text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                      >
+                        <span>Download Secret Backup</span>
+                        <span>⬇</span>
+                      </button>
+                    </div>
+                    <div className="p-2.5 bg-spectr-surface border border-spectr-hairline text-spectr-primary text-xs break-all font-mono select-all">
+                      {privateSecret}
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-spectr-muted">
+                      <span>Commitment: sha256(secret : product_id)</span>
+                      <span className="text-spectr-success">Saved to localStorage</span>
+                    </div>
+                    <div className="p-2 bg-spectr-surface border border-spectr-hairline text-spectr-muted text-xs break-all font-mono">
+                      {commitmentHash}
+                    </div>
+                  </div>
+
+                  {/* What's Public Breakdown Card */}
+                  <div className="p-3 bg-spectr-surface border border-spectr-hairline space-y-2">
+                    <div className="text-xs font-bold uppercase text-spectr-ink">
+                      What&apos;s Public vs Private
+                    </div>
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-spectr-muted">Payer Account & USDC Amount:</span>
+                        <span className="text-spectr-warning font-semibold">Public on-chain</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-spectr-muted">Target Product Identity & Tier:</span>
+                        <span className="text-spectr-success font-semibold">Private (hidden behind commitment)</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-spectr-muted">On-Chain Beneficiary:</span>
+                        <span className="text-spectr-primary font-semibold">Anonymous (private.pandem.testnet)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Cost & Split Breakdown */}
             <div className="bg-spectr-canvas rounded-none p-4 border border-spectr-hairline space-y-2.5 font-mono">
               <div className="flex justify-between items-center text-sm font-semibold text-spectr-ink">
@@ -415,6 +565,9 @@ export function SubscribeModal({
                 <div><span className="text-spectr-muted">method:</span> ft_transfer_call</div>
                 <div><span className="text-spectr-muted">deposit:</span> 1 yoctoNEAR</div>
                 <div><span className="text-spectr-muted">amount:</span> {totalAmountStr} ({formatTUsdc(totalAmountBigInt)} tUSDC)</div>
+                {isPrivateMode && commitmentHash && (
+                  <div><span className="text-spectr-muted">commitment:</span> {commitmentHash.slice(0, 24)}...</div>
+                )}
               </div>
             </div>
 

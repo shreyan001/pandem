@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Badge, Button, Card } from "../../../../ui";
 
@@ -18,6 +18,9 @@ interface AccessLockedViewProps {
   product: LockedProductInfo;
   accountId: string | null;
   onConnectWallet: () => void;
+  onUnlockWithSecret?: (secret: string) => Promise<void>;
+  isVerifyingSecret?: boolean;
+  secretError?: string | null;
   reason?: "not_subscribed" | "cancelled_or_refunded" | "wallet_disconnected" | "expired";
 }
 
@@ -25,12 +28,37 @@ export const AccessLockedView: React.FC<AccessLockedViewProps> = ({
   product,
   accountId,
   onConnectWallet,
+  onUnlockWithSecret,
+  isVerifyingSecret = false,
+  secretError = null,
   reason = "not_subscribed",
 }) => {
+  const [showSecretPanel, setShowSecretPanel] = useState(false);
+  const [secretInput, setSecretInput] = useState("");
+  const [hasStorageSecret, setHasStorageSecret] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`pandem:secret:${product.slug}`);
+      if (saved) {
+        setSecretInput(saved);
+        setHasStorageSecret(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, [product.slug]);
+
+  const handleSecretSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!secretInput.trim() || !onUnlockWithSecret) return;
+    onUnlockWithSecret(secretInput.trim());
+  };
+
   const getReasonText = () => {
     switch (reason) {
       case "wallet_disconnected":
-        return "Connect your NEAR wallet to verify on-chain subscription ownership.";
+        return "Connect your NEAR wallet or provide your private subscription secret to unlock.";
       case "cancelled_or_refunded":
         return "Your subscription agreement was cancelled or refunded. Re-subscribe to restore enclave access.";
       case "expired":
@@ -73,7 +101,7 @@ export const AccessLockedView: React.FC<AccessLockedViewProps> = ({
           </li>
           <li className="flex items-start gap-2">
             <span className="text-spectr-primary">✓</span>
-            <span>Cryptographic NEP-413 signed authentication token</span>
+            <span>Cryptographic NEP-413 or Private Secret signed authentication token</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-spectr-primary">✓</span>
@@ -114,6 +142,68 @@ export const AccessLockedView: React.FC<AccessLockedViewProps> = ({
           View Pricing Tiers →
         </Link>
       </div>
+
+      {/* Private Secret Unlock Panel */}
+      {onUnlockWithSecret && (
+        <div className="pt-4 border-t border-spectr-hairline text-left space-y-3">
+          <button
+            type="button"
+            onClick={() => setShowSecretPanel(!showSecretPanel)}
+            className="w-full flex items-center justify-between text-xs font-mono text-spectr-muted hover:text-spectr-ink transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-spectr-primary">🔑</span>
+              <span>Subscribed in Private Mode? Unlock with Secret</span>
+            </span>
+            <span>{showSecretPanel ? "▲ Hide" : "▼ Enter Secret"}</span>
+          </button>
+
+          {showSecretPanel && (
+            <form onSubmit={handleSecretSubmit} className="p-4 bg-spectr-canvas border border-spectr-hairline space-y-3">
+              <div className="flex items-center justify-between">
+                <label htmlFor="locked-secret" className="text-xs font-mono uppercase text-spectr-ink font-semibold">
+                  Paste 32-Byte Client Secret
+                </label>
+                {hasStorageSecret && (
+                  <span className="text-xs font-mono text-spectr-success bg-spectr-surface border border-spectr-success px-1.5 py-0.5">
+                    Found in localStorage
+                  </span>
+                )}
+              </div>
+
+              <input
+                id="locked-secret"
+                type="text"
+                required
+                value={secretInput}
+                onChange={(e) => {
+                  setSecretInput(e.target.value);
+                  setHasStorageSecret(false);
+                }}
+                placeholder="4f9b2a1c8e7d6f5a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a"
+                className="w-full px-3 py-2 bg-spectr-surface border border-spectr-hairline text-spectr-ink font-mono text-xs focus:outline-none focus:border-spectr-primary"
+              />
+
+              {secretError && (
+                <div className="p-2.5 bg-spectr-surface border border-spectr-danger text-xs font-mono text-spectr-danger">
+                  ⚠ {secretError}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                isLoading={isVerifyingSecret}
+                disabled={!secretInput.trim()}
+                className="w-full sm:w-auto"
+              >
+                {isVerifyingSecret ? "Verifying..." : "Unlock with Secret →"}
+              </Button>
+            </form>
+          )}
+        </div>
+      )}
     </Card>
   );
 };

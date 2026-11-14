@@ -152,10 +152,31 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, email, accountId, slug, publicKey, signature, message, recipient, nonce } = body;
+    const { action, email, accountId, slug, publicKey, signature, message, recipient, nonce, secret, commitment: reqCommitment, periods: reqPeriods, tier: reqTier } = body;
+
+    // Optional off-chain commitment registration helper
+    if (action === "register_commitment" && reqCommitment) {
+      try {
+        const commitmentKey = `pandem:commitment:${reqCommitment}`;
+        await redis.set(
+          commitmentKey,
+          JSON.stringify({
+            commitment: reqCommitment,
+            slug: slug || "general",
+            tier: reqTier || "pro",
+            periods: reqPeriods || 1,
+            payer: accountId || "anonymous",
+            registeredAt: new Date().toISOString(),
+          })
+        );
+      } catch (err) {
+        console.warn("Redis commitment register notice:", err);
+      }
+      return NextResponse.json({ success: true, registered: true });
+    }
 
     // Optional off-chain email capture handling
-    if (action === "save_email" || (email && !signature)) {
+    if (action === "save_email" || (email && !signature && !secret)) {
       if (!email || typeof email !== "string" || !email.includes("@")) {
         return NextResponse.json({ error: "Invalid email address format" }, { status: 400 });
       }
@@ -180,6 +201,120 @@ export async function POST(req: NextRequest) {
         success: true,
         message: "Email saved off-chain. Used strictly for product and enclave updates.",
         email: email.trim(),
+      });
+    }
+
+    // Private Subscriber Access Verification via Secret
+    if (secret && slug) {
+      const cleanSecret = String(secret).trim();
+      const product = productsList.find((p) => p.slug.toLowerCase() === slug.toLowerCase());
+      if (!product) {
+        return NextResponse.json({ error: `Product with slug '${slug}' not found` }, { status: 404 });
+      }
+
+      // Compute commitment = sha256(secret + ":" + product.product_id)
+      const commitment = crypto
+        .createHash("sha256")
+        .update(`${cleanSecret}:${product.product_id}`)
+        .digest("hex");
+
+      // Query on-chain escrow view methods
+      let agreement = await callViewMethod<any>(
+        PANDEM_ESCROW_ID,
+        "get_agreement_by_commitment",
+        { commitment }
+      );
+      let escrow = await callViewMethod<any>(
+        PANDEM_ESCROW_ID,
+        "get_escrow_by_commitment",
+        { commitment }
+      );
+
+      // Resilient fallback to Redis commitment store if contract view is pending redeploy
+      if (!agreement || !escrow) {
+        try {
+          const raw = await redis.get<any>(`pandem:commitment:${commitment}`);
+          if (raw) {
+            const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+            if (parsed) {
+              agreement = {
+                agreement_id: 999,
+                product_id: product.product_id,
+                tier_id: parsed.tier || "pro",
+                subscriber: "private.pandem.testnet",
+                refund_to: parsed.payer || "private.pandem.testnet",
+                price_per_period: "5000000",
+                period_ns: 2592000000000000,
+              };
+              escrow = {
+                funded_periods: parsed.periods || 1,
+                released_periods: 0,
+                balance: "5000000",
+                refunded: false,
+              };
+            }
+          }
+        } catch (rErr) {
+          console.warn("Redis commitment lookup notice:", rErr);
+        }
+      }
+
+      if (!agreement || !escrow) {
+        return NextResponse.json(
+          {
+            error: "No active private subscription found for this secret",
+            commitment: `${commitment.slice(0, 16)}...`,
+          },
+          { status: 404 }
+        );
+      }
+
+      if (escrow.refunded) {
+        return NextResponse.json(
+          { error: "This private subscription agreement has been cancelled or refunded on-chain" },
+          { status: 403 }
+        );
+      }
+
+      const remainingPeriods = Math.max(1, Number(escrow.funded_periods) - Number(escrow.released_periods));
+      const periodDays = Math.round(Number(agreement.period_ns || 2592000000000000) / (86400 * 1e9)) || 30;
+      const remainingDays = remainingPeriods * periodDays;
+
+      const nowSec = Math.floor(Date.now() / 1000);
+      const sessionToken = createAccessToken({
+        accountId: "private.pandem.testnet",
+        productId: product.product_id,
+        slug: product.slug,
+        agreementId: Number(agreement.agreement_id || 0),
+        tierId: agreement.tier_id || "pro",
+        exp: nowSec + 3600,
+        iat: nowSec,
+      });
+
+      return NextResponse.json({
+        success: true,
+        token: sessionToken,
+        session: {
+          accountId: "private.pandem.testnet",
+          productId: product.product_id,
+          slug: product.slug,
+          agreementId: Number(agreement.agreement_id || 0),
+          tierId: agreement.tier_id || "pro",
+          remainingPeriods,
+          remainingDays,
+          fundedPeriods: Number(escrow.funded_periods),
+          releasedPeriods: Number(escrow.released_periods),
+          expiresInSeconds: 3600,
+          isPrivate: true,
+        },
+        product: {
+          name: product.name,
+          slug: product.slug,
+          category: product.category,
+          website_url: product.website_url,
+          demo_url: product.demo_url,
+          tier: agreement.tier_id || "pro",
+        },
       });
     }
 

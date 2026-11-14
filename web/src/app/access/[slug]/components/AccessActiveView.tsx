@@ -100,7 +100,9 @@ export const AccessActiveView: React.FC<AccessActiveViewProps> = ({
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono text-spectr-muted">
-            NEP-413 Signed · Agreement #{session.agreementId}
+            {session.accountId === "private.pandem.testnet"
+              ? "Blind Commitment Verified"
+              : `NEP-413 Signed · Agreement #${session.agreementId}`}
           </span>
           <button
             type="button"
@@ -123,9 +125,19 @@ export const AccessActiveView: React.FC<AccessActiveViewProps> = ({
               <Badge variant="primary" className="uppercase">
                 {session.tierId} Tier
               </Badge>
+              {session.accountId === "private.pandem.testnet" && (
+                <Badge variant="success">Blind Mode</Badge>
+              )}
             </div>
             <p className="text-xs text-spectr-muted font-mono mt-1">
-              Beneficiary Account: {session.accountId}
+              Beneficiary:{" "}
+              {session.accountId === "private.pandem.testnet" ? (
+                <span className="text-spectr-primary font-semibold">
+                  Anonymous (Private Blind Commitment)
+                </span>
+              ) : (
+                session.accountId
+              )}
             </p>
           </div>
 

@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-11-14T17:28:00Z",
+  "network": "testnet",
+  "d6_1_onboarding": {
+    "account": "d61.test-pandem-alice-1.testnet",
+    "createAccountTx": "728jvsfgMpJDMwXS8nCfVzPQ5c1veddyq56RdPrxB54Z",
+    "storageDepositTx": "DozphQeNfzCPutXXk9GGq9ypnrY9jfPeDYBW2Mik13gm",
+    "faucetClaimTx": "GJM3Nke5UovC3gUik319G4MAxQgdKmMa18iDvbyfu97",
+    "screenshot": "reports/screens/onboarding-drawer-390.png"
+  },
+  "d6_2_graded_subscriptions": {
+    "escrowContract": "escrow-d6-df23.test-pandem-alice-1.testnet",
+    "subscribeTx": "FuSkAiSVCihP9Qrkgyv7wagFy5chGPtE2PJXs8hSzAeZ",
+    "upgradeProratedTx": "HzKT8xwouFyiCqFxB4537VJg4EkmCvtYY2t5UZsaFtvn",
+    "renewTx": "GMZ4ya8KXwVWDAgmdW9HQXcJov3jM13fT4Qav62V74Ut",
+    "cancelRefundTx": "8FkaGuUcsKirk9xvjkyTXDrK3qVCWX67yLsfZywseN9C"
+  },
+  "d6_3_gated_access": {
+    "route": "/access/open-webui",
+    "challengeType": "NEP-413 Ed25519 Message Signature",
+    "sessionDuration": "3600s (HMAC-SHA256)",
+    "unlockedScreenshot": "reports/screens/access-unlocked-1280.png",
+    "lockedScreenshot": "reports/screens/access-locked-1280.png"
+  },
+  "d6_4_automated_ops_flow": {
+    "escrowContract": "escrow-d64-40ba.test-pandem-alice-1.testnet",
+    "budgetContract": "pandem-budget-d1-8f199e48.testnet",
+    "releasePeriodTx": "7f2t1evj8sTrWZ7CkNEz3mdexwuBpjym1m6ivGoiZpT7",
+    "initialBudgetBalance": "1000000",
+    "finalBudgetBalance": "2500000",
+    "opsDelta": "1500000"
+  },
+  "d6_6_verify_page": {
+    "route": "/verify",
+    "screenshot": "reports/screens/verify-1280.png",
+    "codeHashes": {
+      "escrow-d64-40ba.test-pandem-alice-1.testnet": "9mkFpZeVZMegTUDU72vA7vPTvFNspsYahTNV4j8oGvuc",
+      "pandem-budget-d1-8f199e48.testnet": "D9EoMHGT2G1zCTUe81cQowSeSfyYu9HvNHu5BCtLfWDM",
+      "pandem-registry-v2-46cee5ca.testnet": "GRyeipX9RCEKYcAUeKeqzFk8UrtR6ghTJcpA3658itpK",
+      "pandem-tusdc-46cee5ca.testnet": "4eHo2Zu22TXK34TZGKKe2zfMiCqkR8TqgVNdgH1RmCjX"
+    }
+  },
+  "d6_7_cross_chain_intents": {
+    "drawerComponent": "web/src/components/CrossChainQuoteDrawer.tsx",
+    "rfqEndpoint": "https://1click.chaindefuser.com/v0/quote",
+    "supportedNetworks": ["Base", "Arbitrum One", "Ethereum", "Solana"],
+    "correlationIds": {
+      "base": "f584899e-2784-4f06-979a-a22d040c76b7",
+      "arbitrum": "eb46c836-eb96-4464-bf8d-1cce7e96a94d",
+      "ethereum": "0b41e536-c37c-4c51-89c0-67759116414c",
+      "solana": "da7a5c0f-8df6-4a57-9335-08388bf85d45"
+    }
+  }
+}
