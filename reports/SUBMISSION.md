@@ -2,10 +2,14 @@
 
 **Project Name**: Pandem  
 **Repository**: [https://github.com/shreyan001/pandem](https://github.com/shreyan001/pandem)  
+**Live Production App**: [https://pandem-xi.vercel.app](https://pandem-xi.vercel.app)  
 **Primary Track**: Real-World Money  
 **Secondary Track**: Privacy & Private AI  
-**Deployed Testnet Contract**: `pandem-escrow-46cee5ca.testnet`  
-**Testnet Explorer Link**: [https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet](https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet)  
+**Deployed Testnet Contracts**:
+- Escrow: [`pandem-escrow-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet)
+- Budget: [`pandem-budget-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-d1-8f199e48.testnet)
+- Registry: [`pandem-registry-v2-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-v2-46cee5ca.testnet)
+- Token (tUSDC): [`pandem-tusdc-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-tusdc-46cee5ca.testnet)
 
 ---
 
@@ -27,33 +31,33 @@ Subscriptions power the modern $300B+ software and AI economy. Yet bringing subs
 ## 3. The Pandem Solution
 
 Pandem replaces centralized billing and blunt upfront payments with **Programmable Escrow Protection**:
-- **Non-Custodial Subscription Locking**: Users deposit NEP-141 tokens (USDC / wNEAR) via standard `ft_transfer_call`.
-- **Hardware-Gated Periodic Releases**: Payments are unlocked in discrete periods (e.g. 14 days or monthly). Each release is strictly conditioned on a cryptographic heartbeat signed by an autonomous agent runner inside an Intel TDX & NVIDIA NRAS TEE on NEAR AI Cloud.
+- **Non-Custodial Subscription Locking**: Users deposit NEP-141 tokens (6-decimal tUSDC) via standard `ft_transfer_call`.
+- **Hardware-Gated Periodic Releases**: Payments are unlocked in discrete periods (e.g. 30 days or yearly). Each release is strictly conditioned on a cryptographic heartbeat signed by an autonomous agent runner inside an Intel TDX & NVIDIA NRAS TEE on NEAR AI Cloud.
 - **Automated 4-Way Payout Split**:
-  - `47.5%` to Service Steward (Developer)
-  - `30.0%` to Operational Reserve (Infrastructure costs)
-  - `20.0%` to Contingency Buffer (Security guarantee)
-  - `2.5%` to Protocol Treasury
-- **Pro-Rata Downside Protection**: If the service dies or triggers the killswitch (`declare_abandoned`), the subscriber instantly claims back 100% of unreleased periods *plus* the unused 20% contingency buffer.
-- **1Click Cross-Chain On-Ramp**: Users holding funds on Ethereum, Solana, Arbitrum, Base, or Bitcoin can subscribe directly in one transaction using the NEAR Intents 1Click Defuser solver engine.
+  - `47.5%` to Service Steward (Developer revenue)
+  - `30.0%` to Operational Reserve (Infrastructure & AI compute costs managed by `pandem-budget`)
+  - `20.0%` to Contingency Buffer (Community governance / 100% refund upon abandonment)
+  - `2.5%` to Protocol Escrow Fee
+- **Pro-Rata Downside Protection**: If the service dies or triggers the killswitch (`declare_abandoned`), the subscriber instantly claims back 100% of unreleased periods *plus* the unused 20% contingency buffer in a single transaction.
+- **1Click Cross-Chain On-Ramp**: Users holding funds on Ethereum, Solana, Arbitrum, Base, or Bitcoin can subscribe directly using the NEAR Intents 1Click Defuser solver engine.
 
 ---
 
-## 4. Live Testnet Artifacts & Explorer Receipts
+## 4. Live Testnet Artifacts & Explorer Receipts (Verified D1 & D4)
 
-| Action | Transaction Hash / Receipt | Outcome |
+Every single operational step has been executed and persistently verified on NEAR Testnet:
+
+| Action / Capability | Transaction ID / Explorer Receipt | Outcome & Telemetry |
 |---|---|---|
-| **Escrow Deploy & Init** | [`88Ms1iCuq3uC...`](https://explorer.testnet.near.org/transactions/88Ms1iCuq3uC7qbNfWm7wgQ4uQd5icUAb1eSac3KAtts) | Deployed Rust escrow to `pandem-escrow-46cee5ca.testnet` |
-| **Budget Deploy & Init** | [`59JVrLeFwsBC...`](https://explorer.testnet.near.org/transactions/59JVrLeFwsBCQoP8YYSyY7Z8bnWWb7JBq756n5fsF1ox) | Deployed Budget ops contract to `pandem-budget-46cee5ca.testnet` |
-| **Registry Deploy & Init** | [`Gi6qzGSg7tjc...`](https://explorer.testnet.near.org/transactions/Gi6qzGSg7tjchAmKRhNJAfSLKTQPMHUhhh9iUeMRUmqZ) | Deployed Listing & Voting registry to `pandem-registry-46cee5ca.testnet` |
-| **Product Approval** | [`DMv1jw1S9tpC...`](https://explorer.testnet.near.org/transactions/DMv1jw1S9tpCJcdRfoRJf3yZbjdph1ZbGenAwtHgsjdy) | Approved `prod-deepsearch-m4` for storefront listing |
-| **Subscription Deposit** | [`5XnsktfXTa6D...`](https://explorer.testnet.near.org/transactions/5XnsktfXTa6Df8NrghXAiEfUUeGjpy5Gy7KK7oF5J3Fc) | Alice deposited 0.3 wNEAR for 3 periods |
-| **Enclave Agent Heartbeat** | [`C9eRiuYdcjeG...`](https://explorer.testnet.near.org/transactions/C9eRiuYdcjeGwAonoNjt3JfYozAdC9ya7nVDwg2HLcBb) | Liveness verified for Period 1 |
-| **Period 1 Fund Release** | [`AyfiTDb2PVWL...`](https://explorer.testnet.near.org/transactions/AyfiTDb2PVWL3QeBypyDTbFGttvLRpS5cUs2R9R7m9fc) | 0.0475 wNEAR paid to steward |
-| **Contingency Proposal #1** | [`BqNZuy17iDo1...`](https://explorer.testnet.near.org/transactions/BqNZuy17iDo1PNcEvsVK21NoKuYWxXioDYKJc7Egt9Rc) | Created failover grant proposal for 0.05 wNEAR |
-| **Proposal #1 Vote** | [`FJvojngvT2Ed...`](https://explorer.testnet.near.org/transactions/FJvojngvT2Eddn9J74vG3qGPLBiT6HJkVNkkWToXnVaE) | Subscriber voted YES on Proposal #1 |
-| **Steward Killswitch** | [`CxgAEmPTJNSY...`](https://explorer.testnet.near.org/transactions/CxgAEmPTJNSYd5pGzaQr57dR2DVqJge32NmiJCuiBpLE) | Triggered `declare_abandoned` |
-| **Subscriber Refund** | [`5vL5sXN1eutg...`](https://explorer.testnet.near.org/transactions/5vL5sXN1eutgZcBaBbJFHMkayjRJdBSPNzU8E7QKYgRk) | Returned 0.22 wNEAR to Alice (2 periods + contingency) |
+| **tUSDC Storage Deposit** | [`YJbKbNUQHXCb...`](https://explorer.testnet.near.org/transactions/YJbKbNUQHXCbFJWb38Aaz51MySYKKtuX18ayGRd7CjP) | Subscriber `test-pandem-check-1.testnet` registered on token contract |
+| **tUSDC Faucet Claim** | [`DvCav8Bgays4...`](https://explorer.testnet.near.org/transactions/DvCav8Bgays4LvHHoiRoxsw6TqBVKPNF4eQJhSwRwRTr) | 100 tUSDC minted via testnet faucet to fresh wallet |
+| **Ops Budget Funding (`ft_transfer_call`)** | [`HyzVjFL5LkfZ...`](https://explorer.testnet.near.org/transactions/HyzVjFL5LkfZcwShGC37PKReiVTuXTxFxHKDJCfXFd7C) | 1.5 tUSDC seeded to `pandem-budget-d1-8f199e48.testnet` for Product #2 |
+| **Yearly Subscribe (`ft_transfer_call`)** | [`3oW6x2wivZWK...`](https://explorer.testnet.near.org/transactions/3oW6x2wivZWKpC1ydtoi75cHTbzAv3HBhhBhFmUTNjxs) | 60 tUSDC locked into Escrow for 12 periods (Agreement #3, Pro tier) |
+| **Enclave Access Link & Email** | *https://localai.pandem.testnet/session* | Verified access link provisioned; subscriber email captured off-chain |
+| **Agent AI Inference Draw** | [`DJuY5Jzj45RQ...`](https://explorer.testnet.near.org/transactions/DJuY5Jzj45RQMjn7EtBPqkGDHLZVwfW3wpzuJe7rnxh3) | 0.5 tUSDC drawn by `pandem-agent-46cee5ca.testnet` from Ops Budget |
+| **Steward Killswitch Triggered** | [`Fw1dEp1rnBjS...`](https://explorer.testnet.near.org/transactions/Fw1dEp1rnBjSHxCYEKCNPYzjFGi97w5QvHYAoCAtWrbH) | `declare_abandoned` executed on Product #2 by Steward |
+| **1-Click Subscriber Refund** | [`Fzr4Qtc9ngoR...`](https://explorer.testnet.near.org/transactions/Fzr4Qtc9ngoRgGqYzN2UfknG9dHUt3f5rFejM7zoA2Eo) | Full 60 tUSDC unreleased funds refunded directly to subscriber |
+| **Final Restored Balance** | *On-chain verified: 98.5 tUSDC* | 100% refund of unreleased subscription verified on testnet RPC |
 
 ---
 

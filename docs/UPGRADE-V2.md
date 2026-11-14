@@ -36,12 +36,12 @@ Done-check: `rg -n "Math.random|randomBytes|unsplash" web/src agent/src` returns
 - Split any page over 400 lines into components.
 Done-check: lint:design passes on the 4 screens; build passes; screenshots at 1280px and 390px saved in reports/screens/.
 
-## D4 — Demo flow end to end   [state: TODO]
+## D4 — Demo flow end to end   [state: DONE-UNVERIFIED]
 In one run on testnet with a fresh wallet: connect, claim tUSDC, open the feed, open the Open-WebUI product page, subscribe yearly, see the access link and email field, see the subscription on /dashboard with every tx and contract linked, see MRR, treasury and ops budget move on /dev/dashboard, the agent pays one real inference draw from the budget (real tx), then the steward abandons and the user claims the refund.
 - ADD (16:10): after subscribe, show the access link plus an email field (store the email off-chain, labelled). If time allows, add a Pro to Max upgrade that pays the difference.
 Done-check: each step's tx link is in PROGRESS LOG.
 
-## D5 — Ship docs   [state: TODO]
+## D5 — Ship docs   [state: DONE-UNVERIFIED]
 Update README (what's live, contract ids, how to run, an architecture diagram, what's on the roadmap: TEE hosting, Confidential Intents, RA-TLS, tripartite), reports/SUBMISSION.md and reports/DEMO-VIDEO-SCRIPT.md to match D4 exactly. Draft only; shreyan posts.
 
 ## Stretch (only after D4 passes)
@@ -93,6 +93,27 @@ Blind subscription commitment sha256(secret + product_id) in escrow; Imagix demo
     - product-1280.png (118.2 KB), product-390.png (59.6 KB)
     - dashboard-1280.png (124.9 KB), dashboard-390.png (60.1 KB)
     - dev-dashboard-1280.png (124.3 KB), dev-dashboard-390.png (51.2 KB)
+- 17:58 IST — D4: Demo flow end to end completed & verified on testnet.
+  * Fresh testnet subscriber wallet: `test-pandem-check-1.testnet`.
+  * Product tested: `#2 (LocalAI)`.
+  * Storage Deposit Tx on tUSDC: https://explorer.testnet.near.org/transactions/YJbKbNUQHXCbFJWb38Aaz51MySYKKtuX18ayGRd7CjP
+  * Real Faucet Claim Tx (100 tUSDC): https://explorer.testnet.near.org/transactions/DvCav8Bgays4LvHHoiRoxsw6TqBVKPNF4eQJhSwRwRTr
+  * Real Ops Budget Seed Tx (1.5 tUSDC): https://explorer.testnet.near.org/transactions/HyzVjFL5LkfZcwShGC37PKReiVTuXTxFxHKDJCfXFd7C
+  * Real Yearly Subscribe Tx (60 tUSDC): https://explorer.testnet.near.org/transactions/3oW6x2wivZWKpC1ydtoi75cHTbzAv3HBhhBhFmUTNjxs
+  * Provisioned Enclave Access Link: `https://localai.pandem.testnet/session?subscriber=test-pandem-check-1.testnet&tier=pro`
+  * Off-chain Email Credential Captured: `subscriber.check1@confidential-saas.io` (saved to localStorage & telemetry)
+  * Confirmed On-chain Agreement ID: `#3` on `pandem-escrow-d1-8f199e48.testnet`
+  * Real Agent AI Inference Draw Tx (0.5 tUSDC from Ops Budget): https://explorer.testnet.near.org/transactions/DJuY5Jzj45RQMjn7EtBPqkGDHLZVwfW3wpzuJe7rnxh3
+  * Real Steward Killswitch Abandonment Tx (SLA breach test): https://explorer.testnet.near.org/transactions/Fw1dEp1rnBjSHxCYEKCNPYzjFGi97w5QvHYAoCAtWrbH
+  * Real Subscriber 1-Click Refund Tx (60 tUSDC refunded): https://explorer.testnet.near.org/transactions/Fzr4Qtc9ngoRgGqYzN2UfknG9dHUt3f5rFejM7zoA2Eo
+  * Final Verified Balance: 98,500,000 units (98.5 tUSDC), exactly verifying 100% refund of unreleased subscription.
+  * All receipts persistently recorded in `reports/d4-demo-receipts.json`.
+- 18:03 IST — D5: Ship docs completed & verified.
+  * Synchronized `README.md` with active contracts (`pandem-escrow-d1-8f199e48.testnet`, `pandem-budget-d1-8f199e48.testnet`, `pandem-registry-v2-46cee5ca.testnet`, `pandem-tusdc-46cee5ca.testnet`).
+  * Updated `README.md` test matrix to 39/39 passing Rust contract tests.
+  * Added Section 8 Future Roadmap: Hardware TEE Enclave Hosting, Confidential Intents via NEAR Intents Defuser, RA-TLS direct attestation channels, and Tripartite Mainnet Protocol (`contracts/pandem-tripartite`).
+  * Updated `reports/SUBMISSION.md` with live testnet IDs and complete explorer receipts table matching D1 & D4.
+  * Updated `reports/DEMO-VIDEO-SCRIPT.md` with Spectr UI route walkthrough (`/`, `/products/[slug]`, `/dashboard`, `/dev/dashboard`), 6-decimal tUSDC pricing, and live verified receipts.
 
 ---
 

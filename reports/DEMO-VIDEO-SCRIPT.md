@@ -11,79 +11,77 @@
 
 | Scene | Time | Focus Area | Visual on Screen |
 |---|---|---|---|
-| **Scene 1** | 0:00 - 0:45 | Problem Pitch | Title slide / Diagram: Stripe vs Crypto Upfront Payments |
-| **Scene 2** | 0:45 - 1:30 | Product Hunt Discovery & 4-Way Escrow | `http://localhost:3000` (Leaderboard, Scoring, Subscribe Modal) |
-| **Scene 3** | 1:30 - 2:15 | 1Click Cross-Chain On-Ramp | `http://localhost:3000/onramp` (Solver Dry-Quote & Intent Payload) |
-| **Scene 4** | 2:15 - 3:00 | Privacy, Hardware TEE & Cloud Payments | `http://localhost:3000/agent` (Intel TDX & NVIDIA NRAS Attestation, Compute Ledger) |
-| **Scene 5** | 3:00 - 3:45 | Contingency Hub & Pro-Rata Refunds | `http://localhost:3000/governance` & `/me` (Proposal Voting, Killswitch, Refund) |
-| **Scene 6** | 3:45 - 4:15 | Multi-Contract Architecture & Verification | Testnet Explorer receipts & GitHub repo (`escrow`, `budget`, `registry`) |
+| **Scene 1** | 0:00 - 0:45 | Problem Pitch | Spectr landing page (`http://localhost:3000`), Developer Launchpad, Security Matrix |
+| **Scene 2** | 0:45 - 1:30 | Product Catalog & 4-Way Escrow Split | Product detail page (`/products/open-webui`), 6-decimal tUSDC pricing, Yearly Pro/Max tiers, Subscribe Modal |
+| **Scene 3** | 1:30 - 2:15 | Access Link & Off-Chain Email Credential | Subscribe success state, Enclave Access Link, off-chain email storage, `/dashboard` agreement station |
+| **Scene 4** | 2:15 - 3:00 | Developer Telemetry & Ops Budget Draw | `/dev/dashboard`, On-chain MRR stream, 30% ops reserve, Agent drawing inference compute via `draw_ops_funds` |
+| **Scene 5** | 3:00 - 3:45 | Steward Killswitch & 1-Click Refund | `/dev/dashboard` Killswitch Panel (`declare_abandoned`), `/dashboard` refund station, 1-click `claim_refund` returning 100% of funds |
+| **Scene 6** | 3:45 - 4:15 | Multi-Contract Architecture & Receipts | Testnet Explorer receipts (`pandem-escrow-d1-8f199e48.testnet`, `pandem-budget-d1-8f199e48.testnet`, `pandem-tusdc-46cee5ca.testnet`) |
 
 ---
 
 ## Detailed Script & Actions
 
 ### Scene 1: The Problem (0:00 - 0:45)
-- **Visual**: Show slide or opening view of `http://localhost:3000`.
+- **Visual**: Show opening view of `http://localhost:3000` (or `https://pandem-xi.vercel.app`).
 - **Narration**:
-  > *"Every month, the global economy spends billions on software subscriptions and autonomous AI services. But in Web3, subscriptions are broken. Either users pay upfront for a whole year—taking on 100% of the counterparty risk if the developer abandons the project—or they rely on centralized payment processors like Stripe that extract fees and censor accounts.*
+  > *"Every month, the global economy spends hundreds of billions on software subscriptions and autonomous AI services. But in Web3, subscriptions are broken. Either users pay upfront for a whole year—taking on 100% of the counterparty risk if the developer abandons the project—or they rely on centralized payment processors like Stripe that extract fees, dispute penalties, and censor accounts.*
   >
-  > *Meet Pandem: the first trust-minimized, non-custodial SaaS subscription escrow natively built on NEAR Protocol. Pandem protects users by locking payments into smart escrow, releasing funds only as discrete periods elapse, and guaranteeing instant, pro-rata refunds if service uptime or privacy fails."*
+  > *Meet Pandem: the first trust-minimized, non-custodial SaaS and AI subscription escrow natively built on NEAR Protocol. Pandem protects subscribers by locking payments into smart escrow, releasing funds period-by-period as services prove liveness, and guaranteeing instant, pro-rata refunds if service uptime or privacy fails."*
 
 ---
 
-### Scene 2: The Storefront & 4-Way Escrow Split (0:45 - 1:30)
-- **Visual**: Navigate to `http://localhost:3000`. Click on the **"DeepSearch AI Pro"** catalog card and open the **"Subscribe"** modal.
-- **Action**: Adjust the duration slider from 3 periods to 6 periods. Hover over the 4-way split breakdown.
+### Scene 2: Product Catalog & 4-Way Escrow Split (0:45 - 1:30)
+- **Visual**: Navigate to `http://localhost:3000/products/open-webui`. Open the **"Subscribe"** modal.
+- **Action**: Show 6-decimal tUSDC pricing (5 tUSDC/month Pro, 15 tUSDC/month Max). Switch duration to 12 periods (yearly = 60 tUSDC).
 - **Narration**:
-  > *"Here on the Pandem storefront, users can subscribe to decentralized services using NEP-141 tokens like USDC or wNEAR.*
+  > *"Here on the Pandem catalog, users subscribe using native NEP-141 tUSDC.*
   >
-  > *Notice what happens when we subscribe: our payment isn't sent directly to the creator's wallet. Instead, it enters Pandem's native Rust escrow contract.*
+  > *When we subscribe, our payment is not sent directly to the developer's wallet. Instead, it enters Pandem's native Rust escrow contract.*
   >
-  > *The smart contract enforces a mathematical 4-way split per period: 47.5% goes directly to the service steward, 30% is directed to an operational reserve for ongoing compute costs, 20% is held in an emergency contingency buffer, and 2.5% sustains the protocol treasury. Most importantly, funds are only unlocked period by period as the service proves liveness."*
+  > *The smart contract enforces a mathematical 4-way split per period: 47.5% to the developer steward, 30% to an operational reserve for ongoing compute costs, 20% to an emergency contingency buffer, and 2.5% to the protocol escrow fee. Funds remain non-custodial and are unlocked only as periods elapse."*
 
 ---
 
-### Scene 3: Cross-Chain 1Click On-Ramp (1:30 - 2:15)
-- **Visual**: Click **"On-Ramp"** in the top navigation bar to go to `http://localhost:3000/onramp`.
-- **Action**: Switch input token from Ethereum ETH to Solana SOL. Type in `50 USDC`. Click **"Simulate 1Click Swap"** to watch the solver simulation steps.
+### Scene 3: Access Link & Subscriber Dashboard (1:30 - 2:15)
+- **Visual**: Show the subscribe transaction confirmation, the Enclave Access Link, and the off-chain email field. Then navigate to `http://localhost:3000/dashboard`.
+- **Action**: Enter subscriber email in the modal, click copy on the Enclave Access URL, and navigate to `/dashboard` showing the live agreement card with all contract links.
 - **Narration**:
-  > *"Real-world adoption requires meeting users where their capital lives. With Pandem's 1Click Cross-Chain On-Ramp powered by NEAR Intents, users don't need to manually bridge or configure testnet RPCs.*
+  > *"Upon subscription on NEAR testnet, the subscriber receives an instant enclave access URL and can provide an off-chain email credential.*
   >
-  > *A user holding ETH on Ethereum or SOL on Solana can simply request an intent quote. The Defuser solver network settles the swap on NEAR and forwards the deposit directly into the escrow agreement in a single transaction. The UI displays the exact custom recipient message that triggers the contract deposit."*
+  > *On the Subscriber Dashboard (`/dashboard`), the user sees every active agreement, the funded vs released periods, the exact smart contracts holding their deposit, and real-time explorer links for every transaction."*
 
 ---
 
-### Scene 4: Hardware TEE Attestation & Confidential AI (2:15 - 3:00)
-- **Visual**: Click **"Agent"** in the navbar to open `http://localhost:3000/agent`.
-- **Action**: Scroll to the **"Hardware Attestation Verification"** card. Expand the raw quote view. Type a query into the confidential chat box.
+### Scene 4: Developer Telemetry & Autonomous Ops Draws (2:15 - 3:00)
+- **Visual**: Navigate to `http://localhost:3000/dev/dashboard`.
+- **Action**: Hover over the live on-chain MRR stream and the Ops Budget Station. Show the agent drawing compute funds.
 - **Narration**:
-  > *"Pandem was designed from the ground up for the Privacy and Private AI track. Behind every agreement runs an autonomous agent inside a Trusted Execution Environment on NEAR AI Cloud.*
+  > *"For developers and AI builders, Pandem provides the Maker Console on `/dev/dashboard`.*
   >
-  > *Before any periodic payout can occur, the agent must sign an on-chain heartbeat. The contract only accepts this heartbeat if the agent holds a verified function-call key bound to an Intel TDX and NVIDIA NRAS hardware enclave.*
+  > *Instead of opaque monthly payouts, developers stream revenue in 7-day intervals. The 30% operational reserve streams directly into `pandem-budget`.*
   >
-  > *Here, you can see the cryptographic quote signed by the physical silicon on the host machine. This guarantees that subscriber queries, inference data, and proprietary model weights remain 100% confidential and tamper-proof."*
+  > *Our autonomous agent runner draws inference compute payments directly from this ops budget on-chain using `draw_ops_funds`, paying for confidential inference without ever touching developer earnings."*
 
 ---
 
-### Scene 5: Liveness, Killswitch & Pro-Rata Refunds (3:00 - 4:00)
-- **Visual**: Switch testnet persona using the persona tray to `Steward` (`pandem-steward-47c388e3.testnet`) and go to `http://localhost:3000/steward`. Then switch to `Alice` and go to `http://localhost:3000/me`.
-- **Action**: On `/steward`, show the active agreement and click the **"declare_abandoned (Killswitch)"** button. Confirm the action. Then navigate to `/me`, show the status change to **"Abandoned"**, and click **"Claim Pro-Rata Refund"**.
+### Scene 5: The Killswitch & 1-Click Consumer Refund (3:00 - 3:45)
+- **Visual**: On `/dev/dashboard`, scroll to the **"Risk Correction & Killswitch Station"**. Trigger `declare_abandoned`. Then switch back to `/dashboard` and click **"Claim Pro-Rata Refund"**.
+- **Action**: Confirm `declare_abandoned` on-chain. On `/dashboard`, show the agreement status update to `Abandoned` and click `Claim Refund`.
 - **Narration**:
-  > *"Now let's see consumer protection in action. Suppose a provider needs to sunset their service or suffers infrastructure failure.*
+  > *"Now let's see consumer protection in action. Suppose an infrastructure provider sunsets their service or breaches privacy SLAs.*
   >
-  > *On the Steward dashboard, the provider triggers `declare_abandoned`. Instantly, the smart contract transitions into the abandoned state and halts all future releases.*
+  > *On the Developer Dashboard, the steward triggers `declare_abandoned`. The smart contract instantly transitions into the abandoned state and halts all future releases.*
   >
-  > *Now let's switch back to the subscriber dashboard on `/me`. The subscriber immediately sees that the agreement has terminated. With a single click on 'Claim Refund', the escrow contract returns all unreleased periods PLUS the 20% contingency buffer—returning 0.22 wNEAR directly to the subscriber's wallet.*
+  > *On the Subscriber Dashboard, the user sees that the agreement has terminated. With a single click on 'Claim Refund', the escrow contract returns all unreleased funds directly back to the subscriber's wallet—returning 60 tUSDC in a single transaction.*
   >
-  > *No chargeback disputes. No waiting on bank investigations. Complete mathematical fairness enforced by code."*
+  > *No chargeback disputes. No bank investigation wait times. Absolute mathematical fairness enforced by code."*
 
 ---
 
-### Scene 6: Conclusion & Architecture (4:00 - 4:30)
-- **Visual**: Show the NEAR Testnet Explorer transaction receipt for contract `pandem-escrow-46cee5ca.testnet` and the GitHub repository.
+### Scene 6: Architecture & Testnet Verification (3:45 - 4:15)
+- **Visual**: Show the terminal with `cargo test` passing 39/39 tests, `reports/d4-demo-receipts.json`, and the GitHub repository.
 - **Narration**:
-  > *"Every transaction you've seen today is live and verified on the NEAR Testnet. The escrow contract is written in native Rust with 100% test coverage and strict `near-contract-audit` compliance.*
+  > *"Pandem is fully implemented in native Rust with 39 passing smart contract tests, compiled to WebAssembly on NEAR, and completely integrated into our Spectr design system on Next.js 16.*
   >
-  > *Pandem bridges Real-World Money with Hardware-Attested Private AI—delivering the missing billing rail for the next generation of decentralized applications.*
-  >
-  > *Check out the repo at github.com/shreyan001/pandem and explore the live contracts on NEAR testnet today. Thank you!"*
+  > *Every transaction you saw today is live and verified on NEAR Testnet. Visit pandem-xi.vercel.app or inspect our contracts on GitHub. Thank you."*

@@ -1,0 +1,19 @@
+{
+  "subscriberAccount": "test-pandem-check-1.testnet",
+  "productId": 2,
+  "productName": "LocalAI",
+  "escrowContract": "pandem-escrow-d1-8f199e48.testnet",
+  "budgetContract": "pandem-budget-d1-8f199e48.testnet",
+  "tokenContract": "pandem-tusdc-46cee5ca.testnet",
+  "storageTx": "YJbKbNUQHXCbFJWb38Aaz51MySYKKtuX18ayGRd7CjP",
+  "faucetTx": "DvCav8Bgays4LvHHoiRoxsw6TqBVKPNF4eQJhSwRwRTr",
+  "subscribeTx": "3oW6x2wivZWKpC1ydtoi75cHTbzAv3HBhhBhFmUTNjxs",
+  "accessUrl": "https://localai.pandem.testnet/session?subscriber=test-pandem-check-1.testnet&tier=pro",
+  "subscriberEmail": "subscriber.check1@confidential-saas.io",
+  "agreementId": 3,
+  "opsSeedTx": "HyzVjFL5LkfZcwShGC37PKReiVTuXTxFxHKDJCfXFd7C",
+  "agentDrawTx": "DJuY5Jzj45RQMjn7EtBPqkGDHLZVwfW3wpzuJe7rnxh3",
+  "abandonTx": "Fw1dEp1rnBjSHxCYEKCNPYzjFGi97w5QvHYAoCAtWrbH",
+  "refundTx": "Fzr4Qtc9ngoRgGqYzN2UfknG9dHUt3f5rFejM7zoA2Eo",
+  "finalBalance": "98500000 (98.5 tUSDC)"
+}

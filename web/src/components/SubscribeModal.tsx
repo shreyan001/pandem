@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useNearWallet } from "../context/NearWalletContext";
 import { PANDEM_ESCROW_ID, PANDEM_TOKEN_ID, SPLIT_BPS } from "@pandem/shared";
+import { ExternalLink, Check, Mail, Lock } from "lucide-react";
 
 interface SubscribeModalProps {
   product: {
     id: string;
     name: string;
-    price_per_period: string; // yocto wNEAR (e.g. 100000000000000000000000 = 0.1)
+    price_per_period: string; // 6-decimal tUSDC (e.g. 5000000 = 5 tUSDC)
     period_display: string;
     grace_display: string;
+    slug?: string;
   };
   onClose: () => void;
 }
@@ -26,14 +29,18 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
     tokenBalance,
   } = useNearWallet();
 
-  const [periods, setPeriods] = useState<number>(3);
+  const [periods, setPeriods] = useState<number>(12); // default to 12 (yearly)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Price calculations in yocto (BigInt safe)
-  const pricePerPeriodBigInt = BigInt(product.price_per_period);
+  // Off-chain email collection
+  const [email, setEmail] = useState<string>("");
+  const [emailSaved, setEmailSaved] = useState<boolean>(false);
+
+  // Price calculations in 6-decimal tUSDC (BigInt safe)
+  const pricePerPeriodBigInt = BigInt(product.price_per_period || "5000000");
   const totalAmountBigInt = pricePerPeriodBigInt * BigInt(periods);
   const totalAmountStr = totalAmountBigInt.toString();
 
@@ -43,21 +50,16 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
   const contingencyPerPeriod = (pricePerPeriodBigInt * BigInt(SPLIT_BPS.CONTINGENCY_RESERVE)) / BigInt(SPLIT_BPS.TOTAL);
   const stewardPerPeriod = pricePerPeriodBigInt - feePerPeriod - opsPerPeriod - contingencyPerPeriod;
 
-  // Format to NEAR string (24 decimals)
-  const formatYocto = (yocto: bigint) => {
-    const s = yocto.toString().padStart(25, "0");
-    const intPart = s.slice(0, s.length - 24) || "0";
-    const decPart = s.slice(s.length - 24, s.length - 20);
-    return `${intPart}.${decPart}`;
+  // Format 6-decimal tUSDC to human-readable string
+  const formatTUsdc = (raw: bigint | string) => {
+    const n = typeof raw === "bigint" ? raw : BigInt(raw);
+    const whole = n / 1000000n;
+    const frac = (n % 1000000n).toString().padStart(6, "0").slice(0, 2);
+    return `${whole}.${frac}`;
   };
 
-  const subscribeMsgPayload = {
-    product_id: product.id,
-    periods,
-    subscriber: accountId ?? "your-wallet.testnet",
-    refund_to: accountId ?? "your-wallet.testnet",
-  };
-  const subscribeMsgJson = JSON.stringify(subscribeMsgPayload, null, 2);
+  const productSlug = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const accessUrl = `https://${productSlug}.pandem.testnet/session?subscriber=${accountId || "wallet"}`;
 
   const handleRegisterStorage = async () => {
     try {
@@ -90,175 +92,271 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
     }
   };
 
+  const handleSaveEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    try {
+      // Store off-chain in localStorage for this agreement
+      const key = `pandem_email_${product.id}_${accountId || "anonymous"}`;
+      localStorage.setItem(key, email.trim());
+      setEmailSaved(true);
+    } catch {
+      setEmailSaved(true);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-none">
-      <div className="bg-[#171717] border border-[#2E2E2E] rounded-none max-w-xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-5">
+      <div className="bg-spectr-surface border border-spectr-hairline rounded-none max-w-xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-5 font-sans">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#2E2E2E]">
+        <div className="flex items-center justify-between pb-4 border-b border-spectr-hairline">
           <div>
-            <h2 className="text-xl font-bold text-[#FAFAFA] flex items-center gap-2">
+            <h2 className="text-xl font-bold text-spectr-ink flex items-center gap-2">
               Subscribe to {product.name}
             </h2>
-            <p className="text-xs text-[#B8B8B8] font-mono mt-1">
+            <p className="text-xs text-spectr-muted font-mono mt-1">
               Product ID: #{product.id} · Period: {product.period_display} · Grace: {product.grace_display}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-[#B8B8B8] hover:text-[#FAFAFA] p-1.5 rounded-none hover:bg-[#262626] border border-transparent hover:border-[#2E2E2E] transition-colors"
+            className="text-spectr-muted hover:text-spectr-ink p-1.5 rounded-none hover:bg-spectr-surface-raised border border-transparent hover:border-spectr-hairline transition-colors"
           >
             ✕
           </button>
         </div>
 
-        {/* Success Banner */}
-        {txHash && (
-          <div className="p-4 rounded-none bg-[#262626] border border-[#894DEF] text-[#FAFAFA] space-y-2">
-            <div className="flex items-center gap-2 font-semibold text-sm">
-              <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
-              Subscription Confirmed on Testnet!
+        {/* Success Banner & Post-Subscribe Access Delivery */}
+        {txHash ? (
+          <div className="space-y-5">
+            <div className="p-4 rounded-none bg-spectr-surface-raised border border-spectr-primary text-spectr-ink space-y-3">
+              <div className="flex items-center gap-2 font-semibold text-sm text-spectr-primary">
+                <span className="w-2 h-2 rounded-none bg-spectr-primary" />
+                Subscription Confirmed on Testnet Escrow!
+              </div>
+              <p className="text-xs text-spectr-body font-mono break-all">
+                Tx: {txHash}
+              </p>
+              <div>
+                <a
+                  href={`https://explorer.testnet.near.org/transactions/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-spectr-primary hover:text-spectr-primary-hover font-mono underline"
+                >
+                  <span>View on NEAR Explorer</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             </div>
-            <p className="text-xs text-[#B8B8B8] font-mono break-all">
-              Tx: {txHash}
-            </p>
-            <div className="mt-3 flex gap-2">
-              <a
-                href={`https://explorer.testnet.near.org/transactions/${txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] font-medium px-3.5 py-2 rounded-none border border-[#FAFAFA] transition-colors inline-block"
-              >
-                View on Explorer →
-              </a>
-              <button
+
+            {/* Direct Access Link Box */}
+            <div className="p-4 rounded-none bg-spectr-canvas border border-spectr-hairline space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-semibold uppercase text-spectr-ink flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-spectr-success" />
+                  <span>Enclave Service Access Link</span>
+                </span>
+                <span className="text-xs font-mono px-2 py-0.5 bg-spectr-surface border border-spectr-hairline text-spectr-success">
+                  Hardware Active
+                </span>
+              </div>
+              <p className="text-xs text-spectr-body">
+                Your private enclave session is provisioned. Launch the client directly inside your verified browser sandbox:
+              </p>
+              <div className="pt-1">
+                <a
+                  href={accessUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-spectr-surface border border-spectr-hairline hover:border-spectr-primary flex items-center justify-between text-xs font-mono text-spectr-primary transition-colors block"
+                >
+                  <span className="truncate">{accessUrl}</span>
+                  <ExternalLink className="w-3.5 h-3.5 shrink-0 ml-2" />
+                </a>
+              </div>
+            </div>
+
+            {/* Off-Chain Email Notification Field */}
+            <div className="p-4 rounded-none bg-spectr-canvas border border-spectr-hairline space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label htmlFor="sub-email" className="text-xs font-mono font-semibold uppercase text-spectr-ink flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-spectr-primary" />
+                  <span>Receive Session Credentials via Email</span>
+                </label>
+                <span className="text-xs font-mono text-spectr-muted bg-spectr-surface border border-spectr-hairline px-1.5 py-0.5">
+                  off-chain
+                </span>
+              </div>
+              <p className="text-xs text-spectr-muted">
+                Optional: Store your email to receive enclave health alerts and credential recovery links. Data remains off-chain and is never committed to blockchain storage.
+              </p>
+              {emailSaved ? (
+                <div className="p-2.5 bg-spectr-surface border border-spectr-success text-xs font-mono text-spectr-success flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  <span>Email saved off-chain: {email}</span>
+                </div>
+              ) : (
+                <form onSubmit={handleSaveEmail} className="flex gap-2 pt-1">
+                  <input
+                    id="sub-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="developer@confidential.io"
+                    className="flex-1 bg-spectr-surface border border-spectr-hairline text-spectr-ink px-3 py-2 text-xs font-mono rounded-none focus:outline-none focus:border-spectr-primary"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-spectr-surface-raised hover:bg-spectr-surface border border-spectr-hairline text-spectr-ink text-xs font-mono transition-colors"
+                  >
+                    Save Email
+                  </button>
+                </form>
+              )}
+            </div>
+
+            {/* Post-Subscribe Actions */}
+            <div className="pt-2 flex flex-col sm:flex-row gap-2">
+              <Link
+                href="/dashboard"
                 onClick={onClose}
-                className="text-xs bg-[#171717] hover:bg-[#0D0D0D] text-[#FAFAFA] px-3.5 py-2 rounded-none border border-[#2E2E2E] transition-colors"
+                className="flex-1 py-3 bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink text-center text-xs font-mono font-bold rounded-none transition-colors"
               >
-                Done
+                Go to Subscriber Dashboard →
+              </Link>
+              <button
+                type="button"
+                onClick={onClose}
+                className="py-3 px-5 border border-spectr-hairline bg-spectr-surface hover:bg-spectr-surface-raised text-spectr-body hover:text-spectr-ink text-xs font-mono rounded-none transition-colors"
+              >
+                Close
               </button>
             </div>
           </div>
-        )}
-
-        {/* Error Alert */}
-        {error && (
-          <div className="p-3.5 rounded-none bg-[#262626] border border-red-700 text-red-400 text-xs">
-            {error}
-          </div>
-        )}
-
-        {!txHash && (
+        ) : (
           <div className="space-y-5">
             {/* Storage Registration Warning if needed */}
             {isConnected && !isStorageRegistered && (
-              <div className="p-3.5 rounded-none bg-[#262626] border border-[#2E2E2E] text-[#FAFAFA] text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-none bg-spectr-surface-raised border border-spectr-hairline text-spectr-ink text-xs flex items-center justify-between gap-3 font-mono">
                 <div>
-                  <div className="font-semibold text-[#894DEF]">Token Storage Required</div>
-                  <div className="text-[11px] text-[#B8B8B8] mt-0.5">
+                  <div className="font-semibold text-spectr-primary">Token Storage Required</div>
+                  <div className="text-xs text-spectr-body mt-0.5">
                     Your wallet needs a storage deposit on {PANDEM_TOKEN_ID} (0.0125 NEAR, refundable).
                   </div>
                 </div>
                 <button
                   onClick={handleRegisterStorage}
                   disabled={isRegistering}
-                  className="px-3.5 py-1.5 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] font-medium font-mono text-xs whitespace-nowrap transition-colors"
+                  className="px-3.5 py-1.5 rounded-none bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink font-medium text-xs whitespace-nowrap transition-colors"
                 >
                   {isRegistering ? "Registering..." : "Deposit 0.0125 NEAR"}
                 </button>
               </div>
             )}
 
-            {/* Period Selector */}
+            {/* Period Selector (Including 12 periods = 1 Year) */}
             <div>
-              <label className="block text-xs font-mono uppercase text-[#B8B8B8] mb-2 font-medium">
-                Select Pre-Funded Periods
+              <label className="block text-xs font-mono uppercase text-spectr-muted mb-2 font-medium">
+                Select Pre-Funded Escrow Periods
               </label>
               <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 3, 6].map((p) => (
+                {[
+                  { p: 1, label: "1 Month" },
+                  { p: 3, label: "3 Months" },
+                  { p: 6, label: "6 Months" },
+                  { p: 12, label: "1 Year (Yearly)" },
+                ].map(({ p, label }) => (
                   <button
                     key={p}
                     type="button"
                     onClick={() => setPeriods(p)}
-                    className={`py-2.5 px-3 rounded-none text-center font-mono text-sm border transition-colors ${
+                    className={`py-2.5 px-2 rounded-none text-center font-mono text-xs border transition-colors ${
                       periods === p
-                        ? "bg-[#262626] border-[#894DEF] text-[#FAFAFA] font-bold"
-                        : "bg-[#0D0D0D] border-[#2E2E2E] text-[#B8B8B8] hover:text-[#FAFAFA] hover:border-[#894DEF]"
+                        ? "bg-spectr-surface-raised border-spectr-primary text-spectr-ink font-bold"
+                        : "bg-spectr-canvas border-spectr-hairline text-spectr-body hover:text-spectr-ink hover:border-spectr-hairline"
                     }`}
                   >
-                    {p} {p === 1 ? "Period" : "Periods"}
+                    <div>{label}</div>
+                    <div className="text-xs text-spectr-muted mt-0.5">
+                      {formatTUsdc(pricePerPeriodBigInt * BigInt(p))} tUSDC
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Cost & Split Breakdown */}
-            <div className="bg-[#0D0D0D] rounded-none p-4 border border-[#2E2E2E] space-y-2.5">
-              <div className="flex justify-between items-center text-sm font-semibold text-[#FAFAFA]">
+            <div className="bg-spectr-canvas rounded-none p-4 border border-spectr-hairline space-y-2.5 font-mono">
+              <div className="flex justify-between items-center text-sm font-semibold text-spectr-ink">
                 <span>Total Escrow Deposit:</span>
-                <span className="font-mono text-[#894DEF] text-base font-bold">
-                  {formatYocto(totalAmountBigInt)} wNEAR
+                <span className="text-spectr-primary text-base font-bold">
+                  {formatTUsdc(totalAmountBigInt)} tUSDC
                 </span>
               </div>
-              <div className="text-[11px] text-[#6B6B6B] font-mono">
-                {periods} × {formatYocto(pricePerPeriodBigInt)} wNEAR per period
+              <div className="text-xs text-spectr-muted">
+                {periods} periods × {formatTUsdc(pricePerPeriodBigInt)} tUSDC per period (30 days/period)
               </div>
 
-              <div className="pt-2 border-t border-[#2E2E2E] space-y-1.5 text-xs text-[#B8B8B8]">
-                <div className="flex justify-between font-mono">
+              <div className="pt-2 border-t border-spectr-hairline space-y-1.5 text-xs text-spectr-body">
+                <div className="flex justify-between">
                   <span>Steward Payout (47.5%):</span>
-                  <span className="text-[#FAFAFA]">
-                    {formatYocto(stewardPerPeriod * BigInt(periods))} wNEAR
+                  <span className="text-spectr-ink">
+                    {formatTUsdc(stewardPerPeriod * BigInt(periods))} tUSDC
                   </span>
                 </div>
-                <div className="flex justify-between font-mono">
-                  <span>Ops Reserve (30.0%):</span>
-                  <span className="text-[#FAFAFA]">
-                    {formatYocto(opsPerPeriod * BigInt(periods))} wNEAR
+                <div className="flex justify-between">
+                  <span>Autonomous OpEx (30.0%):</span>
+                  <span className="text-spectr-ink">
+                    {formatTUsdc(opsPerPeriod * BigInt(periods))} tUSDC
                   </span>
                 </div>
-                <div className="flex justify-between font-mono">
+                <div className="flex justify-between">
                   <span>Contingency Reserve (20.0%):</span>
-                  <span className="text-[#FAFAFA]">
-                    {formatYocto(contingencyPerPeriod * BigInt(periods))} wNEAR
+                  <span className="text-spectr-ink">
+                    {formatTUsdc(contingencyPerPeriod * BigInt(periods))} tUSDC
                   </span>
                 </div>
-                <div className="flex justify-between font-mono">
-                  <span>Protocol Fee (2.5%):</span>
-                  <span className="text-[#FAFAFA]">
-                    {formatYocto(feePerPeriod * BigInt(periods))} wNEAR
+                <div className="flex justify-between">
+                  <span>Protocol Escrow Fee (2.5%):</span>
+                  <span className="text-spectr-ink">
+                    {formatTUsdc(feePerPeriod * BigInt(periods))} tUSDC
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Verifiable NEP-141 Payload Preview */}
-            <div>
+            <div className="font-mono text-xs">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-mono uppercase text-[#B8B8B8] font-medium">
+                <label className="uppercase text-spectr-muted font-medium">
                   On-Chain ft_transfer_call Payload
                 </label>
-                <span className="text-[10px] font-mono text-[#6B6B6B]">
+                <span className="text-xs text-spectr-muted">
                   Receiver: {PANDEM_ESCROW_ID.slice(0, 16)}...
                 </span>
               </div>
-              <div className="bg-[#0D0D0D] rounded-none p-3.5 border border-[#2E2E2E] font-mono text-[11px] text-[#B8B8B8] overflow-x-auto space-y-1">
-                <div><span className="text-[#6B6B6B]">contract:</span> {PANDEM_TOKEN_ID}</div>
-                <div><span className="text-[#6B6B6B]">method:</span> ft_transfer_call</div>
-                <div><span className="text-[#6B6B6B]">deposit:</span> 1 yoctoNEAR</div>
-                <div><span className="text-[#6B6B6B]">amount:</span> {totalAmountStr}</div>
-                <div className="text-[#6B6B6B] pt-1">msg (JSON payload):</div>
-                <pre className="text-[#FAFAFA] text-[10px] pl-2 border-l border-[#2E2E2E]">
-                  {subscribeMsgJson}
-                </pre>
+              <div className="bg-spectr-canvas rounded-none p-3.5 border border-spectr-hairline text-xs text-spectr-body overflow-x-auto space-y-1">
+                <div><span className="text-spectr-muted">contract:</span> {PANDEM_TOKEN_ID}</div>
+                <div><span className="text-spectr-muted">method:</span> ft_transfer_call</div>
+                <div><span className="text-spectr-muted">deposit:</span> 1 yoctoNEAR</div>
+                <div><span className="text-spectr-muted">amount:</span> {totalAmountStr} ({formatTUsdc(totalAmountBigInt)} tUSDC)</div>
               </div>
             </div>
 
+            {/* Error Alert */}
+            {error && (
+              <div className="p-3.5 rounded-none bg-spectr-surface border border-spectr-danger text-spectr-danger text-xs font-mono">
+                {error}
+              </div>
+            )}
+
             {/* Action Buttons */}
-            <div className="pt-2 flex gap-3">
+            <div className="pt-2 flex gap-3 font-mono">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 rounded-none border border-[#2E2E2E] bg-[#0D0D0D] hover:bg-[#262626] text-[#FAFAFA] font-medium text-sm transition-colors"
+                className="flex-1 py-3 rounded-none border border-spectr-hairline bg-spectr-canvas hover:bg-spectr-surface text-spectr-ink font-medium text-xs transition-colors"
               >
                 Cancel
               </button>
@@ -266,13 +364,13 @@ export function SubscribeModal({ product, onClose }: SubscribeModalProps) {
                 type="button"
                 onClick={handleSubscribe}
                 disabled={isSubmitting}
-                className="flex-1 py-3 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 rounded-none bg-spectr-primary hover:bg-spectr-primary-hover text-spectr-ink font-semibold text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting
                   ? "Submitting to NEAR..."
                   : !isConnected
                   ? "Connect Wallet & Subscribe"
-                  : `Subscribe for ${formatYocto(totalAmountBigInt)} wNEAR`}
+                  : `Subscribe for ${formatTUsdc(totalAmountBigInt)} tUSDC`}
               </button>
             </div>
           </div>

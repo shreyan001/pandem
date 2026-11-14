@@ -2,21 +2,24 @@
 
 **Decentralized SaaS & AI Agent Subscription Escrow on NEAR Protocol**
 
-[![NEAR Testnet](https://img.shields.io/badge/NEAR-Testnet-blue?logo=near)](https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet)
+[![NEAR Testnet](https://img.shields.io/badge/NEAR-Testnet-blue?logo=near)](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet)
 [![Contracts](https://img.shields.io/badge/Contracts-Rust%20near--sdk%205.30.1-orange?logo=rust)](contracts/)
-[![Tests](https://img.shields.io/badge/Tests-23%2F23%20Passed-brightgreen)](contracts/)
+[![Tests](https://img.shields.io/badge/Tests-39%2F39%20Passed-brightgreen)](contracts/)
 [![Next.js](https://img.shields.io/badge/Next.js-16%20(React%2019)-black?logo=next.js)](web/)
-[![TEE](https://img.shields.io/badge/TEE-Intel%20TDX%20%7C%20NVIDIA%20NRAS-purple)](agent/)
+[![Design System](https://img.shields.io/badge/Spectr-Sharp%20Corners-purple)](design.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 - **Repository**: [https://github.com/shreyan001/pandem](https://github.com/shreyan001/pandem)
+- **Live Production App**: [https://pandem-xi.vercel.app](https://pandem-xi.vercel.app)
 - **Primary Track**: Real-World Money (`realworld`)
 - **Secondary Track**: Privacy & Private AI (`privacy`)
-- **Deployed Contracts (Testnet)**:
-  - Escrow: [`pandem-escrow-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet)
-  - Budget: [`pandem-budget-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-46cee5ca.testnet)
-  - Registry: [`pandem-registry-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-46cee5ca.testnet)
-  - Testnet Token: [`wrap.testnet`](https://explorer.testnet.near.org/accounts/wrap.testnet)
+- **Deployed Contracts (NEAR Testnet)**:
+  - Escrow: [`pandem-escrow-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet)
+  - Budget: [`pandem-budget-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-d1-8f199e48.testnet)
+  - Registry: [`pandem-registry-v2-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-v2-46cee5ca.testnet)
+  - Testnet Token (tUSDC): [`pandem-tusdc-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-tusdc-46cee5ca.testnet)
+  - Protocol Steward: [`pandem-steward-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-steward-46cee5ca.testnet)
+  - Central Agent: [`pandem-agent-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-agent-46cee5ca.testnet)
 
 ---
 
@@ -88,28 +91,30 @@ Pandem is architected as a modular suite of three native Rust smart contracts co
 
 | Contract | Source | Testnet Account | Tests | Role & Capabilities |
 |---|---|---|---|---|
-| **`pandem-escrow`** | [`contracts/escrow/src/lib.rs`](contracts/escrow/src/lib.rs) | [`pandem-escrow-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet) | 8/8 pass | Product registry, NEP-141 `ft_on_transfer` deposit locking, 4-way split, heartbeat gating, killswitch (`declare_abandoned`), and pro-rata refunds. |
-| **`pandem-budget`** | [`contracts/budget/src/lib.rs`](contracts/budget/src/lib.rs) | [`pandem-budget-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-46cee5ca.testnet) | 9/9 pass | Operational budget streaming (30% share), 120% burst period draw caps, direct agent inference draws, ±15% inference cost dampener, and 7-day review lock. |
-| **`pandem-registry`** | [`contracts/registry/src/lib.rs`](contracts/registry/src/lib.rs) | [`pandem-registry-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-46cee5ca.testnet) | 9/9 pass | Product Hunt style directory, algorithmic composite scoring, and Waterfall Contingency Hub (proposal voting with 50% quorum, 3-day vote windows, and 20% contingency pool caps). |
+| **`pandem-escrow`** | [`contracts/escrow/src/lib.rs`](contracts/escrow/src/lib.rs) | [`pandem-escrow-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-d1-8f199e48.testnet) | 8/8 pass | 12 product listings, NEP-141 `ft_on_transfer` deposit locking on 6-decimal tUSDC, 4-way deterministic split, heartbeat gating, killswitch (`declare_abandoned`), and 1-click pro-rata refunds. |
+| **`pandem-budget`** | [`contracts/budget/src/lib.rs`](contracts/budget/src/lib.rs) | [`pandem-budget-d1-8f199e48.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-d1-8f199e48.testnet) | 9/9 pass | Operational budget streaming (30% share), period draw caps, direct agent inference draws, and on-chain telemetry. |
+| **`pandem-registry`** | [`contracts/registry/src/lib.rs`](contracts/registry/src/lib.rs) | [`pandem-registry-v2-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-v2-46cee5ca.testnet) | 9/9 pass | 12 privacy/AI SaaS directory listings, algorithmic composite scoring, and Waterfall Contingency Hub. |
 | **`pandem-mock-tusdc`** | [`contracts/mock_tusdc/src/lib.rs`](contracts/mock_tusdc/src/lib.rs) | [`pandem-tusdc-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-tusdc-46cee5ca.testnet) | 5/5 pass | Mock NEP-141 USDC token with self-registering faucet (100 tUSDC / 24h). |
 | **`pandem-tripartite`** *(Experimental)* | [`contracts/pandem-tripartite/src/lib.rs`](contracts/pandem-tripartite/src/lib.rs) | Not deployed (Stage 2 experimental) | 8/8 pass | Experimental contract targeting mainnet intents.near with 50/30/17.5/2.5 split and dispute voting. Not wired for Stage 1 D1 money path. |
 
-**Total Test Coverage:** **23 passed, 0 failed, 0 errors** (`cd contracts && cargo test`).
+**Total Test Coverage:** **39 passed, 0 failed, 0 errors** (`cd contracts && cargo test`).
 
 ---
 
-## 3. Verifiable Testnet Explorer Receipts
+## 3. Verifiable Testnet Explorer Receipts (D1 & D4 End-to-End)
 
-Every operational state transition is deployed and verified on NEAR Testnet:
+Every operational state transition is executed and persistently verified on NEAR Testnet:
 
-| Action / Capability | Transaction Hash / Receipt | Target / Details |
+| Action / Capability | Transaction ID / Explorer Receipt | Value / Outcome |
 |---|---|---|
-| **Escrow Contract Deploy & Init** | [`88Ms1iCuq3uC...`](https://explorer.testnet.near.org/transactions/88Ms1iCuq3uC7qbNfWm7wgQ4uQd5icUAb1eSac3KAtts) | Deployed `contracts/escrow` to `pandem-escrow-46cee5ca.testnet` |
-| **Budget Contract Deploy & Init** | [`59JVrLeFwsBC...`](https://explorer.testnet.near.org/transactions/59JVrLeFwsBCQoP8YYSyY7Z8bnWWb7JBq756n5fsF1ox) | Deployed `contracts/budget` to `pandem-budget-46cee5ca.testnet` |
-| **Budget Token Storage Registration** | [`5KPKY5gTdyqz...`](https://explorer.testnet.near.org/transactions/5KPKY5gTdyqza51iZ7uT9vhgrRas3CxQGqpAWA4AkXit) | Registered `pandem-budget-46cee5ca.testnet` on `wrap.testnet` |
-| **Registry Contract Deploy & Init** | [`Gi6qzGSg7tjc...`](https://explorer.testnet.near.org/transactions/Gi6qzGSg7tjchAmKRhNJAfSLKTQPMHUhhh9iUeMRUmqZ) | Deployed `contracts/registry` to `pandem-registry-46cee5ca.testnet` |
-| **Product Approval** | [`DMv1jw1S9tpC...`](https://explorer.testnet.near.org/transactions/DMv1jw1S9tpCJcdRfoRJf3yZbjdph1ZbGenAwtHgsjdy) | Approved product #1 (`prod-deepsearch-m4`) for subscription |
-| **Subscription Deposit (`ft_transfer_call`)** | [`5XnsktfXTa6D...`](https://explorer.testnet.near.org/transactions/5XnsktfXTa6Df8NrghXAiEfUUeGjpy5Gy7KK7oF5J3Fc) | Deposited 0.3 wNEAR for 3 periods into escrow |
+| **tUSDC Storage Deposit** | [`YJbKbNUQHXCb...`](https://explorer.testnet.near.org/transactions/YJbKbNUQHXCbFJWb38Aaz51MySYKKtuX18ayGRd7CjP) | Subscriber registered storage on `pandem-tusdc-46cee5ca.testnet` |
+| **tUSDC Faucet Claim** | [`DvCav8Bgays4...`](https://explorer.testnet.near.org/transactions/DvCav8Bgays4LvHHoiRoxsw6TqBVKPNF4eQJhSwRwRTr) | 100 tUSDC claimed to fresh subscriber account |
+| **Ops Budget Funding (`ft_transfer_call`)** | [`HyzVjFL5LkfZ...`](https://explorer.testnet.near.org/transactions/HyzVjFL5LkfZcwShGC37PKReiVTuXTxFxHKDJCfXFd7C) | 1.5 tUSDC seeded to `pandem-budget-d1-8f199e48.testnet` for Product #2 |
+| **Yearly Subscribe (`ft_transfer_call`)** | [`3oW6x2wivZWK...`](https://explorer.testnet.near.org/transactions/3oW6x2wivZWKpC1ydtoi75cHTbzAv3HBhhBhFmUTNjxs) | 60 tUSDC locked into Escrow for 12 periods (Agreement #3) |
+| **Agent AI Inference Draw** | [`DJuY5Jzj45RQ...`](https://explorer.testnet.near.org/transactions/DJuY5Jzj45RQMjn7EtBPqkGDHLZVwfW3wpzuJe7rnxh3) | 0.5 tUSDC drawn by `pandem-agent-46cee5ca.testnet` from Ops Budget |
+| **Steward Killswitch Triggered** | [`Fw1dEp1rnBjS...`](https://explorer.testnet.near.org/transactions/Fw1dEp1rnBjSHxCYEKCNPYzjFGi97w5QvHYAoCAtWrbH) | `declare_abandoned` executed on Product #2 by Steward |
+| **1-Click Subscriber Refund** | [`Fzr4Qtc9ngoR...`](https://explorer.testnet.near.org/transactions/Fzr4Qtc9ngoRgGqYzN2UfknG9dHUt3f5rFejM7zoA2Eo) | Full 60 tUSDC unreleased funds refunded directly to subscriber |
+| **Final Restored Balance** | *On-chain verified: 98.5 tUSDC* | 100% refund of unreleased subscription verified on testnet RPC |
 | **Enclave Agent Heartbeat** | [`C9eRiuYdcjeG...`](https://explorer.testnet.near.org/transactions/C9eRiuYdcjeGwAonoNjt3JfYozAdC9ya7nVDwg2HLcBb) | Cryptographic liveness heartbeat for period #1 |
 | **Period 1 Fund Release** | [`AyfiTDb2PVWL...`](https://explorer.testnet.near.org/transactions/AyfiTDb2PVWL3QeBypyDTbFGttvLRpS5cUs2R9R7m9fc) | Released 0.0475 wNEAR to steward + treasury/ops |
 | **Registry Product Listing #1** | [`ERa8k4ktcCNS...`](https://explorer.testnet.near.org/transactions/ERa8k4ktcCNSBSVmPnk8uh67NFutpBhQEfi29X2ujKyr) | Registered `DeepSearch AI Pro` with TEE enclave flag |
@@ -188,21 +193,22 @@ cd pandem
 npm install
 ```
 
-### 2. Verify Smart Contract Suite (23 Tests Pass)
+### 2. Verify Smart Contract Suite (39 Tests Pass)
 ```bash
 cd contracts
 cargo test
 cd ..
 ```
 
-### 3. Verify TypeScript Typechecks
+### 3. Verify Design Lock Linter & TypeScript Typechecks
 ```bash
+npm run lint:design
 npm run typecheck
 ```
 
 ### 4. Launch Local Development Daemons
 ```bash
-# Terminal 1: Launch Web Application
+# Terminal 1: Launch Web Application (Next.js 16)
 npm run dev -w web
 
 # Terminal 2: Launch Autonomous Agent Runner Service
@@ -211,17 +217,24 @@ npm run dev -w agent
 
 ### 5. Interactive Pages & Workflows
 Open your browser to:
-- `http://localhost:3000/`: Product Hunt style leaderboard, upvoting, and composite score simulator.
-- `http://localhost:3000/governance`: Waterfall Contingency Hub (active proposal voting and quorum tracking).
-- `http://localhost:3000/me`: Subscriber agreement tracker, refund claims, and embedded 1Click on-ramp.
-- `http://localhost:3000/steward`: Provider console, reserve telemetry, and emergency killswitch.
+- `http://localhost:3000/`: Spectr Design feed, developer launchpad, enclave inspector, and security matrix.
+- `http://localhost:3000/products/[slug]`: Verifiable product page, monthly/yearly Pro & Max tiers, and subscription modal with off-chain email capture.
+- `http://localhost:3000/dashboard`: Subscriber dashboard, agreement telemetry, and 1-click refund button.
+- `http://localhost:3000/dev/dashboard`: Developer telemetry, live on-chain MRR, ops budget station, and killswitch panel.
 - `http://localhost:3000/agent`: Confidential AI chat, Intel TDX attestation quote, and cloud compute ledger.
-- `http://localhost:3000/components`: Atomic design system testbed.
-- `http://localhost:3000/onramp`: Standalone 1Click cross-chain solver simulator.
 
 ---
 
-## 8. Documentation & Submission Deliverables
+## 8. Future Roadmap
+
+1. **Hardware TEE Enclave Hosting**: Autonomous verifiable container orchestration on Phala / Marlin / NEAR AI Cloud TEEs, deploying service frontends to decentralized storage (Filecoin / IPFS) with verifiable CIDs.
+2. **Confidential Intents**: Zero-knowledge private order intents using the NEAR Intents 1Click Defuser solver to eliminate public mempool transaction tracking for high-privacy subscriptions.
+3. **RA-TLS (Remote Attestation TLS)**: End-to-end cryptographic channel directly terminating inside the TEE enclave, guaranteeing TLS traffic cannot be intercepted even by the host machine hypervisor.
+4. **Tripartite Mainnet Protocol (`contracts/pandem-tripartite`)**: Mainnet settlement contract deploying the 50/30/17.5/2.5 split with multi-party dispute arbitration and automated community risk voting.
+
+---
+
+## 9. Documentation & Submission Deliverables
 
 All detailed reports, submission dossiers, and architectural analyses are located in [`reports/`](reports/):
 - **[PROJECT-REPORT.md](reports/PROJECT-REPORT.md)**: Comprehensive technical report and milestone retrospective.
