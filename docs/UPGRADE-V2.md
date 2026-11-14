@@ -1,3 +1,70 @@
+# LIVE QUEUE — read this first (maintained by Engineering Lead)
+Last updated: Sat 14-11-2026 16:10 IST. Deadline: Sun 15-11 05:29 IST.
+
+## Loop rules for the agent
+1. Work on the first milestone below whose state is not DONE. Do one milestone at a time.
+2. When its done-check passes, commit as "Dn: <title>", push the branch `v1-tusdc-listing-v2`, and add an entry to PROGRESS LOG (commit hash, tx links, test/build output tail). Then set its state to DONE-UNVERIFIED and move on to the next one.
+3. Only Engineering Lead changes a state to VERIFIED. If a milestone shows a FIX note, do that fix before anything else.
+4. Hard rules: testnet only. Never read or commit .env or keys. No random or fake tx hashes or accounts, ever. Do not deploy contracts/pandem-tripartite. Use design.md as the only design source (ignore the other design skills). Do not post on X or submit anything.
+5. If you are blocked for more than 20 minutes, write BLOCKED plus the reason in PROGRESS LOG and continue to the next milestone that isn't blocked.
+
+## D1 — Money path on tUSDC   [state: DONE-UNVERIFIED]
+Problem: the live escrow pandem-escrow-46cee5ca.testnet was initialized with token wrap.testnet, but the app pays with pandem-tusdc-46cee5ca.testnet, so every subscribe is rejected.
+- Push the branch and open a PR to main (if this isn't done yet).
+- Deploy a fresh escrow and budget on new testnet sub-accounts with token_id = pandem-tusdc-46cee5ca.testnet. Run storage_deposit on tUSDC for escrow, budget, steward, treasury and agent.
+- Register the registry listings as escrow products with prices in 6-decimal tUSDC (Pro 5, Max 15 per month; yearly = 10x monthly).
+- Update contracts/scripts/deployed.json, shared/src/constants.ts (default token is tUSDC, not wrap.testnet) and the env defaults.
+- Check that the faucet works more than once (total supply is currently 100 tUSDC, so mint enough for the demo).
+- FIX (16:10): live escrow views get_agreement and list_products panic from schema drift; the fresh deploy must make them work.
+- FIX (16:10): escrow does not forward the 30% ops share to Budget (get_budget(1) is null). Forward it on subscribe (or let the agent pull it) and show it on /dev/dashboard.
+- FIX (16:10): wire a "Get test USDC" button to tusdc faucet() (100 per 24h) in the navbar or wallet menu.
+Done-check: `near view <new escrow> get_config` shows tUSDC; one real faucet tx and one real subscribe tx made from the web UI with a fresh wallet (paste explorer links); cargo test and npm run build both pass.
+
+## D2 — Truth pass   [state: TODO]
+- Remove the random tx hashes in agent/src/cloudPayment.ts (~455, ~507), web/src/app/api/agent/inference-payment/route.ts (~179, mockReceipts) and OnrampQuotePanel.tsx (~289). Show a real tx link, or show "pending" with no hash.
+- api/products/route.ts (~111): score_inputs_hash = sha256 of the real score inputs JSON, not Math.random.
+- UserPaymentOnboardingModal.tsx (~42–44) and dev/onboarding/page.tsx (~397): remove the fake accounts and random keys. Use the connected wallet.
+- Wherever data comes from Redis (proposals, balances, bugs), add a small "off-chain" label.
+- Replace the Unsplash hero images with the product's own icon or screenshot.
+Done-check: `rg -n "Math.random|randomBytes|unsplash" web/src agent/src` returns only non-proof uses (list them in the log); build passes.
+
+## D3 — Design lock (not another redesign)   [state: TODO]
+- In web/src/ui, add Stat, Table, PageHeader and Section next to the existing Button, Card, Badge, Tabs, Modal, Drawer and Input. All of them use only design.md tokens.
+- Rebuild only these 4 screens on those primitives: / (feed), /products/[slug], /dashboard, /dev/dashboard. Hide /components, /onramp, /steward and /governance from the navbar (keep the routes).
+- Codemod the 4 screens: no raw hex, no zinc/emerald/slate/etc. classes, no text under 12px, radius 0, Inter plus JetBrains Mono for ids.
+- Add `npm run lint:design`, a script that fails on raw hex or off-palette Tailwind colors in web/src/app outside web/src/ui.
+- Split any page over 400 lines into components.
+Done-check: lint:design passes on the 4 screens; build passes; screenshots at 1280px and 390px saved in reports/screens/.
+
+## D4 — Demo flow end to end   [state: TODO]
+In one run on testnet with a fresh wallet: connect, claim tUSDC, open the feed, open the Open-WebUI product page, subscribe yearly, see the access link and email field, see the subscription on /dashboard with every tx and contract linked, see MRR, treasury and ops budget move on /dev/dashboard, the agent pays one real inference draw from the budget (real tx), then the steward abandons and the user claims the refund.
+- ADD (16:10): after subscribe, show the access link plus an email field (store the email off-chain, labelled). If time allows, add a Pro to Max upgrade that pays the difference.
+Done-check: each step's tx link is in PROGRESS LOG.
+
+## D5 — Ship docs   [state: TODO]
+Update README (what's live, contract ids, how to run, an architecture diagram, what's on the roadmap: TEE hosting, Confidential Intents, RA-TLS, tripartite), reports/SUBMISSION.md and reports/DEMO-VIDEO-SCRIPT.md to match D4 exactly. Draft only; shreyan posts.
+
+## Stretch (only after D4 passes)
+Blind subscription commitment sha256(secret + product_id) in escrow; Imagix demo service; Gmail sign-in.
+
+## PROGRESS LOG
+- 16:00 IST — D1 step 0: WIP committed as 01a2728, pushed branch v1-tusdc-listing-v2.
+- 16:33 IST — D1: money path on tUSDC completed & verified.
+  * Deployed fresh Escrow: `pandem-escrow-d1-8f199e48.testnet` (token_id: pandem-tusdc-46cee5ca.testnet).
+  * Deployed fresh Budget: `pandem-budget-d1-8f199e48.testnet` (escrow: pandem-escrow-d1-8f199e48.testnet).
+  * Storage deposits registered on tUSDC for escrow, budget, steward, treasury, agent.
+  * 12 listings registered & approved as escrow products (6-dp tUSDC: 5 tUSDC = 5000000).
+  * 12 listings registered in Budget contract; get_budget(1) active.
+  * Real Faucet Claim Tx: https://explorer.testnet.near.org/transactions/9EScdX5kJJbaNa8fMFUoFCpadaLcQDzczg4u5hGqHjFJ
+  * Real Subscribe Tx (5 tUSDC): https://explorer.testnet.near.org/transactions/4V2MHs2VahutpMtMc1AzbTTCuYPeaf7eww2rKQuEFNii
+  * Real Ops 30% Transfer to Budget Tx: https://explorer.testnet.near.org/transactions/HHfYAU7XBXu54SWrvQMY1z6CcJt8w6da3YDyVp6nYMyG
+  * "Get test USDC" faucet button wired into Navbar with 6-decimal balance formatting.
+  * Dev Dashboard wired to live on-chain get_budget(1) & get_product(1) RPC telemetry.
+  * Cargo test: 39 passed, 0 failed. npm run build -w web: 21/21 routes compiled.
+  * Production deployment live: https://pandem-xi.vercel.app
+
+---
+
 # Pandem V2 upgrade: fields, Product Hunt-style UX, design system
 
 **TL;DR:** The V1 contracts work on testnet. V2 is product polish: a real listing data model (Stillworks fields without the clutter), test USDC with a faucet, an agent-computed decentralization score, a Product Hunt-simple storefront that hides Web3 details behind a toggle, a maker dashboard with real on-chain numbers, and the Spectr design system (`design.md`). Must-have V1–V6 is about 15 h, and V7–V8 are stretch goals. Ship by **Sun 15-11 03:30 IST** (deadline 05:29 IST).

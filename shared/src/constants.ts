@@ -1,8 +1,8 @@
 export const PANDEM_ESCROW_ID =
-  process.env["PANDEM_ESCROW_ID"] ?? "pandem-escrow-46cee5ca.testnet";
+  process.env["PANDEM_ESCROW_ID"] ?? "pandem-escrow-d1-8f199e48.testnet";
 
 export const PANDEM_TOKEN_ID =
-  process.env["PANDEM_TOKEN_ID"] ?? "wrap.testnet";
+  process.env["PANDEM_TOKEN_ID"] ?? "pandem-tusdc-46cee5ca.testnet";
 
 export const PANDEM_TREASURY_ID =
   process.env["PANDEM_TREASURY_ID"] ?? "pandem-treasury-46cee5ca.testnet";
@@ -14,10 +14,10 @@ export const PANDEM_AGENT_ID =
   process.env["PANDEM_AGENT_ID"] ?? "pandem-agent-46cee5ca.testnet";
 
 export const PANDEM_BUDGET_ID =
-  process.env["PANDEM_BUDGET_ID"] ?? "pandem-budget-46cee5ca.testnet";
+  process.env["PANDEM_BUDGET_ID"] ?? "pandem-budget-d1-8f199e48.testnet";
 
 export const PANDEM_REGISTRY_ID =
-  process.env["PANDEM_REGISTRY_ID"] ?? "pandem-registry-46cee5ca.testnet";
+  process.env["PANDEM_REGISTRY_ID"] ?? "pandem-registry-v2-46cee5ca.testnet";
 
 export const CLOUD_COMPUTE_OPERATOR_ID =
   process.env["CLOUD_COMPUTE_OPERATOR_ID"] ?? "cloud-compute-operator.testnet";

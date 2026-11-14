@@ -88,9 +88,11 @@ Pandem is architected as a modular suite of three native Rust smart contracts co
 
 | Contract | Source | Testnet Account | Tests | Role & Capabilities |
 |---|---|---|---|---|
-| **`pandem-escrow`** | [`contracts/escrow/src/lib.rs`](contracts/escrow/src/lib.rs) | [`pandem-escrow-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet) | 7/7 pass | Product registry, NEP-141 `ft_on_transfer` deposit locking, 4-way split, heartbeat gating, killswitch (`declare_abandoned`), and pro-rata refunds. |
+| **`pandem-escrow`** | [`contracts/escrow/src/lib.rs`](contracts/escrow/src/lib.rs) | [`pandem-escrow-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet) | 8/8 pass | Product registry, NEP-141 `ft_on_transfer` deposit locking, 4-way split, heartbeat gating, killswitch (`declare_abandoned`), and pro-rata refunds. |
 | **`pandem-budget`** | [`contracts/budget/src/lib.rs`](contracts/budget/src/lib.rs) | [`pandem-budget-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-budget-46cee5ca.testnet) | 9/9 pass | Operational budget streaming (30% share), 120% burst period draw caps, direct agent inference draws, ±15% inference cost dampener, and 7-day review lock. |
-| **`pandem-registry`** | [`contracts/registry/src/lib.rs`](contracts/registry/src/lib.rs) | [`pandem-registry-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-46cee5ca.testnet) | 7/7 pass | Product Hunt style directory, algorithmic composite scoring, and Waterfall Contingency Hub (proposal voting with 50% quorum, 3-day vote windows, and 20% contingency pool caps). |
+| **`pandem-registry`** | [`contracts/registry/src/lib.rs`](contracts/registry/src/lib.rs) | [`pandem-registry-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-registry-46cee5ca.testnet) | 9/9 pass | Product Hunt style directory, algorithmic composite scoring, and Waterfall Contingency Hub (proposal voting with 50% quorum, 3-day vote windows, and 20% contingency pool caps). |
+| **`pandem-mock-tusdc`** | [`contracts/mock_tusdc/src/lib.rs`](contracts/mock_tusdc/src/lib.rs) | [`pandem-tusdc-46cee5ca.testnet`](https://explorer.testnet.near.org/accounts/pandem-tusdc-46cee5ca.testnet) | 5/5 pass | Mock NEP-141 USDC token with self-registering faucet (100 tUSDC / 24h). |
+| **`pandem-tripartite`** *(Experimental)* | [`contracts/pandem-tripartite/src/lib.rs`](contracts/pandem-tripartite/src/lib.rs) | Not deployed (Stage 2 experimental) | 8/8 pass | Experimental contract targeting mainnet intents.near with 50/30/17.5/2.5 split and dispute voting. Not wired for Stage 1 D1 money path. |
 
 **Total Test Coverage:** **23 passed, 0 failed, 0 errors** (`cd contracts && cargo test`).
 

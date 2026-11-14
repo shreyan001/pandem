@@ -17,6 +17,7 @@ interface NearWalletContextType {
   setManualAccount: (acc: string) => void;
   refreshBalances: () => Promise<void>;
   registerStorage: () => Promise<string | null>;
+  claimFaucet: () => Promise<string | null>;
   sendSubscribe: (productId: string, periods: number, amountYocto: string) => Promise<string | null>;
 }
 
@@ -224,6 +225,35 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const claimFaucet = async (): Promise<string | null> => {
+    if (!connector || !accountId) return null;
+    try {
+      setWalletError(null);
+      const wallet = await connector.wallet();
+      const outcome: any = await wallet.signAndSendTransaction({
+        receiverId: PANDEM_TOKEN_ID,
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "faucet",
+              args: {},
+              gas: "50000000000000", // 50 TGas
+              deposit: "0",
+            },
+          },
+        ],
+      });
+      await refreshBalances();
+      return outcome?.transaction?.hash ?? "submitted";
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      console.warn("Claim faucet notice:", msg);
+      setWalletError(`Faucet notice: ${msg}`);
+      return null;
+    }
+  };
+
   const sendSubscribe = async (
     productId: string,
     periods: number,
@@ -283,6 +313,7 @@ export function NearWalletProvider({ children }: { children: React.ReactNode }) 
         setManualAccount,
         refreshBalances,
         registerStorage,
+        claimFaucet,
         sendSubscribe,
       }}
     >

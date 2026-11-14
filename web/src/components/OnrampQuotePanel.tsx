@@ -955,7 +955,7 @@ export function OnrampQuotePanel() {
               <div className="p-3.5 rounded-none bg-zinc-900/70 border border-zinc-800">
                 <div className="text-cyan-400 font-bold mb-1">2. Atomic Escrow Delivery</div>
                 <p className="text-zinc-400 leading-relaxed text-[11px]">
-                  Unlike bridge tokens that require manual claiming or wrapping, the winning solver delivers native NEP-141 tokens directly into <code className="text-white">pandem-escrow-46cee5ca.testnet</code>. The entire multi-chain interaction settles in a single atomic pipeline.
+                  Unlike bridge tokens that require manual claiming or wrapping, the winning solver delivers native NEP-141 tokens directly into <code className="text-white">pandem-escrow-d1-8f199e48.testnet</code>. The entire multi-chain interaction settles in a single atomic pipeline.
                 </p>
               </div>
 

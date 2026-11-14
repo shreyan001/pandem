@@ -128,10 +128,11 @@ impl BudgetContract {
     /// Expected msg: {"action": "receive_ops_funds", "product_id": 1}
     pub fn ft_on_transfer(
         &mut self,
-        _sender_id: AccountId,
+        sender_id: AccountId,
         amount: U128,
         msg: String,
     ) -> PromiseOrValue<U128> {
+        let _ = sender_id;
         // 1. Verify caller is approved token
         if env::predecessor_account_id() != self.token_id {
             return PromiseOrValue::Value(amount);

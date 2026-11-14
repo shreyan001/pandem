@@ -25,29 +25,40 @@ export function Navbar() {
     connect,
     disconnect,
     tokenBalance,
+    claimFaucet,
     walletError,
     clearWalletError,
   } = useNearWallet();
   const [mounted, setMounted] = useState(false);
+  const [isClaimingFaucet, setIsClaimingFaucet] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Format yocto wNEAR to human readable (24 decimals)
-  const formatBalance = (yocto: string) => {
-    if (!yocto || yocto === "0") return "0.00";
+  const handleClaimFaucet = async () => {
     try {
-      const len = yocto.length;
-      if (len <= 24) {
-        const padded = yocto.padStart(24, "0");
-        return `0.${padded.slice(0, 4)}`;
+      setIsClaimingFaucet(true);
+      await claimFaucet();
+    } finally {
+      setIsClaimingFaucet(false);
+    }
+  };
+
+  // Format 6-decimal tUSDC to human readable
+  const formatBalance = (raw: string) => {
+    if (!raw || raw === "0") return "0.00";
+    try {
+      const len = raw.length;
+      if (len <= 6) {
+        const padded = raw.padStart(6, "0");
+        return `0.${padded.slice(0, 2)}`;
       }
-      const whole = yocto.slice(0, len - 24);
-      const frac = yocto.slice(len - 24, len - 20);
+      const whole = raw.slice(0, len - 6);
+      const frac = raw.slice(len - 6, len - 4);
       return `${whole}.${frac}`;
     } catch {
-      return yocto;
+      return raw;
     }
   };
 
@@ -111,6 +122,16 @@ export function Navbar() {
 
           {mounted && isConnected ? (
             <div className="flex items-center gap-2" suppressHydrationWarning>
+              <button
+                type="button"
+                onClick={handleClaimFaucet}
+                disabled={isClaimingFaucet}
+                className="px-2.5 py-1.5 text-xs font-mono font-medium bg-[#141414] hover:bg-[#181818] text-[#894DEF] hover:text-[#A273F2] border border-[#222222] hover:border-[#894DEF]/50 transition-colors flex items-center gap-1.5 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#894DEF]"
+                title="Claim 100 test USDC (once per 24 hours)"
+              >
+                <span>{isClaimingFaucet ? "Claiming..." : "Get test USDC"}</span>
+              </button>
+
               <div className="flex items-center gap-2 px-3 py-1.5 bg-[#141414] border border-[#222222] text-xs">
                 <span className="w-1.5 h-1.5 bg-[#22C55E]" aria-hidden="true" />
                 <span className="font-mono text-[#FAFAFA] text-xs">
@@ -119,7 +140,7 @@ export function Navbar() {
                 </span>
                 <span className="text-[#333333]" aria-hidden="true">|</span>
                 <span className="font-mono text-[#A1A1A1] text-xs tabular-nums">
-                  {formatBalance(tokenBalance)} wNEAR
+                  {formatBalance(tokenBalance)} tUSDC
                 </span>
               </div>
               <button
