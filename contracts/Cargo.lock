@@ -1627,6 +1627,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "pandem-mock-tusdc"
+version = "0.1.0"
+dependencies = [
+ "near-sdk",
+]
+
+[[package]]
 name = "pandem-registry"
 version = "0.1.0"
 dependencies = [

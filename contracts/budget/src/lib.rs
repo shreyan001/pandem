@@ -504,7 +504,7 @@ mod tests {
         AccountId,
     ) {
         let owner: AccountId = "owner.testnet".parse().unwrap();
-        let token: AccountId = "usdc.testnet".parse().unwrap();
+        let token: AccountId = "tusdc.testnet".parse().unwrap();
         let escrow: AccountId = "escrow.testnet".parse().unwrap();
         let steward: AccountId = "steward.testnet".parse().unwrap();
         let agent: AccountId = "agent.testnet".parse().unwrap();

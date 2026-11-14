@@ -19,6 +19,14 @@ pub enum ProductStatus {
 }
 
 #[near(serializers = [borsh, json])]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProductTier {
+    pub tier_id: String,
+    pub name: String,
+    pub price_per_period: U128,
+}
+
+#[near(serializers = [borsh, json])]
 #[derive(Clone, Debug)]
 pub struct Product {
     pub steward: AccountId,
@@ -32,12 +40,14 @@ pub struct Product {
     pub ops_reserve: U128,
     pub contingency_reserve: U128,
     pub passport_root: String,
+    pub tiers: Vec<ProductTier>,
 }
 
 #[near(serializers = [borsh, json])]
 #[derive(Clone, Debug)]
 pub struct Agreement {
     pub product_id: u64,
+    pub tier_id: String,
     pub subscriber: AccountId,
     pub refund_to: AccountId,
     pub price_per_period: U128,
@@ -62,6 +72,7 @@ pub struct EscrowState {
 pub struct RawSubscribeMsg {
     pub product_id: String,
     pub periods: u64,
+    pub tier_id: Option<String>,
     pub subscriber: Option<AccountId>,
     pub refund_to: Option<AccountId>,
 }
@@ -131,6 +142,21 @@ impl EscrowContract {
         let id = self.next_product_id;
         self.next_product_id += 1;
 
+        let default_pro = price_per_period;
+        let default_max = U128(price_per_period.0.checked_mul(3).unwrap_or(price_per_period.0));
+        let tiers = vec![
+            ProductTier {
+                tier_id: "pro".to_string(),
+                name: "Pro".to_string(),
+                price_per_period: default_pro,
+            },
+            ProductTier {
+                tier_id: "max".to_string(),
+                name: "Max".to_string(),
+                price_per_period: default_max,
+            },
+        ];
+
         let product = Product {
             steward,
             heartbeat_signer,
@@ -143,6 +169,7 @@ impl EscrowContract {
             ops_reserve: U128(0),
             contingency_reserve: U128(0),
             passport_root,
+            tiers,
         };
 
         self.products.insert(id, product);
@@ -152,6 +179,37 @@ impl EscrowContract {
         ));
 
         id
+    }
+
+    /// Add or update a product tier (steward or owner).
+    pub fn add_product_tier(
+        &mut self,
+        product_id: u64,
+        tier_id: String,
+        name: String,
+        price_per_period: U128,
+    ) {
+        let product = self.products.get_mut(&product_id).expect("Product not found");
+        let caller = env::predecessor_account_id();
+        require!(
+            caller == product.steward || caller == self.owner,
+            "Only steward or owner can add tier"
+        );
+        require!(price_per_period.0 > 0, "Price must be positive");
+        if let Some(existing) = product
+            .tiers
+            .iter_mut()
+            .find(|t| t.tier_id.to_lowercase() == tier_id.to_lowercase())
+        {
+            existing.price_per_period = price_per_period;
+            existing.name = name;
+        } else {
+            product.tiers.push(ProductTier {
+                tier_id,
+                name,
+                price_per_period,
+            });
+        }
     }
 
     /// Steward approves and activates product.
@@ -206,7 +264,21 @@ impl EscrowContract {
             return PromiseOrValue::Value(amount);
         }
 
-        let price = product.price_per_period.0;
+        // 4. Resolve tier & price
+        let tier_id = raw_msg
+            .tier_id
+            .clone()
+            .unwrap_or_else(|| "pro".to_string());
+        let price = if let Some(tier) = product
+            .tiers
+            .iter()
+            .find(|t| t.tier_id.to_lowercase() == tier_id.to_lowercase())
+        {
+            tier.price_per_period.0
+        } else {
+            product.price_per_period.0
+        };
+
         let total_cost = match price.checked_mul(raw_msg.periods as u128) {
             Some(c) => c,
             None => return PromiseOrValue::Value(amount),
@@ -228,6 +300,7 @@ impl EscrowContract {
 
         let agreement = Agreement {
             product_id,
+            tier_id: tier_id.clone(),
             subscriber: subscriber.clone(),
             refund_to: refund_to.clone(),
             price_per_period: U128(price),
@@ -249,7 +322,7 @@ impl EscrowContract {
         self.escrows.insert(agreement_id, escrow);
 
         env::log_str(&format!(
-            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"subscribed","data":[{{"id":{agreement_id},"subscriber":"{subscriber}","product_id":{product_id},"periods":{},"amount":"{total_cost}"}}]}}"#,
+            r#"EVENT_JSON:{{"standard":"pandem","version":"0.1.0","event":"subscribed","data":[{{"id":{agreement_id},"subscriber":"{subscriber}","product_id":{product_id},"periods":{},"tier_id":"{tier_id}","amount":"{total_cost}"}}]}}"#,
             raw_msg.periods
         ));
 
@@ -619,7 +692,7 @@ mod tests {
 
     fn setup_contract() -> (EscrowContract, AccountId, AccountId, AccountId, AccountId, AccountId) {
         let owner: AccountId = "owner.testnet".parse().unwrap();
-        let token: AccountId = "usdc.testnet".parse().unwrap();
+        let token: AccountId = "tusdc.testnet".parse().unwrap();
         let treasury: AccountId = "treasury.testnet".parse().unwrap();
         let steward: AccountId = "steward.testnet".parse().unwrap();
         let agent: AccountId = "agent.testnet".parse().unwrap();
@@ -846,5 +919,28 @@ mod tests {
         let product = contract.get_product(1).unwrap();
         assert_eq!(product.ops_reserve.0, 0);
         assert_eq!(product.contingency_reserve.0, 0);
+    }
+
+    // 7. Subscribe with tier (pro vs max)
+    #[test]
+    fn test_subscribe_with_tier_pro_and_max() {
+        let (mut contract, _owner, token, _treasury, _steward, _agent) = setup_contract();
+
+        // Subscribe to tier "max" (price = 3_000 per period). 2 periods = 6_000
+        testing_env!(VMContextBuilder::new().predecessor_account_id(token.clone()).build());
+        let msg_max = r#"{"product_id":"1","periods":2,"tier_id":"max"}"#;
+        let res_max = contract.ft_on_transfer("bob.testnet".parse().unwrap(), U128(7_000), msg_max.to_string());
+        if let PromiseOrValue::Value(unused) = res_max {
+            assert_eq!(unused.0, 1_000); // 7000 - 6000 = 1000 unused
+        } else {
+            panic!("Expected Value");
+        }
+
+        let agreement = contract.get_agreement(1).unwrap();
+        assert_eq!(agreement.tier_id, "max");
+        assert_eq!(agreement.price_per_period.0, 3_000);
+        let escrow = contract.get_escrow(1).unwrap();
+        assert_eq!(escrow.balance.0, 6_000);
+        assert_eq!(escrow.funded_periods, 2);
     }
 }

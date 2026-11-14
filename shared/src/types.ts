@@ -1,5 +1,11 @@
 export type ProductStatus = "Pending" | "Active" | "Abandoned";
 
+export interface ProductTier {
+  tier_id: string;
+  name: string;
+  price_per_period: string;
+}
+
 export interface Product {
   steward: string;
   heartbeat_signer: string;
@@ -12,10 +18,12 @@ export interface Product {
   ops_reserve: string;
   contingency_reserve: string;
   passport_root: string;
+  tiers?: ProductTier[];
 }
 
 export interface Agreement {
   product_id: string;
+  tier_id: string;
   subscriber: string;
   refund_to: string;
   price_per_period: string;
@@ -44,8 +52,66 @@ export interface Health {
 export interface SubscribeMsg {
   product_id: string;
   periods: number;
+  tier_id?: string;
   subscriber?: string;
   refund_to?: string;
+}
+
+export interface RoadmapItem {
+  title: string;
+  description: string;
+  target_date: string;
+  completed: boolean;
+}
+
+export interface ListingTier {
+  tier_id: string;
+  name: string;
+  price_monthly: string;
+  price_yearly: string;
+  description?: string;
+}
+
+export interface DecentralizationCheck {
+  check_id: string;
+  title: string;
+  passed: boolean;
+  evidence_url?: string;
+}
+
+export interface ListingV2 {
+  product_id: number;
+  slug: string;
+  name: string;
+  tagline: string;
+  description: string;
+  category: string;
+  logo_url: string;
+  hero_url: string;
+  website_url: string;
+  repo_url: string;
+  demo_url: string;
+  license: string;
+  launched_at: string;
+  steward: string;
+  roadmap: RoadmapItem[];
+  tiers: ListingTier[];
+  decentralization_checks: DecentralizationCheck[];
+  score: number;
+  score_inputs_hash: string;
+  upvotes: number;
+  heartbeat_streak: number;
+  contingency_reserve: string;
+}
+
+export interface FungibleTokenMetadata {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon?: string;
+  reference?: string;
+  reference_hash?: string;
+  decimals: number;
 }
 
 export interface CatalogItem {
