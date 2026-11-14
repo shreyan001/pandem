@@ -284,11 +284,8 @@ export function OnrampQuotePanel() {
     setSimStep("escrow_deposit");
     await new Promise((r) => setTimeout(r, 900));
 
-    // Generate random simulated tx hash
-    const randHex = Array.from({ length: 32 }, () =>
-      Math.floor(Math.random() * 16).toString(16)
-    ).join("");
-    setSimTxHash(`0x${randHex}`);
+    // Status pending on-chain settlement (no fake tx hashes per D2)
+    setSimTxHash("pending");
     setSimStep("confirmed");
   };
 
@@ -869,7 +866,7 @@ export function OnrampQuotePanel() {
 
                       <div className="flex items-center justify-between pt-1 text-xs font-mono">
                         <span className="text-zinc-400 truncate max-w-xs">
-                          Simulated Tx: <code className="text-zinc-300">{simTxHash?.slice(0, 18)}...</code>
+                          Status: <span className="text-amber-400 font-medium">Pending On-Chain Settlement</span>
                         </span>
                         <div className="flex gap-2">
                           <Link

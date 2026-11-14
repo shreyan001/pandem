@@ -694,6 +694,9 @@ export default function SubscriberDashboardPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-white">{bug.title}</span>
+                    <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 bg-[#222222] text-[#8A8A8A] border border-[#333333]">
+                      off-chain
+                    </span>
                     <span
                       className={`text-[9px] font-mono px-2 py-0.2 rounded-none border ${
                         bug.severity === "Critical"

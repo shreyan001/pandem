@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { redis } from "../../../lib/redis";
 import { ENRICHED_PRODUCTS, EnrichedProduct } from "@pandem/shared";
 
@@ -108,7 +109,19 @@ export async function POST(req: NextRequest) {
         body.why_direct_payment_fails ||
         `Direct SaaS payments lack uptime escrow guarantees and automated warranty protections. Pandem releases funds on verified heartbeats.`,
       score: typeof body.score === "number" ? body.score : 88,
-      score_inputs_hash: "0x" + Math.random().toString(16).substring(2, 18) + Math.random().toString(16).substring(2, 18),
+      score_inputs_hash:
+        "0x" +
+        crypto
+          .createHash("sha256")
+          .update(
+            JSON.stringify({
+              slug: cleanSlug,
+              name: String(name).trim(),
+              category: String(category).trim(),
+              steward: String(steward).trim(),
+            })
+          )
+          .digest("hex"),
       upvotes: 0,
       rank: ENRICHED_PRODUCTS.length + 1,
       heartbeat_healthy: true,

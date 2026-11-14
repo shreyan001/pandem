@@ -35,13 +35,11 @@ export function UserPaymentOnboardingModal({ isOpen, onClose, onComplete }: User
       await new Promise((r) => setTimeout(r, 1000));
 
       let generatedAccount = "";
-      if (walletType === "google_passkey") {
+      if (accountId) {
+        generatedAccount = accountId;
+      } else if (walletType === "google_passkey" && userName.trim()) {
         const cleanHandle = userName.toLowerCase().replace(/[^a-z0-9]/g, "") || "subscriber";
         generatedAccount = `${cleanHandle}.testnet`;
-      } else if (walletType === "metamask_base") {
-        generatedAccount = `0x${Math.random().toString(16).substring(2, 10)}...near`;
-      } else if (walletType === "phantom_solana") {
-        generatedAccount = `sol_${Math.random().toString(36).substring(2, 10)}.testnet`;
       } else {
         generatedAccount = accountId || "subscriber.testnet";
       }

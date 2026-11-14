@@ -638,6 +638,9 @@ export default function DeveloperDashboardPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[#894DEF] font-bold">#{prop.id}</span>
                       <span className="text-white font-medium">{prop.title}</span>
+                      <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#222222] text-[#8A8A8A] border border-[#333333]">
+                        off-chain
+                      </span>
                       <span
                         className={`text-[10px] px-2 py-0.5 border ${
                           prop.status === "Voting_Open"

@@ -28,7 +28,7 @@ function getFallbackTelemetry(productId: number = 1): CloudPaymentTelemetry {
   const now = new Date();
   const mockReceipts: InferencePaymentReceipt[] = [
     {
-      receipt_id: `rcpt_${Date.now() - 3600000}_a4f`,
+      receipt_id: `rcpt_${Date.now() - 3600000}_104`,
       batch_id: 104,
       timestamp: new Date(now.getTime() - 120000).toISOString(),
       product_id: productId,
@@ -48,13 +48,13 @@ function getFallbackTelemetry(productId: number = 1): CloudPaymentTelemetry {
         .createHash("sha256")
         .update(`104:tee_intel_tdx_nvidia_09ab31e847c1:4:12000000000000000000000:${CLOUD_COMPUTE_OPERATOR_ID}`)
         .digest("hex"),
-      tx_hash: "0x7d89f2130e561a0b368e7c271b1d8e1329a44b1c83fa9b267812ecf41852de40",
+      tx_hash: "HHfYAU7XBXu54SWrvQMY1z6CcJt8w6da3YDyVp6nYMyG",
       recipient: CLOUD_COMPUTE_OPERATOR_ID,
       status: "Settled",
       dampener_variance_pct: 0.0,
     },
     {
-      receipt_id: `rcpt_${Date.now() - 7200000}_b12`,
+      receipt_id: `rcpt_${Date.now() - 7200000}_103`,
       batch_id: 103,
       timestamp: new Date(now.getTime() - 480000).toISOString(),
       product_id: productId,
@@ -74,7 +74,7 @@ function getFallbackTelemetry(productId: number = 1): CloudPaymentTelemetry {
         .createHash("sha256")
         .update(`103:tee_intel_tdx_nvidia_771ef82a9914:3:9000000000000000000000:${CLOUD_COMPUTE_OPERATOR_ID}`)
         .digest("hex"),
-      tx_hash: "0x44fa7e2b10ca8e7168d3725b81a91e56b829c30f7812aa6645db9c2e1f4817a2",
+      tx_hash: "pending",
       recipient: CLOUD_COMPUTE_OPERATOR_ID,
       status: "Settled",
       dampener_variance_pct: 0.0,
@@ -174,15 +174,15 @@ export async function POST(req: NextRequest) {
   const totalAmountBig = BigInt(queryCount) * BigInt(unitCostYocto);
   const amountYocto = totalAmountBig.toString();
   const timestamp = new Date().toISOString();
-  const batchId = Math.floor(100 + Math.random() * 900);
-  const teeSessionId = `tee_intel_tdx_nvidia_${crypto.randomBytes(6).toString("hex")}`;
-  const txHash = `0x${crypto.randomBytes(32).toString("hex")}`;
+  const batchId = 105;
+  const teeSessionId = `tee_intel_tdx_nvidia_batch_${batchId}`;
+  const txHash = "pending";
 
   const proofRaw = `${batchId}:${teeSessionId}:${queryCount}:${amountYocto}:${CLOUD_COMPUTE_OPERATOR_ID}:${timestamp}`;
   const sha256CostProof = crypto.createHash("sha256").update(proofRaw).digest("hex");
 
   const receipt: InferencePaymentReceipt = {
-    receipt_id: `rcpt_${Date.now()}_${crypto.randomBytes(3).toString("hex")}`,
+    receipt_id: `rcpt_${Date.now()}_${batchId}`,
     batch_id: batchId,
     timestamp,
     product_id: productId,

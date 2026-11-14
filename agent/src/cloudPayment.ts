@@ -120,7 +120,7 @@ export class CloudPaymentEngine {
     const session: InferenceUsageSession = {
       sessionId:
         usage.sessionId ||
-        `tee_session_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`,
+        `tee_session_${Date.now()}_${usage.productId || 1}`,
       productId: usage.productId || 1,
       model: MODEL_ID,
       promptTokens: usage.promptTokens || 0,
@@ -376,7 +376,7 @@ export class CloudPaymentEngine {
       .digest("hex");
 
     const receipt: InferencePaymentReceipt = {
-      receipt_id: `rcpt_${Date.now()}_${crypto.randomBytes(3).toString("hex")}`,
+      receipt_id: `rcpt_${Date.now()}_${params.batchId}`,
       batch_id: params.batchId,
       timestamp,
       product_id: params.productId,
@@ -446,13 +446,11 @@ export class CloudPaymentEngine {
     const batchId = this.batchCounter++;
     const teeSessionId =
       unsettled[0]?.sessionId ||
-      `tee_session_h100_${crypto.randomBytes(6).toString("hex")}`;
+      `tee_session_h100_${batchId}`;
 
     // Execute on-chain draw
     const onChainTx = await this.executeDrawOpsFunds(productId, safeAmountYocto);
-    const txHash =
-      onChainTx ||
-      `0x${crypto.randomBytes(32).toString("hex")}`; // Realistic hash for simulated receipt
+    const txHash = onChainTx || "pending";
 
     const status: "Settled" | "Simulated" = onChainTx ? "Settled" : "Simulated";
 
@@ -503,8 +501,8 @@ export class CloudPaymentEngine {
     const amountYocto = amountBig.toString();
 
     const batchId = this.batchCounter++;
-    const teeSessionId = `tee_intel_tdx_nvidia_${crypto.randomBytes(6).toString("hex")}`;
-    const txHash = `0x${crypto.randomBytes(32).toString("hex")}`;
+    const teeSessionId = `tee_intel_tdx_nvidia_${batchId}`;
+    const txHash = "pending";
 
     const receipt = this.createVerifiableReceipt({
       productId,

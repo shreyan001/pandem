@@ -27,6 +27,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useNearWallet } from "../../../context/NearWalletContext";
+import { PANDEM_ESCROW_ID, PANDEM_BUDGET_ID, PANDEM_STEWARD_ID, PANDEM_REGISTRY_ID } from "@pandem/shared";
 
 interface OnboardingFormState {
   // Segment 1: Verifiable Frontend & Identity
@@ -391,11 +392,11 @@ secrets:
       await new Promise((r) => setTimeout(r, 1500));
 
       const cleanSlug = form.slug.toLowerCase().trim().replace(/[^a-z0-9_-]/g, "-");
-      const escrowContract = `escrow.${cleanSlug}.testnet`;
-      const budgetContract = `budget.${cleanSlug}.testnet`;
-      const votingContract = `voting.${cleanSlug}.testnet`;
-      const randomKeyHex = Math.random().toString(16).substring(2, 10);
-      const generatedApiKey = `pk-pandem-tee-${cleanSlug}-${randomKeyHex}`;
+      const escrowContract = PANDEM_ESCROW_ID;
+      const budgetContract = PANDEM_BUDGET_ID;
+      const votingContract = PANDEM_REGISTRY_ID;
+      const stewardAccount = accountId || form.steward || PANDEM_STEWARD_ID;
+      const generatedApiKey = `pk-pandem-tee-${cleanSlug}`;
 
       const matchedCategory = CATEGORIES.find((c) => c.id === form.category);
 
@@ -409,7 +410,7 @@ secrets:
           tagline: form.tagline,
           description: form.description,
           category: form.category,
-          steward: form.steward || "developer.testnet",
+          steward: stewardAccount,
           suite: matchedCategory?.suite || "Decentralized Infrastructure",
           privacy_problem: `Sensitive user queries and vector embeddings execute strictly inside hardware-isolated ${
             form.enclaveRuntime === "phala_dstack" ? "Intel TDX" : "AMD SEV-SNP"

@@ -451,6 +451,9 @@ export default function ProductVotingPage({ params }: VotingPageProps) {
                         >
                           {prop.status.replace("_", " ")}
                         </span>
+                        <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 bg-[#222222] text-[#8A8A8A] border border-[#333333]">
+                          off-chain
+                        </span>
 
                         <span className="text-[11px] font-mono text-[#737373]">
                           by <strong className="text-[#B8B8B8]">{prop.author}</strong>
