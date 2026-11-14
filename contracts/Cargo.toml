@@ -1,5 +1,5 @@
 [workspace]
-members = ["escrow", "budget", "registry", "mock_tusdc"]
+members = ["escrow", "budget", "registry", "mock_tusdc", "pandem-tripartite"]
 resolver = "2"
 
 [profile.release]

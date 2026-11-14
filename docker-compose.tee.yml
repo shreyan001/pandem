@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  pandem-langgraph-enclave:
+    image: ghcr.io/pandem-protocol/langgraph-tee-node:latest
+    container_name: pandem-langgraph-enclave
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://pandem_enclave:${DB_ENCLAVE_KEY}@pandem-enclave-postgres:5432/pandem_user_state
+      - OPENAI_BASE_URL=https://cloud-api.near.ai/v1
+      - OPENAI_API_KEY=${PANDEM_SCOPED_API_KEY}
+      - DSTACK_TAPP_SOCKET=/var/run/tappd.sock
+      - PANDEM_CONTRACT_ID=pandem-tripartite.near
+    volumes:
+      - /var/run/tappd.sock:/var/run/tappd.sock
+    depends_on:
+      - pandem-enclave-postgres
+
+  pandem-enclave-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: pandem-enclave-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=pandem_enclave
+      - POSTGRES_PASSWORD=${DB_ENCLAVE_KEY}
+      - POSTGRES_DB=pandem_user_state
+    volumes:
+      # Hardware-sealed volume unlocked ONLY if the container compose-hash matches on-chain registry
+      - /dstack/encrypted-storage/pgdata:/var/lib/postgresql/data
+
+  pandem-filecoin-checkpoint-sync:
+    image: ghcr.io/pandem-protocol/filecoin-fastfs-sync:latest
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://pandem_enclave:${DB_ENCLAVE_KEY}@pandem-enclave-postgres:5432/pandem_user_state
+      - LIGHTHOUSE_X402_RENEW_URL=https://x402-walrus.lighthouse.storage
+    volumes:
+      - /var/run/tappd.sock:/var/run/tappd.sock
