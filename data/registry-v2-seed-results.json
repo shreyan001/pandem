@@ -1,0 +1,98 @@
+[
+  {
+    "product_id": 1,
+    "name": "Open-WebUI",
+    "slug": "open-webui",
+    "txHash": "FVHpHM6yZfbz97TnZbfcH3QBJ9aS3HyZxRvT8UKJamqL",
+    "txLink": "https://explorer.testnet.near.org/transactions/FVHpHM6yZfbz97TnZbfcH3QBJ9aS3HyZxRvT8UKJamqL",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 2,
+    "name": "LocalAI",
+    "slug": "localai",
+    "txHash": "8wuEZcspAEVfTFgSJed9RvcE7jqdG1orCgoHBr4vDJZA",
+    "txLink": "https://explorer.testnet.near.org/transactions/8wuEZcspAEVfTFgSJed9RvcE7jqdG1orCgoHBr4vDJZA",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 3,
+    "name": "SearXNG",
+    "slug": "searxng",
+    "txHash": "33VKm4BEscq4x5HZ6BijS5k2YGAgjJD4W45F9C4G6rn5",
+    "txLink": "https://explorer.testnet.near.org/transactions/33VKm4BEscq4x5HZ6BijS5k2YGAgjJD4W45F9C4G6rn5",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 4,
+    "name": "Vaultwarden",
+    "slug": "vaultwarden",
+    "txHash": "6JrqbFtLWkyX7NKtdyvgeJa7pU8Hj6QG4GQqcE6kFSBK",
+    "txLink": "https://explorer.testnet.near.org/transactions/6JrqbFtLWkyX7NKtdyvgeJa7pU8Hj6QG4GQqcE6kFSBK",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 5,
+    "name": "Immich",
+    "slug": "immich",
+    "txHash": "4MHkYCL7kgyao5odEUAxfibsmFsiU2bMGvef4sr4FfqP",
+    "txLink": "https://explorer.testnet.near.org/transactions/4MHkYCL7kgyao5odEUAxfibsmFsiU2bMGvef4sr4FfqP",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 6,
+    "name": "Nextcloud",
+    "slug": "nextcloud",
+    "txHash": "G8qC7RFoGdHno92avY2MKAvwAiqUWjn4py1rQkbjkPTi",
+    "txLink": "https://explorer.testnet.near.org/transactions/G8qC7RFoGdHno92avY2MKAvwAiqUWjn4py1rQkbjkPTi",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 7,
+    "name": "Synapse",
+    "slug": "synapse",
+    "txHash": "4e6VhaWXuCNB3WU3M16ep78u1ifHo83zRipkBGLc1eZQ",
+    "txLink": "https://explorer.testnet.near.org/transactions/4e6VhaWXuCNB3WU3M16ep78u1ifHo83zRipkBGLc1eZQ",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 8,
+    "name": "Paperless-ngx",
+    "slug": "paperless-ngx",
+    "txHash": "EgyjxsnoKmt9uhMoAz62H4yJQBd2NwjgbwcRtMYmTA4q",
+    "txLink": "https://explorer.testnet.near.org/transactions/EgyjxsnoKmt9uhMoAz62H4yJQBd2NwjgbwcRtMYmTA4q",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 9,
+    "name": "Ghost",
+    "slug": "ghost",
+    "txHash": "6yBTBuxuoS4LKt87gg1NGsM2WJRDEsCt3Rq7TWMSUhZz",
+    "txLink": "https://explorer.testnet.near.org/transactions/6yBTBuxuoS4LKt87gg1NGsM2WJRDEsCt3Rq7TWMSUhZz",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 10,
+    "name": "n8n",
+    "slug": "n8n",
+    "txHash": "HByv6UETPvFPmhnAQtRrEiYFPFDLNw99rmusGjVok3DT",
+    "txLink": "https://explorer.testnet.near.org/transactions/HByv6UETPvFPmhnAQtRrEiYFPFDLNw99rmusGjVok3DT",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 11,
+    "name": "Appwrite",
+    "slug": "appwrite",
+    "txHash": "tYLBsdiXi1AaUAa9473XGfNHdd1EkHqvUc52TUPtjyh",
+    "txLink": "https://explorer.testnet.near.org/transactions/tYLBsdiXi1AaUAa9473XGfNHdd1EkHqvUc52TUPtjyh",
+    "status": "verified_existing"
+  },
+  {
+    "product_id": 12,
+    "name": "Calibre Web",
+    "slug": "calibre-web",
+    "txHash": "EDUTbewBCoQRMJnr1kq4g7uBgwUhRsaX64XXTRQLR9cf",
+    "txLink": "https://explorer.testnet.near.org/transactions/EDUTbewBCoQRMJnr1kq4g7uBgwUhRsaX64XXTRQLR9cf",
+    "status": "verified_existing"
+  }
+]

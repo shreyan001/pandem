@@ -1,107 +1,1228 @@
 [
   {
-    "id": "1",
-    "name": "PrivateGPT Enclave Edition",
-    "tagline": "TEE-isolated LLM assistant with encrypted chat memory and verifiable hardware attestation.",
-    "description": "High-assurance private LLM inference running inside NVIDIA NRAS / Intel TDX confidential hardware enclaves. Periodic on-chain heartbeats guarantee hardware attestation and liveness, with automatic pro-rata refunds if service degrades.",
-    "price_per_period": "100000000000000000000000",
-    "price_display": "0.1 wNEAR",
-    "period_seconds": 300,
-    "period_display": "5 minutes (demo)",
-    "grace_seconds": 120,
-    "grace_display": "2 minutes",
-    "category": "Confidential AI",
-    "status": "Active",
-    "upvotes": 348,
-    "rank": 1,
-    "isProductOfTheDay": true,
-    "steward": "pandem-steward-47c388e3.testnet",
-    "teeHardware": "Intel TDX + NVIDIA H100 SXM5",
-    "teeModel": "Qwen/Qwen3.8-27B (nearai)",
-    "features": [
-      "Hardware TEE Attestation (NVIDIA NRAS / Intel TDX)",
-      "Verifiable on-chain heartbeats",
-      "2.5% protocol / 30% ops / 20% contingency / 47.5% steward split",
-      "Non-custodial subscriber killswitch protection",
-      "Permissionless automated pro-rata refund claims"
-    ]
+    "product_id": 1,
+    "slug": "open-webui",
+    "name": "Open-WebUI",
+    "tagline": "User-friendly AI Interface, supports Ollama, OpenAI API.",
+    "description": "User-friendly AI Interface, supports Ollama, OpenAI API.",
+    "category": "Private AI",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/open-webui.webp",
+    "hero_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://openwebui.com",
+    "repo_url": "https://github.com/open-webui/open-webui",
+    "demo_url": "https://openwebui.com",
+    "license": "BSD-3-Clause",
+    "launched_at": "1794635383646000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/open-webui/open-webui"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://openwebui.com"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": true,
+        "evidence_url": "https://cloud-api.near.ai/v1/attestation/report"
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 158250,
+    "commit_history": {
+      "2025-12": 322,
+      "2026-01": 280,
+      "2026-02": 505,
+      "2026-03": 503,
+      "2026-04": 387,
+      "2026-05": 309,
+      "2026-06": 439,
+      "2026-07": 675,
+      "2026-08": 552,
+      "2026-09": 508,
+      "2026-10": 1252,
+      "2026-11": 448
+    },
+    "current_release": {
+      "tag": "v0.13.3",
+      "published_at": "2026-11-08"
+    }
   },
   {
-    "id": "2",
-    "name": "SafeSync Zero-Knowledge Vault",
-    "tagline": "Client-side encrypted verifiable storage with periodic cryptographic integrity heartbeats.",
-    "description": "Decentralized automated storage with zero-knowledge encryption proofs. Heartbeats prove continuous data availability and backup freshness on NEAR testnet.",
-    "price_per_period": "200000000000000000000000",
-    "price_display": "0.2 wNEAR",
-    "period_seconds": 300,
-    "period_display": "5 minutes (demo)",
-    "grace_seconds": 120,
-    "grace_display": "2 minutes",
-    "category": "Zero-Knowledge",
-    "status": "Pending",
-    "upvotes": 284,
-    "rank": 2,
-    "isProductOfTheDay": false,
-    "steward": "safesync-dao.testnet",
-    "teeHardware": "Intel SGX Enclave",
-    "teeModel": "zk-Storage-Prover v2.1",
-    "features": [
-      "Client-side zero-knowledge encryption",
-      "Cryptographic proof of retrievability",
-      "Staged reserve contingency fund",
-      "Permissionless refund upon missed heartbeats"
-    ]
+    "product_id": 2,
+    "slug": "localai",
+    "name": "LocalAI",
+    "tagline": "Run your AI models locally and generate images and audio (alternative to OpenAI and Claude).",
+    "description": "Run your AI models locally and generate images and audio (alternative to OpenAI and Claude).",
+    "category": "Private AI",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/localai.webp",
+    "hero_url": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://localai.io/",
+    "repo_url": "https://github.com/mudler/LocalAI",
+    "demo_url": "https://localai.io/",
+    "license": "MIT",
+    "launched_at": "1794635383661000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/mudler/LocalAI"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://localai.io/"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": true,
+        "evidence_url": "https://cloud-api.near.ai/v1/attestation/report"
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 50280,
+    "commit_history": {
+      "2025-12": 195,
+      "2026-01": 182,
+      "2026-02": 179,
+      "2026-03": 272,
+      "2026-04": 288,
+      "2026-05": 337,
+      "2026-06": 365,
+      "2026-07": 461,
+      "2026-08": 379,
+      "2026-09": 586,
+      "2026-10": 503,
+      "2026-11": 899
+    },
+    "current_release": {
+      "tag": "v4.12.1",
+      "published_at": "2026-10-23"
+    }
   },
   {
-    "id": "3",
-    "name": "DeepSearch AI Sentinel",
-    "tagline": "Confidential web research and code audit agent running in certified hardware enclaves.",
-    "description": "Deep autonomous research agent executing multi-step search pipelines in isolated enclaves. Queries and browsing sessions are encrypted end-to-end.",
-    "price_per_period": "150000000000000000000000",
-    "price_display": "0.15 wNEAR",
-    "period_seconds": 300,
-    "period_display": "5 minutes (demo)",
-    "grace_seconds": 120,
-    "grace_display": "2 minutes",
-    "category": "Confidential AI",
-    "status": "Active",
-    "upvotes": 219,
-    "rank": 3,
-    "isProductOfTheDay": false,
-    "steward": "deepsearch-labs.testnet",
-    "teeHardware": "NVIDIA H100 NRAS TEE",
-    "teeModel": "DeepSearch-Llama-70B",
-    "features": [
-      "Hardware-enforced zero data retention",
-      "Autonomous 14-day heartbeat releases",
-      "Pro-rata downside protection with 20% contingency return",
-      "Direct NEP-141 USDC/wNEAR escrow settlement"
-    ]
+    "product_id": 3,
+    "slug": "searxng",
+    "name": "SearXNG",
+    "tagline": "Internet metasearch engine which aggregates results from various search services and databases (fork of Searx).",
+    "description": "Internet metasearch engine which aggregates results from various search services and databases (fork of Searx).",
+    "category": "Decentralized Search",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/searxng.webp",
+    "hero_url": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://docs.searxng.org/",
+    "repo_url": "https://github.com/searxng/searxng/",
+    "demo_url": "https://docs.searxng.org/",
+    "license": "AGPL-3.0",
+    "launched_at": "1794635383672000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/searxng/searxng/"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://docs.searxng.org/"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 39401,
+    "commit_history": {
+      "2025-12": 55,
+      "2026-01": 47,
+      "2026-02": 44,
+      "2026-03": 74,
+      "2026-04": 44,
+      "2026-05": 82,
+      "2026-06": 125,
+      "2026-07": 79,
+      "2026-08": 33,
+      "2026-09": 123,
+      "2026-10": 51,
+      "2026-11": 17
+    },
+    "current_release": {
+      "tag": "v1.0.0",
+      "published_at": "2026-10-01"
+    }
   },
   {
-    "id": "4",
-    "name": "Indexer Guard Pro",
-    "tagline": "High-throughput NEAR blockchain indexing engine with on-chain SLA escrow enforcement.",
-    "description": "Enterprise GraphQL indexer for NEAR Protocol. Escrow releases are tied directly to sub-second block ingestion proofs and SLA benchmarks.",
-    "price_per_period": "300000000000000000000000",
-    "price_display": "0.3 wNEAR",
-    "period_seconds": 300,
-    "period_display": "5 minutes (demo)",
-    "grace_seconds": 120,
-    "grace_display": "2 minutes",
-    "category": "Developer Tools",
-    "status": "Active",
-    "upvotes": 175,
-    "rank": 4,
-    "isProductOfTheDay": false,
-    "steward": "indexer-sentinel.testnet",
-    "teeHardware": "AWS Nitro Enclave",
-    "teeModel": "Indexer-Verifier-Node",
-    "features": [
-      "Sub-second block ingestion proofs",
-      "SLA guarantee backed by contingency reserve",
-      "Automatic refund if block lag exceeds threshold",
-      "Non-custodial monthly escrow releases"
-    ]
+    "product_id": 4,
+    "slug": "vaultwarden",
+    "name": "Vaultwarden",
+    "tagline": "Lightweight Bitwarden server API implementation written in Rust.",
+    "description": "Lightweight Bitwarden server API implementation written in Rust.",
+    "category": "Security & Auth",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/vaultwarden.webp",
+    "hero_url": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://github.com/dani-garcia/vaultwarden",
+    "repo_url": "https://github.com/dani-garcia/vaultwarden",
+    "demo_url": "https://github.com/dani-garcia/vaultwarden",
+    "license": "GPL-3.0",
+    "launched_at": "1794635383684000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/dani-garcia/vaultwarden"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://github.com/dani-garcia/vaultwarden"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 70505,
+    "commit_history": {
+      "2025-12": 25,
+      "2026-01": 10,
+      "2026-02": 10,
+      "2026-03": 20,
+      "2026-04": 34,
+      "2026-05": 10,
+      "2026-06": 1,
+      "2026-07": 18,
+      "2026-08": 12,
+      "2026-09": 25,
+      "2026-10": 44,
+      "2026-11": 8
+    },
+    "current_release": {
+      "tag": "1.37.5",
+      "published_at": "2026-11-01"
+    }
+  },
+  {
+    "product_id": 5,
+    "slug": "immich",
+    "name": "Immich",
+    "tagline": "Photo and video backup solution directly from your mobile phone (alternative to Google Photos).",
+    "description": "Photo and video backup solution directly from your mobile phone (alternative to Google Photos).",
+    "category": "Private Media & Backup",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/immich.webp",
+    "hero_url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://immich.app/",
+    "repo_url": "https://github.com/immich-app/immich",
+    "demo_url": "https://github.com/immich-app/immich#demo",
+    "license": "AGPL-3.0",
+    "launched_at": "1794635383698000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/immich-app/immich"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://immich.app/"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 118657,
+    "commit_history": {
+      "2025-12": 131,
+      "2026-01": 265,
+      "2026-02": 300,
+      "2026-03": 258,
+      "2026-04": 236,
+      "2026-05": 215,
+      "2026-06": 270,
+      "2026-07": 262,
+      "2026-08": 252,
+      "2026-09": 217,
+      "2026-10": 287,
+      "2026-11": 114
+    },
+    "current_release": {
+      "tag": "v3.4.0-rc.3",
+      "published_at": "2026-11-06"
+    }
+  },
+  {
+    "product_id": 6,
+    "slug": "nextcloud",
+    "name": "Nextcloud",
+    "tagline": "Access and share your files, calendars, contacts, mail and more from any device, on your terms.",
+    "description": "Access and share your files, calendars, contacts, mail and more from any device, on your terms.",
+    "category": "Self-Hosted Cloud",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/nextcloud.webp",
+    "hero_url": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://nextcloud.com/",
+    "repo_url": "https://github.com/nextcloud/server",
+    "demo_url": "https://try.nextcloud.com/",
+    "license": "AGPL-3.0",
+    "launched_at": "1794635383709000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/nextcloud/server"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://nextcloud.com/"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 37459,
+    "commit_history": {
+      "2025-12": 418,
+      "2026-01": 723,
+      "2026-02": 576,
+      "2026-03": 448,
+      "2026-04": 610,
+      "2026-05": 638,
+      "2026-06": 802,
+      "2026-07": 712,
+      "2026-08": 873,
+      "2026-09": 919,
+      "2026-10": 807,
+      "2026-11": 315
+    },
+    "current_release": {
+      "tag": "v35.0.3rc1",
+      "published_at": "2026-11-05"
+    }
+  },
+  {
+    "product_id": 7,
+    "slug": "synapse",
+    "name": "Synapse",
+    "tagline": "Server for Matrix, an open standard for decentralized persistent communication.",
+    "description": "Server for Matrix, an open standard for decentralized persistent communication.",
+    "category": "Decentralized Messaging",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/synapse.webp",
+    "hero_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://element-hq.github.io/synapse/latest/index.html",
+    "repo_url": "https://github.com/element-hq/synapse",
+    "demo_url": "https://element-hq.github.io/synapse/latest/index.html",
+    "license": "Apache-2.0",
+    "launched_at": "1794635383719000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/element-hq/synapse"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://element-hq.github.io/synapse/latest/index.html"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 4778,
+    "commit_history": {
+      "2025-12": 59,
+      "2026-01": 65,
+      "2026-02": 46,
+      "2026-03": 79,
+      "2026-04": 64,
+      "2026-05": 59,
+      "2026-06": 65,
+      "2026-07": 95,
+      "2026-08": 73,
+      "2026-09": 113,
+      "2026-10": 114,
+      "2026-11": 48
+    },
+    "current_release": {
+      "tag": "v1.165.0rc1",
+      "published_at": "2026-11-04"
+    }
+  },
+  {
+    "product_id": 8,
+    "slug": "paperless-ngx",
+    "name": "Paperless-ngx",
+    "tagline": "Scan, index, and archive all of your paper documents with an improved interface (fork of Paperless).",
+    "description": "Scan, index, and archive all of your paper documents with an improved interface (fork of Paperless).",
+    "category": "Document Management",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/paperless-ngx.webp",
+    "hero_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://docs.paperless-ngx.com/",
+    "repo_url": "https://github.com/paperless-ngx/paperless-ngx",
+    "demo_url": "https://demo.paperless-ngx.com/",
+    "license": "GPL-3.0",
+    "launched_at": "1794635383729000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/paperless-ngx/paperless-ngx"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://docs.paperless-ngx.com/"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 47961,
+    "commit_history": {
+      "2025-12": 66,
+      "2026-01": 145,
+      "2026-02": 144,
+      "2026-03": 192,
+      "2026-04": 154,
+      "2026-05": 86,
+      "2026-06": 75,
+      "2026-07": 176,
+      "2026-08": 230,
+      "2026-09": 255,
+      "2026-10": 181,
+      "2026-11": 62
+    },
+    "current_release": {
+      "tag": "v3.4.2",
+      "published_at": "2026-11-03"
+    }
+  },
+  {
+    "product_id": 9,
+    "slug": "ghost",
+    "name": "Ghost",
+    "tagline": "Just a blogging platform.",
+    "description": "Just a blogging platform.",
+    "category": "Independent Publishing",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/ghost.webp",
+    "hero_url": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://ghost.org/",
+    "repo_url": "https://github.com/TryGhost/Ghost",
+    "demo_url": "https://ghost.org/",
+    "license": "MIT",
+    "launched_at": "1794635383743000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/TryGhost/Ghost"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://ghost.org/"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 55720,
+    "commit_history": {
+      "2025-12": 172,
+      "2026-01": 248,
+      "2026-02": 413,
+      "2026-03": 323,
+      "2026-04": 503,
+      "2026-05": 599,
+      "2026-06": 774,
+      "2026-07": 708,
+      "2026-08": 642,
+      "2026-09": 631,
+      "2026-10": 1110,
+      "2026-11": 222
+    },
+    "current_release": {
+      "tag": "v6.75.0",
+      "published_at": "2026-11-04"
+    }
+  },
+  {
+    "product_id": 10,
+    "slug": "n8n",
+    "name": "n8n",
+    "tagline": "Free node based Workflow Automation Tool.",
+    "description": "Free node based Workflow Automation Tool. Easily automate tasks across different services.",
+    "category": "Workflow Automation",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/n8n.webp",
+    "hero_url": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://n8n.io/",
+    "repo_url": "https://github.com/n8n-io/n8n",
+    "demo_url": "https://n8n.io/",
+    "license": "Apache-2.0",
+    "launched_at": "1794635383761000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/n8n-io/n8n"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://n8n.io/"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 209959,
+    "commit_history": {
+      "2025-12": 497,
+      "2026-01": 531,
+      "2026-02": 527,
+      "2026-03": 542,
+      "2026-04": 710,
+      "2026-05": 833,
+      "2026-06": 1177,
+      "2026-07": 1150,
+      "2026-08": 1116,
+      "2026-09": 1437,
+      "2026-10": 1679,
+      "2026-11": 205
+    },
+    "current_release": {
+      "tag": "stable",
+      "published_at": "2026-11-09"
+    }
+  },
+  {
+    "product_id": 11,
+    "slug": "appwrite",
+    "name": "Appwrite",
+    "tagline": "End to end backend server for web, native, and mobile developers 🚀.",
+    "description": "End to end backend server for web, native, and mobile developers 🚀.",
+    "category": "Developer Cloud",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/appwrite.webp",
+    "hero_url": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://appwrite.io",
+    "repo_url": "https://github.com/appwrite/appwrite",
+    "demo_url": "https://appwrite.io",
+    "license": "BSD-3-Clause",
+    "launched_at": "1794635383772000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/appwrite/appwrite"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://appwrite.io"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 57922,
+    "commit_history": {
+      "2025-12": 259,
+      "2026-01": 532,
+      "2026-02": 909,
+      "2026-03": 772,
+      "2026-04": 1129,
+      "2026-05": 1115,
+      "2026-06": 631,
+      "2026-07": 957,
+      "2026-08": 1951,
+      "2026-09": 4134,
+      "2026-10": 4674,
+      "2026-11": 1351
+    },
+    "current_release": {
+      "tag": "2.7.1",
+      "published_at": "2026-11-04"
+    }
+  },
+  {
+    "product_id": 12,
+    "slug": "calibre-web",
+    "name": "Calibre Web",
+    "tagline": "Browse, read and download eBooks using an existing Calibre database.",
+    "description": "Browse, read and download eBooks using an existing Calibre database.",
+    "category": "Digital Library",
+    "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/calibre-web.webp",
+    "hero_url": "https://images.unsplash.com/photo-1507842229452-78d10a62d011?auto=format&fit=crop&w=1200&q=80",
+    "website_url": "https://github.com/janeczku/calibre-web",
+    "repo_url": "https://github.com/janeczku/calibre-web",
+    "demo_url": "https://github.com/janeczku/calibre-web",
+    "license": "GPL-3.0",
+    "launched_at": "1794635383781000000",
+    "steward": "pandem-steward-46cee5ca.testnet",
+    "roadmap": [
+      {
+        "title": "Hardware Enclave Integration",
+        "description": "Full Intel TDX remote attestation with zero-knowledge execution telemetry.",
+        "target_date": "2026-Q4",
+        "completed": false
+      },
+      {
+        "title": "Decentralized Escrow Subscriptions",
+        "description": "NEP-141 USDC periodic release with autonomous heartbeat liveness check.",
+        "target_date": "2026-Q4",
+        "completed": true
+      },
+      {
+        "title": "Multi-Region Solver On-Ramping",
+        "description": "1Click cross-chain swap integration across Ethereum, Solana, and Bitcoin.",
+        "target_date": "2027-Q1",
+        "completed": false
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "pro",
+        "name": "Pro",
+        "price_monthly": "5000000",
+        "price_yearly": "50000000",
+        "description": "Standard self-hosted instance with automated escrow protection."
+      },
+      {
+        "tier_id": "max",
+        "name": "Max",
+        "price_monthly": "15000000",
+        "price_yearly": "150000000",
+        "description": "Priority enclave resources with dedicated hardware attestation."
+      }
+    ],
+    "decentralization_checks": [
+      {
+        "check_id": "open_source",
+        "title": "Open Source Codebase",
+        "passed": true,
+        "evidence_url": "https://github.com/janeczku/calibre-web"
+      },
+      {
+        "check_id": "self_hostable",
+        "title": "Self-Hostable Architecture",
+        "passed": true,
+        "evidence_url": "https://github.com/janeczku/calibre-web"
+      },
+      {
+        "check_id": "private_ai_tee",
+        "title": "Private AI TEE Enclave",
+        "passed": false
+      },
+      {
+        "check_id": "non_custodial",
+        "title": "Non-Custodial Escrow Billing",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      },
+      {
+        "check_id": "heartbeat",
+        "title": "Cryptographic Uptime Heartbeats",
+        "passed": true,
+        "evidence_url": "https://explorer.testnet.near.org/accounts/pandem-escrow-46cee5ca.testnet"
+      }
+    ],
+    "stargazers_count": 18547,
+    "commit_history": {
+      "2025-12": 28,
+      "2026-01": 43,
+      "2026-02": 27,
+      "2026-03": 9,
+      "2026-04": 46,
+      "2026-05": 10,
+      "2026-06": 3,
+      "2026-07": 6,
+      "2026-08": 84,
+      "2026-09": 4,
+      "2026-10": 0,
+      "2026-11": 0
+    },
+    "current_release": {
+      "tag": "0.6.27",
+      "published_at": "2026-08-08"
+    }
   }
 ]

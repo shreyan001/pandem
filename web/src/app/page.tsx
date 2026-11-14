@@ -11,7 +11,7 @@ import catalogData from "../../../shared/catalog.json";
 export default function Home() {
   const [detailProduct, setDetailProduct] = useState<CatalogItem | null>(null);
   const [subscribeProduct, setSubscribeProduct] = useState<CatalogItem | null>(null);
-  const catalog = catalogData as CatalogItem[];
+  const catalog = catalogData as unknown as CatalogItem[];
 
   const handleSelectProduct = (product: CatalogItem) => {
     setDetailProduct(product);
