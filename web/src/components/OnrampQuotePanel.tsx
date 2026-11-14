@@ -306,26 +306,26 @@ export function OnrampQuotePanel() {
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Banner / Environment Badge */}
-      <div className="rounded-xl bg-gradient-to-r from-emerald-950/60 via-zinc-900 to-cyan-950/60 border border-emerald-500/30 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-emerald-950/20">
+      <div className="rounded-none bg-[#171717] border border-[#2E2E2E] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-none">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5">
-            <span className="text-emerald-400 font-mono text-sm font-bold">1C</span>
+          <div className="w-9 h-9 rounded-none bg-[#262626] border border-[#2E2E2E] flex items-center justify-center shrink-0 mt-0.5">
+            <span className="text-[#894DEF] font-mono text-sm font-bold">1C</span>
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-mono font-bold tracking-wider text-emerald-400 uppercase">
+              <span className="text-xs font-mono font-bold tracking-wider text-[#894DEF] uppercase">
                 1Click Cross-Chain Solver Integration
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
                 Dry-Quote Simulation Mode
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-zinc-800 text-zinc-300 border border-zinc-700">
                 Testnet Hackathon Environment
               </span>
             </div>
             <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
               1Click Defuser resolves cross-chain liquidity across Ethereum, Solana, Bitcoin, Base, & Arbitrum.
-              It executes atomic <code className="text-emerald-400 bg-emerald-950/40 px-1 py-0.2 rounded font-mono">ft_transfer_call</code> deposits directly into Pandem Escrow on NEAR Testnet.
+              It executes atomic <code className="text-[#894DEF] bg-[#262626] px-1 py-0.2 rounded-none font-mono">ft_transfer_call</code> deposits directly into Pandem Escrow on NEAR Testnet.
             </p>
           </div>
         </div>
@@ -334,7 +334,7 @@ export function OnrampQuotePanel() {
             href="https://1click.chaindefuser.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-mono text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 px-3 py-1.5 rounded-md border border-zinc-700 transition-colors inline-flex items-center gap-1"
+            className="text-xs font-mono text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 px-3 py-1.5 rounded-none border border-zinc-700 transition-colors inline-flex items-center gap-1"
           >
             1Click Specs ↗
           </a>
@@ -342,7 +342,7 @@ export function OnrampQuotePanel() {
       </div>
 
       {/* Main Interactive On-Ramp Box */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 shadow-2xl overflow-hidden backdrop-blur-sm">
+      <div className="rounded-none border border-zinc-800 bg-zinc-950/90 shadow-2xl overflow-hidden backdrop-blur-sm">
         {/* Step Tabs Navigation */}
         <div className="border-b border-zinc-800 px-6 pt-4 pb-0 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
@@ -350,12 +350,12 @@ export function OnrampQuotePanel() {
               onClick={() => setActiveTab("quote")}
               className={`pb-3 text-sm font-medium border-b-2 transition-all flex items-center gap-2 ${
                 activeTab === "quote"
-                  ? "border-emerald-400 text-white"
+                  ? "border-[#894DEF] text-white"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <span>1. Solver Dry-Quote</span>
-              <span className="text-[10px] font-mono bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-mono bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded-none">
                 Live
               </span>
             </button>
@@ -368,7 +368,7 @@ export function OnrampQuotePanel() {
               }`}
             >
               <span>2. Verifiable customRecipientMsg</span>
-              <span className="text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800/40 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800/40 px-1.5 py-0.5 rounded-none">
                 JSON
               </span>
             </button>
@@ -386,12 +386,12 @@ export function OnrampQuotePanel() {
 
           <div className="pb-3 flex items-center gap-2">
             <span className="text-xs text-zinc-400 font-mono">Fee Tier:</span>
-            <div className="inline-flex rounded-lg bg-zinc-900 p-0.5 border border-zinc-800">
+            <div className="inline-flex rounded-none bg-zinc-900 p-0.5 border border-zinc-800">
               <button
                 onClick={() => setIsPartnerTier(true)}
-                className={`px-2 py-0.5 text-xs font-mono rounded ${
+                className={`px-2 py-0.5 text-xs font-mono rounded-none ${
                   isPartnerTier
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold"
+                    ? "bg-[#262626] text-[#FAFAFA] border border-[#2E2E2E] font-bold"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
                 title="Pandem Protocol Authenticated Tier (1 bp / 0.01%)"
@@ -400,7 +400,7 @@ export function OnrampQuotePanel() {
               </button>
               <button
                 onClick={() => setIsPartnerTier(false)}
-                className={`px-2 py-0.5 text-xs font-mono rounded ${
+                className={`px-2 py-0.5 text-xs font-mono rounded-none ${
                   !isPartnerTier
                     ? "bg-zinc-800 text-white font-bold"
                     : "text-zinc-400 hover:text-zinc-200"
@@ -420,7 +420,7 @@ export function OnrampQuotePanel() {
             <div>
               <div className="flex items-center justify-between mb-2.5">
                 <label className="text-xs font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span className="w-1.5 h-1.5 rounded-none bg-[#894DEF]" />
                   Select Source Origin Chain
                 </label>
                 <span className="text-xs text-zinc-400 font-mono">
@@ -434,20 +434,20 @@ export function OnrampQuotePanel() {
                     <button
                       key={c.id}
                       onClick={() => handleChainChange(c.id)}
-                      className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                      className={`p-3 rounded-none border text-left transition-all flex flex-col justify-between ${
                         isSelected
-                          ? `bg-zinc-900 border-emerald-400/80 shadow-md shadow-emerald-500/10`
+                          ? `bg-zinc-900 border-[#894DEF]/80 shadow-md shadow-none`
                           : "bg-zinc-900/40 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/70"
                       }`}
                     >
                       <div className="flex items-center justify-between w-full mb-1">
                         <span
-                          className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${c.iconBg}`}
+                          className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-none border ${c.iconBg}`}
                         >
                           {c.iconText}
                         </span>
                         {isSelected && (
-                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                          <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
                         )}
                       </div>
                       <div>
@@ -465,7 +465,7 @@ export function OnrampQuotePanel() {
             {/* 2. Source Asset & Target Subscription Periods */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               {/* Asset Selector */}
-              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-4 space-y-3">
+              <div className="rounded-none border border-zinc-800/80 bg-zinc-900/50 p-4 space-y-3">
                 <label className="text-xs font-mono text-zinc-400 uppercase tracking-wider block">
                   Source Asset ({chain.name})
                 </label>
@@ -476,9 +476,9 @@ export function OnrampQuotePanel() {
                       <button
                         key={a.symbol}
                         onClick={() => setSelectedAssetSymbol(a.symbol)}
-                        className={`flex-1 py-2 px-3 rounded-lg border text-sm font-mono flex items-center justify-between transition-all ${
+                        className={`flex-1 py-2 px-3 rounded-none border text-sm font-mono flex items-center justify-between transition-all ${
                           isSelected
-                            ? "bg-zinc-800 border-emerald-500 text-white font-bold shadow-sm"
+                            ? "bg-zinc-800 border-[#894DEF] text-white font-bold shadow-sm"
                             : "bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
                         }`}
                       >
@@ -499,7 +499,7 @@ export function OnrampQuotePanel() {
                     </span>
                     <button
                       onClick={() => setCustomOriginAddress(chain.defaultAddress)}
-                      className="text-[10px] font-mono text-emerald-400 hover:underline"
+                      className="text-[10px] font-mono text-[#894DEF] hover:underline"
                     >
                       Reset Default
                     </button>
@@ -508,7 +508,7 @@ export function OnrampQuotePanel() {
                     type="text"
                     value={customOriginAddress || chain.defaultAddress}
                     onChange={(e) => setCustomOriginAddress(e.target.value)}
-                    className="w-full bg-black/60 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs font-mono text-zinc-200 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-black/60 border border-zinc-700 rounded-none px-3 py-1.5 text-xs font-mono text-zinc-200 focus:outline-none focus:border-[#894DEF]"
                     placeholder={`e.g. ${chain.defaultAddress}`}
                   />
                   <p className="text-[10px] text-zinc-400 mt-1 font-mono">
@@ -518,12 +518,12 @@ export function OnrampQuotePanel() {
               </div>
 
               {/* Subscription Period Selector */}
-              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-4 space-y-3">
+              <div className="rounded-none border border-zinc-800/80 bg-zinc-900/50 p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-mono text-zinc-400 uppercase tracking-wider">
                     Escrow Subscription Periods
                   </label>
-                  <span className="text-xs font-mono text-emerald-400">
+                  <span className="text-xs font-mono text-[#894DEF]">
                     Product #1 (0.1 wNEAR / period)
                   </span>
                 </div>
@@ -534,9 +534,9 @@ export function OnrampQuotePanel() {
                       <button
                         key={p}
                         onClick={() => setPeriods(p)}
-                        className={`py-2 px-1 rounded-lg border text-center text-xs font-mono transition-all ${
+                        className={`py-2 px-1 rounded-none border text-center text-xs font-mono transition-all ${
                           isSelected
-                            ? "bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold"
+                            ? "bg-[#262626] border-[#894DEF] text-[#FAFAFA] font-bold"
                             : "bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
                         }`}
                       >
@@ -563,17 +563,17 @@ export function OnrampQuotePanel() {
             </div>
 
             {/* 3. Live Solver Dry-Quote Matrix */}
-            <div className="rounded-xl border border-zinc-800 bg-black/40 p-5 space-y-4">
+            <div className="rounded-none border border-zinc-800 bg-black/40 p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-none bg-cyan-400 animate-pulse" />
                   <span className="text-xs font-mono uppercase tracking-wider text-white font-bold">
                     Defuser Solver Route · EXACT_OUTPUT Dry-Quote
                   </span>
                 </div>
                 <div className="text-xs font-mono text-zinc-400 flex items-center gap-1.5">
                   <span>Quote Status:</span>
-                  <span className="text-emerald-400 font-bold bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
+                  <span className="text-[#894DEF] font-bold bg-[#262626] px-2 py-0.5 rounded-none border border-[#2E2E2E]">
                     PREVIEW READY
                   </span>
                 </div>
@@ -581,11 +581,11 @@ export function OnrampQuotePanel() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 1. Guaranteed Output */}
-                <div className="bg-zinc-900/60 rounded-lg p-3 border border-zinc-800/80">
+                <div className="bg-zinc-900/60 rounded-none p-3 border border-zinc-800/80">
                   <span className="text-[11px] font-mono text-zinc-400 block mb-1">
                     Guaranteed Minimum Output
                   </span>
-                  <div className="text-lg font-mono font-bold text-emerald-400 flex items-baseline gap-1">
+                  <div className="text-lg font-mono font-bold text-[#894DEF] flex items-baseline gap-1">
                     <span>{totalWNearRequired.toFixed(4)}</span>
                     <span className="text-xs text-zinc-400">wNEAR</span>
                   </div>
@@ -595,7 +595,7 @@ export function OnrampQuotePanel() {
                 </div>
 
                 {/* 2. Source Deposit Amount */}
-                <div className="bg-zinc-900/60 rounded-lg p-3 border border-zinc-800/80">
+                <div className="bg-zinc-900/60 rounded-none p-3 border border-zinc-800/80">
                   <span className="text-[11px] font-mono text-zinc-400 block mb-1">
                     Estimated Source In ({asset.symbol})
                   </span>
@@ -615,7 +615,7 @@ export function OnrampQuotePanel() {
                 </div>
 
                 {/* 3. Solver Fee */}
-                <div className="bg-zinc-900/60 rounded-lg p-3 border border-zinc-800/80">
+                <div className="bg-zinc-900/60 rounded-none p-3 border border-zinc-800/80">
                   <span className="text-[11px] font-mono text-zinc-400 block mb-1">
                     Solver Execution Fee
                   </span>
@@ -629,7 +629,7 @@ export function OnrampQuotePanel() {
                 </div>
 
                 {/* 4. Est. Network Gas */}
-                <div className="bg-zinc-900/60 rounded-lg p-3 border border-zinc-800/80">
+                <div className="bg-zinc-900/60 rounded-none p-3 border border-zinc-800/80">
                   <span className="text-[11px] font-mono text-zinc-400 block mb-1">
                     Estimated Origin Gas ({chain.name})
                   </span>
@@ -644,54 +644,54 @@ export function OnrampQuotePanel() {
               </div>
 
               {/* Settlement Route Path */}
-              <div className="pt-2 text-xs font-mono text-zinc-300 bg-zinc-900/30 rounded-lg p-3 border border-zinc-800/50 flex flex-col md:flex-row md:items-center justify-between gap-2">
+              <div className="pt-2 text-xs font-mono text-zinc-300 bg-zinc-900/30 rounded-none p-3 border border-zinc-800/50 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-zinc-400">Solver Route:</span>
-                  <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-200">
+                  <span className="px-2 py-0.5 rounded-none bg-zinc-800 text-zinc-200">
                     {chain.name} ({asset.symbol})
                   </span>
                   <span className="text-zinc-500">→</span>
-                  <span className="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800/40">
+                  <span className="px-2 py-0.5 rounded-none bg-purple-950 text-purple-300 border border-purple-800/40">
                     1Click Defuser Network
                   </span>
                   <span className="text-zinc-500">→</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/40">
+                  <span className="px-2 py-0.5 rounded-none bg-[#262626] text-[#FAFAFA] border border-[#2E2E2E]">
                     NEAR {PANDEM_TOKEN_ID}
                   </span>
                   <span className="text-zinc-500">→</span>
-                  <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/40 font-mono">
+                  <span className="px-2 py-0.5 rounded-none bg-cyan-950 text-cyan-300 border border-cyan-800/40 font-mono">
                     pandem-escrow.testnet
                   </span>
                 </div>
                 <div className="text-zinc-400 whitespace-nowrap">
-                  Est. Settlement: <span className="text-emerald-400 font-bold">~15-30s</span>
+                  Est. Settlement: <span className="text-[#894DEF] font-bold">~15-30s</span>
                 </div>
               </div>
             </div>
 
             {/* 4. Verifiable customRecipientMsg Card */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-2">
+            <div className="rounded-none border border-zinc-800 bg-zinc-950 p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono font-bold text-white">
                     Verifiable 1Click <code className="text-cyan-400">customRecipientMsg</code> Preview
                   </span>
-                  <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  <span className="text-[10px] font-mono px-2 py-0.2 rounded-none bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     Passed to ft_transfer_call
                   </span>
                 </div>
                 <button
                   onClick={() => handleCopy(customRecipientMsgStr)}
-                  className="text-xs font-mono text-zinc-400 hover:text-white px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 transition-colors flex items-center gap-1"
+                  className="text-xs font-mono text-zinc-400 hover:text-white px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 transition-colors flex items-center gap-1"
                 >
                   {copiedPayload ? (
-                    <span className="text-emerald-400">✓ Copied</span>
+                    <span className="text-[#894DEF]">✓ Copied</span>
                   ) : (
                     <span>Copy JSON</span>
                   )}
                 </button>
               </div>
-              <pre className="bg-black/80 rounded-lg p-3 text-xs font-mono text-emerald-400 overflow-x-auto border border-zinc-800/80">
+              <pre className="bg-black/80 rounded-none p-3 text-xs font-mono text-[#894DEF] overflow-x-auto border border-zinc-800/80">
                 {JSON.stringify(customRecipientMsgObj, null, 2)}
               </pre>
               <p className="text-[11px] text-zinc-400 font-mono">
@@ -706,7 +706,7 @@ export function OnrampQuotePanel() {
               {simStep === "idle" && (
                 <button
                   onClick={runSimulation}
-                  className="w-full py-3.5 px-6 rounded-xl font-medium text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black font-mono font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 group"
+                  className="w-full py-3.5 px-6 rounded-none font-medium text-sm bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-mono font-bold transition-colors flex items-center justify-center gap-2 group"
                 >
                   <span>Simulate 1Click Swap & Deposit</span>
                   <span className="text-black/70 group-hover:translate-x-1 transition-transform">
@@ -717,10 +717,10 @@ export function OnrampQuotePanel() {
 
               {/* Multi-Step Simulation Modal / Progress View */}
               {simStep !== "idle" && (
-                <div className="rounded-xl border border-emerald-500/40 bg-zinc-900/90 p-5 space-y-4">
+                <div className="rounded-none border border-[#2E2E2E] bg-zinc-900/90 p-5 space-y-4">
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="w-2.5 h-2.5 rounded-none bg-[#894DEF] animate-pulse" />
                       <span className="text-sm font-mono font-bold text-white">
                         {simStep === "confirmed"
                           ? "1Click Solver Deposit Confirmed!"
@@ -730,7 +730,7 @@ export function OnrampQuotePanel() {
                     {simStep === "confirmed" && (
                       <button
                         onClick={resetSimulation}
-                        className="text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800"
+                        className="text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded-none bg-zinc-800"
                       >
                         Run Again
                       </button>
@@ -741,9 +741,9 @@ export function OnrampQuotePanel() {
                   <div className="space-y-3 font-mono text-xs">
                     {/* Step 1: RFQ */}
                     <div
-                      className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
+                      className={`flex items-center justify-between p-2.5 rounded-none border transition-all ${
                         simStep === "rfq"
-                          ? "bg-zinc-800/80 border-emerald-500/60 text-white"
+                          ? "bg-zinc-800/80 border-[#2E2E2E] text-white"
                           : simStep === "origin_lock" ||
                             simStep === "relayer_bridge" ||
                             simStep === "escrow_deposit" ||
@@ -753,7 +753,7 @@ export function OnrampQuotePanel() {
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-emerald-400 font-bold">1.</span>
+                        <span className="text-[#894DEF] font-bold">1.</span>
                         <span>Broadcast Intent to 1Click Solver Mesh (POST /v0/quote)</span>
                       </div>
                       <span className="text-[11px]">
@@ -763,9 +763,9 @@ export function OnrampQuotePanel() {
 
                     {/* Step 2: Origin Lock */}
                     <div
-                      className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
+                      className={`flex items-center justify-between p-2.5 rounded-none border transition-all ${
                         simStep === "origin_lock"
-                          ? "bg-zinc-800/80 border-emerald-500/60 text-white"
+                          ? "bg-zinc-800/80 border-[#2E2E2E] text-white"
                           : simStep === "relayer_bridge" ||
                             simStep === "escrow_deposit" ||
                             simStep === "confirmed"
@@ -774,7 +774,7 @@ export function OnrampQuotePanel() {
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-emerald-400 font-bold">2.</span>
+                        <span className="text-[#894DEF] font-bold">2.</span>
                         <span>
                           Origin Chain Deposit ({requiredAssetUnits.toFixed(4)} {asset.symbol} on {chain.name})
                         </span>
@@ -786,16 +786,16 @@ export function OnrampQuotePanel() {
 
                     {/* Step 3: Relayer Delivery */}
                     <div
-                      className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
+                      className={`flex items-center justify-between p-2.5 rounded-none border transition-all ${
                         simStep === "relayer_bridge"
-                          ? "bg-zinc-800/80 border-emerald-500/60 text-white"
+                          ? "bg-zinc-800/80 border-[#2E2E2E] text-white"
                           : simStep === "escrow_deposit" || simStep === "confirmed"
                           ? "bg-zinc-900/40 border-zinc-800 text-zinc-400"
                           : "opacity-40 border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-emerald-400 font-bold">3.</span>
+                        <span className="text-[#894DEF] font-bold">3.</span>
                         <span>Solver executes ft_transfer_call with customRecipientMsg</span>
                       </div>
                       <span className="text-[11px]">
@@ -805,16 +805,16 @@ export function OnrampQuotePanel() {
 
                     {/* Step 4: Escrow Ingestion */}
                     <div
-                      className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
+                      className={`flex items-center justify-between p-2.5 rounded-none border transition-all ${
                         simStep === "escrow_deposit"
-                          ? "bg-zinc-800/80 border-emerald-500/60 text-white"
+                          ? "bg-zinc-800/80 border-[#2E2E2E] text-white"
                           : simStep === "confirmed"
                           ? "bg-zinc-900/40 border-zinc-800 text-zinc-400"
                           : "opacity-40 border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-emerald-400 font-bold">4.</span>
+                        <span className="text-[#894DEF] font-bold">4.</span>
                         <span>Pandem Escrow ft_on_transfer: Invariants & Reserves Verified</span>
                       </div>
                       <span className="text-[11px]">
@@ -825,9 +825,9 @@ export function OnrampQuotePanel() {
 
                   {/* Confirmation Receipt */}
                   {simStep === "confirmed" && (
-                    <div className="rounded-lg bg-emerald-950/30 border border-emerald-500/30 p-4 space-y-3">
+                    <div className="rounded-none bg-[#171717] border border-[#2E2E2E] p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold text-emerald-400">
+                        <span className="text-xs font-mono font-bold text-[#894DEF]">
                           ✓ Subscription Agreement Created on NEAR Testnet
                         </span>
                         <span className="text-[10px] font-mono text-zinc-400">
@@ -836,28 +836,28 @@ export function OnrampQuotePanel() {
                       </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-                        <div className="bg-black/50 p-2 rounded">
+                        <div className="bg-black/50 p-2 rounded-none">
                           <span className="text-zinc-500 block text-[10px]">Subscriber</span>
                           <span className="text-white truncate block" title={originAddress}>
                             {originAddress.slice(0, 10)}...{originAddress.slice(-4)}
                           </span>
                         </div>
-                        <div className="bg-black/50 p-2 rounded">
+                        <div className="bg-black/50 p-2 rounded-none">
                           <span className="text-zinc-500 block text-[10px]">Funded Periods</span>
-                          <span className="text-emerald-400 font-bold">{periods} Periods</span>
+                          <span className="text-[#894DEF] font-bold">{periods} Periods</span>
                         </div>
-                        <div className="bg-black/50 p-2 rounded">
+                        <div className="bg-black/50 p-2 rounded-none">
                           <span className="text-zinc-500 block text-[10px]">Escrow Deposit</span>
                           <span className="text-white font-bold">{totalWNearRequired.toFixed(2)} wNEAR</span>
                         </div>
-                        <div className="bg-black/50 p-2 rounded">
+                        <div className="bg-black/50 p-2 rounded-none">
                           <span className="text-zinc-500 block text-[10px]">Escrow Status</span>
-                          <span className="text-emerald-400 font-bold">Active</span>
+                          <span className="text-[#894DEF] font-bold">Active</span>
                         </div>
                       </div>
 
                       {/* Split Breakdown */}
-                      <div className="bg-black/40 rounded p-2.5 text-[11px] font-mono text-zinc-300">
+                      <div className="bg-black/40 rounded-none p-2.5 text-[11px] font-mono text-zinc-300">
                         <div className="text-zinc-400 mb-1 font-bold">Reserve Splits Allocated:</div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           <div>Steward (47.5%): <span className="text-white">{stewardAmountWNear.toFixed(4)} wN</span></div>
@@ -874,7 +874,7 @@ export function OnrampQuotePanel() {
                         <div className="flex gap-2">
                           <Link
                             href="/me"
-                            className="px-3 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-bold transition-colors"
+                            className="px-3 py-1 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-bold transition-colors"
                           >
                             View in /me →
                           </Link>
@@ -882,7 +882,7 @@ export function OnrampQuotePanel() {
                             href={`https://explorer.testnet.near.org/accounts/${PANDEM_ESCROW_ID}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-white transition-colors"
+                            className="px-3 py-1 rounded-none bg-zinc-800 hover:bg-zinc-700 text-white transition-colors"
                           >
                             Escrow Explorer ↗
                           </a>
@@ -910,27 +910,27 @@ export function OnrampQuotePanel() {
               </div>
               <button
                 onClick={() => handleCopy(JSON.stringify(oneClickQuotePayload, null, 2))}
-                className="text-xs font-mono text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition-colors"
+                className="text-xs font-mono text-zinc-300 hover:text-white px-3 py-1.5 rounded-none bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition-colors"
               >
                 {copiedPayload ? "✓ Copied Full Payload" : "Copy Full Payload"}
               </button>
             </div>
 
-            <pre className="bg-black/90 rounded-xl p-4 text-xs font-mono text-emerald-400 overflow-x-auto border border-zinc-800">
+            <pre className="bg-black/90 rounded-none p-4 text-xs font-mono text-[#894DEF] overflow-x-auto border border-zinc-800">
               {JSON.stringify(oneClickQuotePayload, null, 2)}
             </pre>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="rounded-lg bg-zinc-900/60 border border-zinc-800 p-3 text-xs font-mono text-zinc-300 space-y-1">
+              <div className="rounded-none bg-zinc-900/60 border border-zinc-800 p-3 text-xs font-mono text-zinc-300 space-y-1">
                 <span className="text-white font-bold block">Why EXACT_OUTPUT?</span>
                 <p className="text-zinc-400 text-[11px] leading-relaxed">
-                  Escrow subscriptions require exact funding amounts (e.g. 0.3 wNEAR for 3 periods). With <code className="text-emerald-400">EXACT_OUTPUT</code>, the solver guarantees the destination receives the exact required token balance. Any excess input on the origin chain is returned to <code className="text-zinc-300">refundTo</code>.
+                  Escrow subscriptions require exact funding amounts (e.g. 0.3 wNEAR for 3 periods). With <code className="text-[#894DEF]">EXACT_OUTPUT</code>, the solver guarantees the destination receives the exact required token balance. Any excess input on the origin chain is returned to <code className="text-zinc-300">refundTo</code>.
                 </p>
               </div>
-              <div className="rounded-lg bg-zinc-900/60 border border-zinc-800 p-3 text-xs font-mono text-zinc-300 space-y-1">
+              <div className="rounded-none bg-zinc-900/60 border border-zinc-800 p-3 text-xs font-mono text-zinc-300 space-y-1">
                 <span className="text-white font-bold block">How customRecipientMsg Works</span>
                 <p className="text-zinc-400 text-[11px] leading-relaxed">
-                  NEAR NEP-141 tokens support <code className="text-emerald-400">ft_transfer_call</code>, which carries a stringified <code className="text-cyan-400">msg</code> to the receiver contract. Pandem Escrow parses this string to identify the subscriber address and product ID, without requiring the payer to sign a NEAR transaction.
+                  NEAR NEP-141 tokens support <code className="text-[#894DEF]">ft_transfer_call</code>, which carries a stringified <code className="text-cyan-400">msg</code> to the receiver contract. Pandem Escrow parses this string to identify the subscriber address and product ID, without requiring the payer to sign a NEAR transaction.
                 </p>
               </div>
             </div>
@@ -945,21 +945,21 @@ export function OnrampQuotePanel() {
             </h3>
             
             <div className="space-y-3">
-              <div className="p-3.5 rounded-lg bg-zinc-900/70 border border-zinc-800">
-                <div className="text-emerald-400 font-bold mb-1">1. Decentralized Solver RFQ (Request For Quote)</div>
+              <div className="p-3.5 rounded-none bg-zinc-900/70 border border-zinc-800">
+                <div className="text-[#894DEF] font-bold mb-1">1. Decentralized Solver RFQ (Request For Quote)</div>
                 <p className="text-zinc-400 leading-relaxed text-[11px]">
                   When a subscriber initiates an on-ramp from Base, Ethereum, Solana, or Bitcoin, 1Click broadcasts an Intent to a competitive network of independent market makers (solvers). Solvers compete to provide the tightest exchange rates and fastest fulfillment times.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-lg bg-zinc-900/70 border border-zinc-800">
+              <div className="p-3.5 rounded-none bg-zinc-900/70 border border-zinc-800">
                 <div className="text-cyan-400 font-bold mb-1">2. Atomic Escrow Delivery</div>
                 <p className="text-zinc-400 leading-relaxed text-[11px]">
                   Unlike bridge tokens that require manual claiming or wrapping, the winning solver delivers native NEP-141 tokens directly into <code className="text-white">pandem-escrow-46cee5ca.testnet</code>. The entire multi-chain interaction settles in a single atomic pipeline.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-lg bg-zinc-900/70 border border-zinc-800">
+              <div className="p-3.5 rounded-none bg-zinc-900/70 border border-zinc-800">
                 <div className="text-purple-400 font-bold mb-1">3. Non-Custodial Refund Invariant</div>
                 <p className="text-zinc-400 leading-relaxed text-[11px]">
                   If the origin deposit fails or the solver is unable to deliver the exact required output before the deadline (~10 minutes), the solver protocol automatically refunds the deposit on the origin chain. Once delivered, Pandem's native smart contract enforces automated pro-rata refunds upon missed heartbeats.

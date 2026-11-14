@@ -66,61 +66,61 @@ export default function ComponentTestbedPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
+              <span className="w-3 h-3 rounded-none bg-[#894DEF] animate-ping" />
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                 Design System & Component Testbed
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+              <span className="px-2.5 py-0.5 rounded-none text-xs font-mono bg-[#262626] text-[#894DEF] border border-[#2E2E2E] font-semibold">
                 v1.0 Baseline
               </span>
             </div>
             <p className="text-sm text-zinc-400 mt-2 max-w-3xl">
               Interactive testbed for every atomic UI element, button state, metric card, progress bar, alert banner,
               and modal in the Pandem protocol. Built on strict dark tokens (<code className="text-zinc-200">bg-black</code>,{" "}
-              <code className="text-zinc-200">border-zinc-800</code>, <code className="text-emerald-400">emerald-500</code> accents).
+              <code className="text-zinc-200">border-[#2E2E2E]</code>, <code className="text-[#894DEF]">#894DEF</code> accents).
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <a
               href="#buttons"
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
             >
               #buttons
             </a>
             <a
               href="#badges"
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
             >
               #badges
             </a>
             <a
               href="#metrics"
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
             >
               #metrics
             </a>
             <a
               href="#progress"
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
             >
               #progress
             </a>
             <a
               href="#alerts"
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
             >
               #alerts
             </a>
             <a
               href="#modals"
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
             >
               #modals
             </a>
             <a
               href="#wallet"
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              className="px-2.5 py-1 rounded-none bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
             >
               #wallet
             </a>
@@ -128,10 +128,10 @@ export default function ComponentTestbedPage() {
         </div>
 
         {/* Live Interaction Log */}
-        <div className="mt-6 p-3 rounded-xl bg-zinc-950 border border-zinc-850 flex items-center justify-between text-xs font-mono">
+        <div className="mt-6 p-3 rounded-none bg-zinc-950 border border-zinc-850 flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
             <span className="text-zinc-500">Live Log:</span>
-            <span className="text-emerald-400">{actionLog[0]}</span>
+            <span className="text-[#894DEF]">{actionLog[0]}</span>
           </div>
           <span className="text-zinc-600 text-[11px] shrink-0 ml-4 hidden sm:inline">
             {actionLog.length} events logged
@@ -143,28 +143,28 @@ export default function ComponentTestbedPage() {
       <section id="buttons" className="space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <span className="w-2.5 h-2.5 rounded-none bg-[#894DEF]" />
             A. Action Buttons & States
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
-            Standard action primitives: Primary (Emerald), Secondary (Zinc), Destructive (Rose killswitch), Warning (Amber refund).
+            Standard action primitives: Primary (Spectr Purple), Secondary (Zinc), Destructive (Rose killswitch), Warning (Amber refund).
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Primary Emerald */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
+          {/* Primary Spectr Purple */}
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-emerald-400 font-semibold uppercase">
-                Primary (Emerald)
+              <span className="text-xs font-mono text-[#894DEF] font-semibold uppercase">
+                Primary (Spectr Purple)
               </span>
               <span className="text-[10px] font-mono text-zinc-500">Subscribe / Execute</span>
             </div>
 
             <div className="space-y-2">
               <button
-                onClick={() => logAction("Clicked Primary Emerald (Enabled)")}
-                className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition-all shadow-md shadow-emerald-500/10 flex items-center justify-center gap-2"
+                onClick={() => logAction("Clicked Primary Spectr Purple (Enabled)")}
+                className="w-full py-2.5 px-4 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold text-xs transition-all shadow-md shadow-none flex items-center justify-center gap-2"
               >
                 <span>Subscribe via Escrow</span>
                 <span className="font-mono text-xs">→</span>
@@ -172,7 +172,7 @@ export default function ComponentTestbedPage() {
 
               <button
                 disabled
-                className="w-full py-2.5 px-4 rounded-xl bg-emerald-500/40 text-black/60 font-semibold text-xs cursor-not-allowed"
+                className="w-full py-2.5 px-4 rounded-none bg-[#894DEF]/40 text-black/60 font-semibold text-xs cursor-not-allowed"
               >
                 Primary Disabled
               </button>
@@ -182,7 +182,7 @@ export default function ComponentTestbedPage() {
                   setPrimaryLoading(!primaryLoading);
                   logAction(`Toggled Primary Loading state: ${!primaryLoading}`);
                 }}
-                className="w-full py-2 px-3 rounded-xl border border-dashed border-zinc-700 bg-zinc-950 text-zinc-400 hover:text-white font-mono text-[11px] transition-colors"
+                className="w-full py-2 px-3 rounded-none border border-dashed border-zinc-700 bg-zinc-950 text-zinc-400 hover:text-white font-mono text-[11px] transition-colors"
               >
                 {primaryLoading ? "Stop Loading" : "Simulate Loading"}
               </button>
@@ -190,9 +190,9 @@ export default function ComponentTestbedPage() {
               {primaryLoading && (
                 <button
                   disabled
-                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 text-black font-semibold text-xs flex items-center justify-center gap-2 cursor-wait"
+                  className="w-full py-2.5 px-4 rounded-none bg-[#894DEF] text-black font-semibold text-xs flex items-center justify-center gap-2 cursor-wait"
                 >
-                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-none animate-spin" />
                   <span>Submitting to NEAR...</span>
                 </button>
               )}
@@ -200,7 +200,7 @@ export default function ComponentTestbedPage() {
           </div>
 
           {/* Secondary Zinc */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-zinc-300 font-semibold uppercase">
                 Secondary (Zinc)
@@ -211,21 +211,21 @@ export default function ComponentTestbedPage() {
             <div className="space-y-2">
               <button
                 onClick={() => logAction("Clicked Secondary Zinc (Solid)")}
-                className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs font-mono border border-zinc-700 transition-colors"
+                className="w-full py-2.5 px-4 rounded-none bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs font-mono border border-zinc-700 transition-colors"
               >
                 ↻ Refresh State
               </button>
 
               <button
                 onClick={() => logAction("Clicked Secondary Zinc (Ghost/Outline)")}
-                className="w-full py-2.5 px-4 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800/60 text-zinc-300 font-mono text-xs transition-colors"
+                className="w-full py-2.5 px-4 rounded-none border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800/60 text-zinc-300 font-mono text-xs transition-colors"
               >
                 View Transaction Log ↗
               </button>
 
               <button
                 disabled
-                className="w-full py-2.5 px-4 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-600 font-mono text-xs cursor-not-allowed"
+                className="w-full py-2.5 px-4 rounded-none border border-zinc-800 bg-zinc-900/40 text-zinc-600 font-mono text-xs cursor-not-allowed"
               >
                 Secondary Disabled
               </button>
@@ -233,7 +233,7 @@ export default function ComponentTestbedPage() {
           </div>
 
           {/* Destructive Rose */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-rose-400 font-semibold uppercase">
                 Destructive (Rose)
@@ -247,7 +247,7 @@ export default function ComponentTestbedPage() {
                   logAction("Clicked Destructive Rose (Killswitch Action)");
                   setIsKillswitchModalOpen(true);
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 px-4 rounded-none bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5"
               >
                 <span>Pull Killswitch ⚠</span>
               </button>
@@ -257,7 +257,7 @@ export default function ComponentTestbedPage() {
                   setDestructiveLoading(!destructiveLoading);
                   logAction(`Toggled Destructive Loading: ${!destructiveLoading}`);
                 }}
-                className="w-full py-2 px-3 rounded-xl border border-dashed border-rose-900/50 bg-zinc-950 text-rose-400 hover:text-rose-300 font-mono text-[11px] transition-colors"
+                className="w-full py-2 px-3 rounded-none border border-dashed border-rose-900/50 bg-zinc-950 text-rose-400 hover:text-rose-300 font-mono text-[11px] transition-colors"
               >
                 {destructiveLoading ? "Reset Loading" : "Simulate Abort..."}
               </button>
@@ -265,9 +265,9 @@ export default function ComponentTestbedPage() {
               {destructiveLoading && (
                 <button
                   disabled
-                  className="w-full py-2.5 px-4 rounded-xl bg-rose-600/80 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-wait font-mono"
+                  className="w-full py-2.5 px-4 rounded-none bg-rose-600/80 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-wait font-mono"
                 >
-                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-none animate-spin" />
                   <span>Terminating Product...</span>
                 </button>
               )}
@@ -275,7 +275,7 @@ export default function ComponentTestbedPage() {
           </div>
 
           {/* Warning Amber */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-amber-400 font-semibold uppercase">
                 Warning (Amber)
@@ -289,7 +289,7 @@ export default function ComponentTestbedPage() {
                   logAction("Clicked Warning Amber (Claim Refund)");
                   setIsRefundModalOpen(true);
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-mono transition-colors shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 px-4 rounded-none bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-mono transition-colors shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5"
               >
                 <span>Claim Refund (Pro-Rata)</span>
               </button>
@@ -299,7 +299,7 @@ export default function ComponentTestbedPage() {
                   setWarningLoading(!warningLoading);
                   logAction(`Toggled Warning Loading: ${!warningLoading}`);
                 }}
-                className="w-full py-2 px-3 rounded-xl border border-dashed border-amber-900/50 bg-zinc-950 text-amber-400 hover:text-amber-300 font-mono text-[11px] transition-colors"
+                className="w-full py-2 px-3 rounded-none border border-dashed border-amber-900/50 bg-zinc-950 text-amber-400 hover:text-amber-300 font-mono text-[11px] transition-colors"
               >
                 {warningLoading ? "Reset Loading" : "Simulate Deposit..."}
               </button>
@@ -307,9 +307,9 @@ export default function ComponentTestbedPage() {
               {warningLoading && (
                 <button
                   disabled
-                  className="w-full py-2.5 px-4 rounded-xl bg-amber-500 text-black font-semibold text-xs flex items-center justify-center gap-2 cursor-wait font-mono"
+                  className="w-full py-2.5 px-4 rounded-none bg-amber-500 text-black font-semibold text-xs flex items-center justify-center gap-2 cursor-wait font-mono"
                 >
-                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-none animate-spin" />
                   <span>Depositing 0.0125 NEAR...</span>
                 </button>
               )}
@@ -322,7 +322,7 @@ export default function ComponentTestbedPage() {
       <section id="badges" className="space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
+            <span className="w-2.5 h-2.5 rounded-none bg-cyan-400" />
             B. Status Badges & Indicators
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
@@ -332,11 +332,11 @@ export default function ComponentTestbedPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Active Badge */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
             <div className="text-[11px] font-mono text-zinc-400">Escrow State: Active</div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold flex items-center gap-1.5 shadow-sm shadow-emerald-500/10">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-mono px-3 py-1 rounded-none bg-[#262626] text-[#894DEF] border border-[#2E2E2E] font-semibold flex items-center gap-1.5 shadow-sm shadow-none">
+                <span className="w-2 h-2 rounded-none bg-[#894DEF] animate-pulse" />
                 Active
               </span>
             </div>
@@ -346,11 +346,11 @@ export default function ComponentTestbedPage() {
           </div>
 
           {/* Abandoned Badge */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
             <div className="text-[11px] font-mono text-zinc-400">Escrow State: Terminated</div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 font-semibold flex items-center gap-1.5 shadow-sm shadow-rose-500/10">
-                <span className="w-2 h-2 rounded-full bg-rose-400" />
+              <span className="text-xs font-mono px-3 py-1 rounded-none bg-rose-500/10 text-rose-400 border border-rose-500/30 font-semibold flex items-center gap-1.5 shadow-sm shadow-rose-500/10">
+                <span className="w-2 h-2 rounded-none bg-rose-400" />
                 Abandoned
               </span>
             </div>
@@ -360,11 +360,11 @@ export default function ComponentTestbedPage() {
           </div>
 
           {/* Pending Badge */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
             <div className="text-[11px] font-mono text-zinc-400">Liveness: Grace Window</div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold flex items-center gap-1.5 shadow-sm shadow-amber-500/10">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="text-xs font-mono px-3 py-1 rounded-none bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold flex items-center gap-1.5 shadow-sm shadow-amber-500/10">
+                <span className="w-2 h-2 rounded-none bg-amber-400 animate-pulse" />
                 Pending Heartbeat
               </span>
             </div>
@@ -374,10 +374,10 @@ export default function ComponentTestbedPage() {
           </div>
 
           {/* TEE Hardware Verified */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
             <div className="text-[11px] font-mono text-zinc-400">Hardware Attestation</div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-semibold flex items-center gap-1.5 shadow-sm shadow-cyan-500/10">
+              <span className="text-xs font-mono px-3 py-1 rounded-none bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-semibold flex items-center gap-1.5 shadow-sm shadow-cyan-500/10">
                 <span className="text-[11px]">⛉</span>
                 TEE Verified
               </span>
@@ -388,11 +388,11 @@ export default function ComponentTestbedPage() {
           </div>
 
           {/* Testnet Escrow Badge */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
             <div className="text-[11px] font-mono text-zinc-400">Network Scope</div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 font-semibold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-xs font-mono px-3 py-1 rounded-none bg-zinc-800 text-zinc-300 border border-zinc-700 font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-none bg-[#894DEF]" />
                 Testnet Escrow
               </span>
             </div>
@@ -407,7 +407,7 @@ export default function ComponentTestbedPage() {
       <section id="metrics" className="space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-400" />
+            <span className="w-2.5 h-2.5 rounded-none bg-purple-400" />
             C. Stat / Metric Cards & Split Calculator
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
@@ -417,10 +417,10 @@ export default function ComponentTestbedPage() {
 
         {/* 4 Metric Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-2">
+          <div className="p-5 rounded-none bg-zinc-900/60 border border-zinc-800 space-y-2">
             <div className="text-xs font-mono text-zinc-400 flex items-center justify-between">
               <span>Total Escrow Locked</span>
-              <span className="text-emerald-400 font-bold">● Live</span>
+              <span className="text-[#894DEF] font-bold">● Live</span>
             </div>
             <div className="text-2xl font-extrabold text-white font-mono tracking-tight">
               142.5000 <span className="text-xs font-normal text-zinc-400">wNEAR</span>
@@ -430,7 +430,7 @@ export default function ComponentTestbedPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-2">
+          <div className="p-5 rounded-none bg-zinc-900/60 border border-zinc-800 space-y-2">
             <div className="text-xs font-mono text-cyan-400 flex items-center justify-between">
               <span>Ops Reserve (30.0%)</span>
               <span className="text-zinc-500 text-[10px]">PANDEM SPLIT</span>
@@ -443,7 +443,7 @@ export default function ComponentTestbedPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-2">
+          <div className="p-5 rounded-none bg-zinc-900/60 border border-zinc-800 space-y-2">
             <div className="text-xs font-mono text-purple-400 flex items-center justify-between">
               <span>Contingency Pool (20.0%)</span>
               <span className="text-zinc-500 text-[10px]">REFUND BUFFER</span>
@@ -456,10 +456,10 @@ export default function ComponentTestbedPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-2">
+          <div className="p-5 rounded-none bg-zinc-900/60 border border-zinc-800 space-y-2">
             <div className="text-xs font-mono text-amber-400 flex items-center justify-between">
               <span>Verified Heartbeat</span>
-              <span className="text-emerald-400 text-[10px]">SYNCED</span>
+              <span className="text-[#894DEF] text-[10px]">SYNCED</span>
             </div>
             <div className="text-2xl font-extrabold text-white font-mono tracking-tight">
               Period #4 <span className="text-xs font-normal text-zinc-400">/ 24h</span>
@@ -471,12 +471,12 @@ export default function ComponentTestbedPage() {
         </div>
 
         {/* Interactive Split Formula Calculator Card */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 space-y-5">
+        <div className="rounded-none border border-zinc-800 bg-zinc-950/80 p-6 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-850">
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <span>Four-Way Split Formula Calculator</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] border border-[#2E2E2E]">
                   Exact Math
                 </span>
               </h3>
@@ -494,7 +494,7 @@ export default function ComponentTestbedPage() {
                   min="0.1"
                   value={splitAmountInput}
                   onChange={(e) => setSplitAmountInput(e.target.value)}
-                  className="bg-black/80 border border-zinc-700 px-3 py-1.5 rounded-lg text-white font-mono text-xs w-32 focus:outline-none focus:border-emerald-500"
+                  className="bg-black/80 border border-zinc-700 px-3 py-1.5 rounded-none text-white font-mono text-xs w-32 focus:outline-none focus:border-[#894DEF]"
                 />
                 <span className="absolute right-2.5 top-1.5 text-xs text-zinc-500 font-mono">wNEAR</span>
               </div>
@@ -502,7 +502,7 @@ export default function ComponentTestbedPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono">
-            <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+            <div className="p-3.5 rounded-none bg-zinc-900 border border-zinc-800">
               <div className="text-zinc-400 flex justify-between">
                 <span>Steward Payout</span>
                 <span className="text-white font-bold">47.5%</span>
@@ -512,7 +512,7 @@ export default function ComponentTestbedPage() {
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+            <div className="p-3.5 rounded-none bg-zinc-900 border border-zinc-800">
               <div className="text-zinc-400 flex justify-between">
                 <span>Ops Reserve</span>
                 <span className="text-cyan-400 font-bold">30.0%</span>
@@ -522,7 +522,7 @@ export default function ComponentTestbedPage() {
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+            <div className="p-3.5 rounded-none bg-zinc-900 border border-zinc-800">
               <div className="text-zinc-400 flex justify-between">
                 <span>Contingency Reserve</span>
                 <span className="text-purple-400 font-bold">20.0%</span>
@@ -532,12 +532,12 @@ export default function ComponentTestbedPage() {
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800">
+            <div className="p-3.5 rounded-none bg-zinc-900 border border-zinc-800">
               <div className="text-zinc-400 flex justify-between">
                 <span>Protocol Treasury</span>
-                <span className="text-emerald-400 font-bold">2.5%</span>
+                <span className="text-[#894DEF] font-bold">2.5%</span>
               </div>
-              <div className="text-lg font-bold text-emerald-400 mt-1">
+              <div className="text-lg font-bold text-[#894DEF] mt-1">
                 {splitFee} <span className="text-xs font-normal text-zinc-500">wNEAR</span>
               </div>
             </div>
@@ -545,7 +545,7 @@ export default function ComponentTestbedPage() {
 
           <div className="text-[11px] font-mono text-zinc-500 flex items-center justify-between">
             <span>Formula check: 47.5% + 30.0% + 20.0% + 2.5% = 100.00%</span>
-            <span className="text-emerald-400">Sum: {parsedAmount.toFixed(4)} wNEAR (Balanced)</span>
+            <span className="text-[#894DEF]">Sum: {parsedAmount.toFixed(4)} wNEAR (Balanced)</span>
           </div>
         </div>
       </section>
@@ -554,7 +554,7 @@ export default function ComponentTestbedPage() {
       <section id="progress" className="space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-400" />
+            <span className="w-2.5 h-2.5 rounded-none bg-teal-400" />
             D. Progress Bars & Period Releases
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
@@ -562,7 +562,7 @@ export default function ComponentTestbedPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-6">
+        <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-6 space-y-6">
           {/* Preset Demonstrations */}
           <div className="space-y-5">
             <div>
@@ -570,38 +570,38 @@ export default function ComponentTestbedPage() {
                 <span className="text-zinc-300">0% Released (Initial Escrow Deposit)</span>
                 <span className="text-zinc-500">0 / 3 Periods Released</span>
               </div>
-              <div className="h-3 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
-                <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: "0%" }} />
+              <div className="h-3 w-full bg-zinc-950 rounded-none overflow-hidden border border-zinc-800">
+                <div className="h-full bg-[#894DEF] rounded-none transition-all duration-500" style={{ width: "0%" }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-xs font-mono mb-1.5">
                 <span className="text-zinc-300">33.3% Released (1 Period Heartbeat Verified)</span>
-                <span className="text-emerald-400 font-bold">1 / 3 Periods Released</span>
+                <span className="text-[#894DEF] font-bold">1 / 3 Periods Released</span>
               </div>
-              <div className="h-3 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
-                <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style={{ width: "33.33%" }} />
+              <div className="h-3 w-full bg-zinc-950 rounded-none overflow-hidden border border-zinc-800">
+                <div className="h-full bg-[#171717]" style={{ width: "33.33%" }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-xs font-mono mb-1.5">
                 <span className="text-zinc-300">66.6% Released (2 Periods Heartbeat Verified)</span>
-                <span className="text-emerald-400 font-bold">2 / 3 Periods Released</span>
+                <span className="text-[#894DEF] font-bold">2 / 3 Periods Released</span>
               </div>
-              <div className="h-3 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
-                <div className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full transition-all duration-500" style={{ width: "66.66%" }} />
+              <div className="h-3 w-full bg-zinc-950 rounded-none overflow-hidden border border-zinc-800">
+                <div className="h-full bg-[#171717]" style={{ width: "66.66%" }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-xs font-mono mb-1.5">
                 <span className="text-zinc-300">100% Completed (All Periods Fully Released)</span>
-                <span className="text-emerald-400 font-bold">3 / 3 Periods Released</span>
+                <span className="text-[#894DEF] font-bold">3 / 3 Periods Released</span>
               </div>
-              <div className="h-3 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
-                <div className="h-full bg-emerald-400 rounded-full transition-all duration-500" style={{ width: "100%" }} />
+              <div className="h-3 w-full bg-zinc-950 rounded-none overflow-hidden border border-zinc-800">
+                <div className="h-full bg-[#894DEF] rounded-none transition-all duration-500" style={{ width: "100%" }} />
               </div>
             </div>
           </div>
@@ -610,7 +610,7 @@ export default function ComponentTestbedPage() {
           <div className="pt-6 border-t border-zinc-800 space-y-3">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-white font-bold">Interactive Release Simulator:</span>
-              <span className="text-emerald-400 font-bold">{progressVal}% Released</span>
+              <span className="text-[#894DEF] font-bold">{progressVal}% Released</span>
             </div>
             <input
               type="range"
@@ -618,7 +618,7 @@ export default function ComponentTestbedPage() {
               max="100"
               value={progressVal}
               onChange={(e) => setProgressVal(Number(e.target.value))}
-              className="w-full accent-emerald-500 cursor-pointer"
+              className="w-full accent-[#894DEF] cursor-pointer"
             />
             <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
               <span>0% (Full Refundable Balance)</span>
@@ -633,7 +633,7 @@ export default function ComponentTestbedPage() {
       <section id="alerts" className="space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+            <span className="w-2.5 h-2.5 rounded-none bg-amber-400" />
             E. Alerts, Banners & TEE Attestation Proof Card
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
@@ -644,12 +644,12 @@ export default function ComponentTestbedPage() {
         <div className="space-y-4">
           {/* Success Banner */}
           {showSuccessBanner && (
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-emerald-500/5">
+            <div className="p-4 rounded-none bg-[#262626] border border-[#2E2E2E] text-[#894DEF] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-none">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 font-semibold text-sm">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="w-2 h-2 rounded-none bg-[#894DEF] animate-ping" />
                   <span>Subscription Confirmed on Testnet!</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">
+                  <span className="text-[10px] px-2 py-0.5 rounded-none bg-[#262626] text-[#FAFAFA] font-mono">
                     FINALIZED
                   </span>
                 </div>
@@ -663,13 +663,13 @@ export default function ComponentTestbedPage() {
                   href="https://explorer.testnet.near.org"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-3 py-1.5 rounded-xl transition-colors font-mono"
+                  className="text-xs bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold px-3 py-1.5 rounded-none transition-colors font-mono"
                 >
                   View on Explorer →
                 </a>
                 <button
                   onClick={() => setShowSuccessBanner(false)}
-                  className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded-lg"
+                  className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded-none"
                 >
                   Dismiss
                 </button>
@@ -679,7 +679,7 @@ export default function ComponentTestbedPage() {
 
           {/* Warning Banner */}
           {showWarningBanner && (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 rounded-none bg-amber-500/10 border border-amber-500/30 text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 font-semibold text-sm">
                   <span>⚠</span>
@@ -693,13 +693,13 @@ export default function ComponentTestbedPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => logAction("Simulated Storage Deposit Executed")}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-mono transition-colors"
+                  className="px-3 py-1.5 rounded-none bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-mono transition-colors"
                 >
                   Deposit 0.0125 NEAR
                 </button>
                 <button
                   onClick={() => setShowWarningBanner(false)}
-                  className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded-lg"
+                  className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded-none"
                 >
                   Dismiss
                 </button>
@@ -709,7 +709,7 @@ export default function ComponentTestbedPage() {
 
           {/* Destructive Banner */}
           {showDestructiveBanner && (
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 rounded-none bg-rose-500/10 border border-rose-500/30 text-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 font-semibold text-sm text-rose-400">
                   <span>🛑</span>
@@ -723,13 +723,13 @@ export default function ComponentTestbedPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <Link
                   href="/me"
-                  className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors shadow-md shadow-rose-600/20"
+                  className="px-3 py-1.5 rounded-none bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors shadow-md shadow-rose-600/20"
                 >
                   Claim My Refund →
                 </Link>
                 <button
                   onClick={() => setShowDestructiveBanner(false)}
-                  className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded-lg"
+                  className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded-none"
                 >
                   Dismiss
                 </button>
@@ -739,13 +739,13 @@ export default function ComponentTestbedPage() {
 
           {/* TEE Attestation Proof Card */}
           {showTeeProof && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5 space-y-4">
+            <div className="rounded-none border border-zinc-800 bg-zinc-950/90 p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-850 gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-none bg-cyan-400 animate-pulse" />
                   <h3 className="text-sm font-bold text-white font-mono flex items-center gap-2">
                     TEE Hardware Enclave Attestation Proof
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    <span className="text-[10px] px-2 py-0.5 rounded-none bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                       INTEL TDX + NVIDIA NRAS
                     </span>
                   </h3>
@@ -756,13 +756,13 @@ export default function ComponentTestbedPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                <div className="p-3 rounded-none bg-zinc-900 border border-zinc-800">
                   <span className="text-zinc-500 block text-[11px]">Hardware Enclave:</span>
                   <span className="text-white font-bold mt-0.5 block">NVIDIA H100 SXM5 80GB</span>
                   <span className="text-[10px] text-zinc-400">Intel Xeon TDX Enclave</span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                <div className="p-3 rounded-none bg-zinc-900 border border-zinc-800">
                   <span className="text-zinc-500 block text-[11px]">Signing Key:</span>
                   <span className="text-cyan-400 font-bold mt-0.5 block truncate">
                     ed25519:6s9Gk2xQpL7n...
@@ -770,17 +770,17 @@ export default function ComponentTestbedPage() {
                   <span className="text-[10px] text-zinc-400">Curve Ed25519 Non-Custodial</span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                <div className="p-3 rounded-none bg-zinc-900 border border-zinc-800">
                   <span className="text-zinc-500 block text-[11px]">Cryptographic Nonce:</span>
-                  <span className="text-emerald-400 font-bold mt-0.5 block truncate">
+                  <span className="text-[#894DEF] font-bold mt-0.5 block truncate">
                     0x8f3c7a21b4e99f02
                   </span>
                   <span className="text-[10px] text-zinc-400">Replay Protected</span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                <div className="p-3 rounded-none bg-zinc-900 border border-zinc-800">
                   <span className="text-zinc-500 block text-[11px]">Quote Status:</span>
-                  <span className="text-emerald-400 font-bold mt-0.5 block">
+                  <span className="text-[#894DEF] font-bold mt-0.5 block">
                     ✓ Hardware Attested
                   </span>
                   <span className="text-[10px] text-zinc-400">Verified by Intel Root CA</span>
@@ -796,18 +796,18 @@ export default function ComponentTestbedPage() {
                 </button>
                 <button
                   onClick={() => logAction("Copied TEE Attestation Evidence to Clipboard")}
-                  className="px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-mono text-xs transition-colors"
+                  className="px-3 py-1 rounded-none bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-mono text-xs transition-colors"
                 >
                   Copy Proof JSON
                 </button>
               </div>
 
               {expandRawProof && (
-                <div className="bg-black/90 p-3 rounded-xl border border-zinc-800 font-mono text-[11px] text-zinc-400 overflow-x-auto space-y-1">
+                <div className="bg-black/90 p-3 rounded-none border border-zinc-800 font-mono text-[11px] text-zinc-400 overflow-x-auto space-y-1">
                   <div><span className="text-zinc-500">enclave_model:</span> meta-llama/Llama-3.3-70B-Instruct</div>
                   <div><span className="text-zinc-500">intel_tdx_quote:</span> 0400000000000000938472910fbc...</div>
                   <div><span className="text-zinc-500">nras_token:</span> eyJhbGciOiJSUzI1NiIsImtpZCI6Im52aWRpY...</div>
-                  <div><span className="text-zinc-500">attestation_verified:</span> <span className="text-emerald-400">true</span></div>
+                  <div><span className="text-zinc-500">attestation_verified:</span> <span className="text-[#894DEF]">true</span></div>
                 </div>
               )}
             </div>
@@ -819,7 +819,7 @@ export default function ComponentTestbedPage() {
       <section id="modals" className="space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+            <span className="w-2.5 h-2.5 rounded-none bg-blue-400" />
             F. Interactive Modal Triggers
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
@@ -828,7 +828,7 @@ export default function ComponentTestbedPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-4">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-6 space-y-4">
             <div className="text-sm font-bold text-white">SubscribeModal Flow</div>
             <p className="text-xs text-zinc-400">
               Opens the real non-custodial subscription modal, allowing period selection, split breakdown preview, and ft_transfer_call simulation.
@@ -838,13 +838,13 @@ export default function ComponentTestbedPage() {
                 logAction("Opened SubscribeModal");
                 setIsSubscribeModalOpen(true);
               }}
-              className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-mono transition-colors shadow-md shadow-emerald-500/10"
+              className="w-full py-2.5 px-4 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold text-xs font-mono transition-colors shadow-md shadow-none"
             >
               Launch SubscribeModal
             </button>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-4">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-6 space-y-4">
             <div className="text-sm font-bold text-white">Steward Killswitch Modal</div>
             <p className="text-xs text-zinc-400">
               Opens the dangerous state confirmation dialog for stewards to terminate a product and lock on-chain heartbeats with a logged reason.
@@ -854,13 +854,13 @@ export default function ComponentTestbedPage() {
                 logAction("Opened Killswitch Confirmation Modal");
                 setIsKillswitchModalOpen(true);
               }}
-              className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors shadow-md shadow-rose-600/20"
+              className="w-full py-2.5 px-4 rounded-none bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors shadow-md shadow-rose-600/20"
             >
               Launch Killswitch Modal
             </button>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-4">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-6 space-y-4">
             <div className="text-sm font-bold text-white">Pro-Rata Refund Modal</div>
             <p className="text-xs text-zinc-400">
               Demonstrates subscriber refund calculations: unreleased periods refund plus proportional contingency reserve claim.
@@ -870,7 +870,7 @@ export default function ComponentTestbedPage() {
                 logAction("Opened Refund Modal");
                 setIsRefundModalOpen(true);
               }}
-              className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-mono transition-colors shadow-md shadow-amber-500/20"
+              className="w-full py-2.5 px-4 rounded-none bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-mono transition-colors shadow-md shadow-amber-500/20"
             >
               Launch Refund Modal
             </button>
@@ -882,7 +882,7 @@ export default function ComponentTestbedPage() {
       <section id="wallet" className="space-y-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <span className="w-2.5 h-2.5 rounded-none bg-[#894DEF]" />
             G. Live Wallet Card & Account Switcher
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
@@ -890,15 +890,15 @@ export default function ComponentTestbedPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-6">
+        <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-850 gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white">Active Testnet Wallet</span>
                 <span
-                  className={`text-xs font-mono px-2 py-0.5 rounded-full border ${
+                  className={`text-xs font-mono px-2 py-0.5 rounded-none border ${
                     isConnected
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      ? "bg-[#262626] text-[#894DEF] border-[#2E2E2E]"
                       : "bg-zinc-800 text-zinc-400 border-zinc-700"
                   }`}
                 >
@@ -917,7 +917,7 @@ export default function ComponentTestbedPage() {
                     disconnect();
                     logAction("Disconnected Wallet");
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono transition-colors border border-zinc-700"
+                  className="px-3 py-1.5 rounded-none bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono transition-colors border border-zinc-700"
                 >
                   Sign Out
                 </button>
@@ -927,7 +927,7 @@ export default function ComponentTestbedPage() {
                     connect();
                     logAction("Triggered Connect Wallet");
                   }}
-                  className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-mono transition-colors shadow-sm shadow-emerald-500/20"
+                  className="px-4 py-1.5 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold text-xs font-mono transition-colors shadow-sm shadow-none"
                 >
                   Connect Wallet
                 </button>
@@ -936,24 +936,24 @@ export default function ComponentTestbedPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+            <div className="p-4 rounded-none bg-zinc-950 border border-zinc-800">
               <span className="text-zinc-500 block text-[11px]">NEP-141 Token Balance:</span>
-              <span className="text-lg font-bold text-emerald-400 mt-1 block">
+              <span className="text-lg font-bold text-[#894DEF] mt-1 block">
                 {tokenBalance && tokenBalance !== "0" ? tokenBalance : "100.0000"} wNEAR
               </span>
               <span className="text-[10px] text-zinc-500">{PANDEM_TOKEN_ID}</span>
             </div>
 
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+            <div className="p-4 rounded-none bg-zinc-950 border border-zinc-800">
               <span className="text-zinc-500 block text-[11px]">Storage Deposit Status:</span>
               <span className="text-lg font-bold text-white mt-1 block flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${isStorageRegistered ? "bg-emerald-400" : "bg-amber-400"}`} />
+                <span className={`w-2 h-2 rounded-none ${isStorageRegistered ? "bg-[#894DEF]" : "bg-amber-400"}`} />
                 {isStorageRegistered ? "Registered (0.0125 N)" : "Action Required"}
               </span>
               <span className="text-[10px] text-zinc-500">Refundable storage lock</span>
             </div>
 
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+            <div className="p-4 rounded-none bg-zinc-950 border border-zinc-800">
               <span className="text-zinc-500 block text-[11px]">Network & Contract:</span>
               <span className="text-lg font-bold text-zinc-200 mt-1 block truncate">
                 testnet · {PANDEM_ESCROW_ID.slice(0, 10)}...
@@ -973,7 +973,7 @@ export default function ComponentTestbedPage() {
                   setManualAccount("pandem-alice-8d6888e3.testnet");
                   logAction("Switched to Alice (Subscriber)");
                 }}
-                className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs border border-zinc-700 transition-colors"
+                className="px-3 py-1.5 rounded-none bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs border border-zinc-700 transition-colors"
               >
                 Alice (Subscriber)
               </button>
@@ -982,7 +982,7 @@ export default function ComponentTestbedPage() {
                   setManualAccount("pandem-steward-47c388e3.testnet");
                   logAction("Switched to Steward (Provider)");
                 }}
-                className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs border border-zinc-700 transition-colors"
+                className="px-3 py-1.5 rounded-none bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs border border-zinc-700 transition-colors"
               >
                 Steward (Provider)
               </button>
@@ -991,7 +991,7 @@ export default function ComponentTestbedPage() {
                   setManualAccount("pandem-agent-12a488e3.testnet");
                   logAction("Switched to Agent (Heartbeat Enclave)");
                 }}
-                className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs border border-zinc-700 transition-colors"
+                className="px-3 py-1.5 rounded-none bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs border border-zinc-700 transition-colors"
               >
                 Agent (Heartbeat Enclave)
               </button>
@@ -1003,7 +1003,7 @@ export default function ComponentTestbedPage() {
                 placeholder="Enter custom testnet account ID"
                 value={customDevInput}
                 onChange={(e) => setCustomDevInput(e.target.value)}
-                className="bg-black/70 border border-zinc-700 px-3 py-1.5 rounded-xl text-white font-mono text-xs flex-1 focus:outline-none focus:border-emerald-500"
+                className="bg-black/70 border border-zinc-700 px-3 py-1.5 rounded-none text-white font-mono text-xs flex-1 focus:outline-none focus:border-[#894DEF]"
               />
               <button
                 onClick={() => {
@@ -1013,7 +1013,7 @@ export default function ComponentTestbedPage() {
                     setCustomDevInput("");
                   }
                 }}
-                className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold font-mono text-xs transition-colors"
+                className="px-3 py-1.5 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold font-mono text-xs transition-colors"
               >
                 Set Active
               </button>
@@ -1036,7 +1036,7 @@ export default function ComponentTestbedPage() {
       {/* MODAL 2: Killswitch Modal Simulation */}
       {isKillswitchModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-zinc-900 border border-rose-500/40 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-zinc-900 border border-rose-500/40 rounded-none max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-2 text-rose-400 font-bold text-lg">
               <span>⚠</span>
               <span>Steward Killswitch Simulation</span>
@@ -1054,7 +1054,7 @@ export default function ComponentTestbedPage() {
                 type="text"
                 value={killswitchReason}
                 onChange={(e) => setKillswitchReason(e.target.value)}
-                className="w-full bg-black/60 border border-zinc-700 px-3 py-2 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-rose-500"
+                className="w-full bg-black/60 border border-zinc-700 px-3 py-2 rounded-none text-white font-mono text-xs focus:outline-none focus:border-rose-500"
               />
             </div>
 
@@ -1062,7 +1062,7 @@ export default function ComponentTestbedPage() {
               <button
                 type="button"
                 onClick={() => setIsKillswitchModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-300 font-medium text-xs hover:bg-zinc-700 transition-colors"
+                className="flex-1 py-2.5 rounded-none border border-zinc-700 bg-zinc-800 text-zinc-300 font-medium text-xs hover:bg-zinc-700 transition-colors"
               >
                 Cancel
               </button>
@@ -1072,7 +1072,7 @@ export default function ComponentTestbedPage() {
                   logAction(`Confirmed Killswitch: ${killswitchReason}`);
                   setIsKillswitchModalOpen(false);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-md shadow-rose-600/20"
+                className="flex-1 py-2.5 rounded-none bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-md shadow-rose-600/20"
               >
                 Confirm Killswitch
               </button>
@@ -1084,7 +1084,7 @@ export default function ComponentTestbedPage() {
       {/* MODAL 3: Refund Modal Simulation */}
       {isRefundModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-zinc-900 border border-amber-500/40 rounded-none max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-2 text-amber-400 font-bold text-lg">
               <span>↺</span>
               <span>Subscriber Pro-Rata Refund Claim</span>
@@ -1093,7 +1093,7 @@ export default function ComponentTestbedPage() {
               Calculates non-custodial refund for unreleased agreement periods plus remaining contingency reserve shares.
             </p>
 
-            <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800 space-y-2 text-xs font-mono">
+            <div className="bg-zinc-950 p-3.5 rounded-none border border-zinc-800 space-y-2 text-xs font-mono">
               <div className="flex justify-between text-zinc-400">
                 <span>Unreleased Periods (2 × 0.1 N):</span>
                 <span className="text-white">0.2000 wNEAR</span>
@@ -1104,7 +1104,7 @@ export default function ComponentTestbedPage() {
               </div>
               <div className="pt-2 border-t border-zinc-850 flex justify-between font-bold">
                 <span className="text-zinc-200">Total Refund Claim:</span>
-                <span className="text-emerald-400">0.2400 wNEAR</span>
+                <span className="text-[#894DEF]">0.2400 wNEAR</span>
               </div>
             </div>
 
@@ -1112,7 +1112,7 @@ export default function ComponentTestbedPage() {
               <button
                 type="button"
                 onClick={() => setIsRefundModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-300 font-medium text-xs hover:bg-zinc-700 transition-colors"
+                className="flex-1 py-2.5 rounded-none border border-zinc-700 bg-zinc-800 text-zinc-300 font-medium text-xs hover:bg-zinc-700 transition-colors"
               >
                 Cancel
               </button>
@@ -1122,7 +1122,7 @@ export default function ComponentTestbedPage() {
                   logAction("Claimed Pro-Rata Refund of 0.2400 wNEAR");
                   setIsRefundModalOpen(false);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-colors shadow-md shadow-amber-500/20 font-mono"
+                className="flex-1 py-2.5 rounded-none bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-colors shadow-md shadow-amber-500/20 font-mono"
               >
                 Execute Refund
               </button>

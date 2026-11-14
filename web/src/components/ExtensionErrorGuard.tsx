@@ -96,16 +96,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-6 m-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-center space-y-4">
-          <div className="text-amber-400 font-mono text-sm font-bold">
+        <div className="p-6 m-4 rounded-none bg-[#171717] border border-[#2E2E2E] text-center space-y-4">
+          <div className="text-[#894DEF] font-mono text-sm font-bold">
             Notice: Component encountered an unexpected state
           </div>
-          <p className="text-xs text-zinc-400 max-w-md mx-auto font-mono">
+          <p className="text-xs text-[#B8B8B8] max-w-md mx-auto font-mono">
             {this.state.errorMessage}
           </p>
           <button
             onClick={() => this.setState({ hasError: false, errorMessage: "" })}
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-mono transition-colors"
+            className="px-4 py-2 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold text-xs font-mono transition-colors"
           >
             Reset & Try Again
           </button>

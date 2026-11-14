@@ -209,11 +209,11 @@ export interface DeveloperMetrics {
 export interface TreasuryBreakdown {
   total_locked_usd: string;
   streamed_to_provider_usd: string;
-  bug_warranty_reserve_usd: string; // 7% reserved for bug fixes and updates
+  bug_warranty_reserve_usd: string; // 15% reserved for bug fixes and updates
   contingency_reserve_usd: string;
   average_budget_per_sub_usd: string;
   mrr_growth_pct: number;
-  escrow_warranty_days: number; // 70-day wait / dispute window
+  escrow_warranty_days: number; // 7-day release / dispute interval
   dynamic_allocation_status: "Streaming" | "Paused_Killswitch" | "Settled";
 }
 

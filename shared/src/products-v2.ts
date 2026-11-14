@@ -138,7 +138,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$3,700.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 24.8,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [
@@ -257,7 +257,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$2,960.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 19.4,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [
@@ -346,7 +346,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$2,240.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 16.5,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [
@@ -392,7 +392,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
     description: "CipherTax processes sensitive crypto transaction histories, bank imports, and investment gains inside a private TEE enclave, generating certified tax reports while cryptographically scrubbing raw balances.",
     category: "Financial Privacy",
     privacy_problem: "Web2 crypto tax software leaks entire wallet histories, off-ramp records, and investment balances to commercial tracking databases.",
-    why_direct_payment_fails: "Tax software is seasonal. Direct payments expose users to abandonment right when filing season starts. Pandem's 70-day escrow warranty guarantees developer SLA through tax deadlines.",
+    why_direct_payment_fails: "Tax software is seasonal. Direct payments expose users to abandonment right when filing season starts. Pandem's 7-day milestone release schedule guarantees developer SLA through tax deadlines.",
     score: 91,
     score_inputs_hash: "0x12b948c092384a92840928409284092840928409284092840928409284092840",
     upvotes: 284,
@@ -435,7 +435,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$1,880.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 14.1,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [
@@ -517,7 +517,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$2,700.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 21.0,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [
@@ -599,7 +599,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$3,240.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 22.4,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [
@@ -681,7 +681,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$2,160.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 15.3,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [
@@ -762,7 +762,7 @@ export const ENRICHED_PRODUCTS: EnrichedProduct[] = [
       contingency_reserve_usd: "$2,480.00",
       average_budget_per_sub_usd: "$100.00 / yr",
       mrr_growth_pct: 18.2,
-      escrow_warranty_days: 70,
+      escrow_warranty_days: 7,
       dynamic_allocation_status: "Streaming",
     },
     proposals: [

@@ -18,7 +18,6 @@ export default function ProductDetailPage({
 }) {
   const { slug } = use(params);
   const [isSubscribeOpen, setIsSubscribeOpen] = useState<boolean>(false);
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<"monthly" | "yearly">("yearly");
 
   const product = ENRICHED_PRODUCTS.find((p) => p.slug.toLowerCase() === slug.toLowerCase());
 
@@ -47,16 +46,16 @@ export default function ProductDetailPage({
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 bg-[#0D0D0D]">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs font-mono text-zinc-500">
-        <Link href="/" className="hover:text-zinc-300 transition-colors">
+      <nav className="flex items-center gap-2 text-xs font-mono text-[#6B6B6B]">
+        <Link href="/" className="hover:text-[#FAFAFA] transition-colors">
           Catalog
         </Link>
         <span>/</span>
-        <span className="text-zinc-400">{product.suite}</span>
+        <span className="text-[#B8B8B8]">{product.suite}</span>
         <span>/</span>
-        <span className="text-emerald-400 font-semibold">{product.name}</span>
+        <span className="text-[#894DEF] font-semibold">{product.name}</span>
       </nav>
 
       {/* Main Product Header */}
@@ -66,17 +65,17 @@ export default function ProductDetailPage({
       />
 
       {/* Real-Life Problem & Privacy Violation Spotlight */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-red-950/20 via-zinc-900/60 to-zinc-900/60 border border-red-500/20 space-y-3">
-        <div className="flex items-center gap-2 text-xs font-mono text-red-400 uppercase tracking-wider font-semibold">
-          <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+      <div className="p-6 rounded-none bg-[#171717] border border-[#2E2E2E] space-y-3">
+        <div className="flex items-center gap-2 text-xs font-mono text-[#894DEF] uppercase tracking-wider font-semibold">
+          <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
           <span>Real-Life Crisis Solved: Privacy & Data Exploitation</span>
         </div>
-        <h3 className="text-lg font-bold text-white">
+        <h3 className="text-lg font-bold text-[#FAFAFA]">
           {product.privacy_problem}
         </h3>
-        <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-3xl">
+        <p className="text-xs sm:text-sm text-[#B8B8B8] leading-relaxed max-w-3xl">
           Centralized SaaS platforms and public AI models log queries, retain confidential IP, and expose unencrypted user data to third-party data brokers and regulatory subpoenas.
-          <strong className="text-white block mt-1">
+          <strong className="text-[#FAFAFA] block mt-1">
             Pandem isolates execution within hardware-attested confidential TEE enclaves. Data self-destructs post-inference.
           </strong>
         </p>

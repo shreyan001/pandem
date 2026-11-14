@@ -30,7 +30,16 @@ const DEV_PERSONAS = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { accountId, isConnected, connect, disconnect, tokenBalance, setManualAccount, walletError, clearWalletError } = useNearWallet();
+  const {
+    accountId,
+    isConnected,
+    connect,
+    disconnect,
+    tokenBalance,
+    setManualAccount,
+    walletError,
+    clearWalletError,
+  } = useNearWallet();
   const [showAccountInput, setShowAccountInput] = useState(false);
   const [inputAcc, setInputAcc] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -72,22 +81,22 @@ export function Navbar() {
   };
 
   return (
-    <nav className="border-b border-zinc-800 bg-black/90 backdrop-blur sticky top-0 z-50" suppressHydrationWarning>
+    <nav className="border-b border-[#2E2E2E] bg-[#0D0D0D] sticky top-0 z-50 rounded-none" suppressHydrationWarning>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand & Desktop Links */}
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <span className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-mono font-bold text-emerald-400 group-hover:scale-105 transition-transform">
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <span className="w-8 h-8 rounded-none bg-[#894DEF] border border-[#FAFAFA] flex items-center justify-center font-mono font-bold text-[#FAFAFA] text-sm">
               P
             </span>
             <div className="flex flex-col">
-              <span className="font-bold text-white text-base tracking-tight flex items-center gap-2 leading-tight">
+              <span className="font-bold text-[#FAFAFA] text-base tracking-tight flex items-center gap-2 leading-tight">
                 Pandem
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-[#171717] text-[#894DEF] border border-[#2E2E2E]">
                   TESTNET
                 </span>
               </span>
-              <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline leading-none mt-0.5">
+              <span className="text-[11px] text-[#B8B8B8] font-mono hidden sm:inline leading-none mt-0.5">
                 SaaS Escrow Protocol
               </span>
             </div>
@@ -101,15 +110,15 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-none text-xs font-mono font-medium transition-colors flex items-center gap-1.5 border ${
                     isActive
-                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm shadow-emerald-500/10"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent"
+                      ? "bg-[#171717] text-[#FAFAFA] border-[#894DEF]"
+                      : "text-[#B8B8B8] hover:text-[#FAFAFA] hover:bg-[#171717] border-transparent"
                   }`}
                 >
                   <span>{link.label}</span>
                   {link.badge && (
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                    <span className="text-[9px] px-1 py-0.5 rounded-none bg-[#262626] text-[#B8B8B8] border border-[#2E2E2E]">
                       {link.badge}
                     </span>
                   )}
@@ -125,27 +134,28 @@ export function Navbar() {
             href={`https://explorer.testnet.near.org/accounts/${PANDEM_ESCROW_ID}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden xl:flex items-center gap-1.5 text-xs font-mono text-zinc-400 bg-zinc-900/80 px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300 transition-all"
+            className="hidden xl:flex items-center gap-1.5 text-xs font-mono text-[#B8B8B8] bg-[#171717] px-2.5 py-1.5 rounded-none border border-[#2E2E2E] hover:border-[#894DEF] hover:text-[#FAFAFA] transition-colors"
             title="View Escrow Contract on NEAR Testnet Explorer"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-zinc-500">escrow:</span>
+            <span className="w-1.5 h-1.5 rounded-none bg-[#894DEF]" />
+            <span className="text-[#6B6B6B]">escrow:</span>
             <span>{PANDEM_ESCROW_ID.slice(0, 14)}...</span>
           </a>
 
           {mounted && isConnected ? (
             <div className="flex items-center gap-2" suppressHydrationWarning>
-              <div className="flex flex-col items-end px-3 py-1 rounded-xl bg-zinc-900 border border-zinc-800 text-xs">
-                <span className="font-mono text-white font-medium text-[11px] sm:text-xs">
-                  {accountId?.slice(0, 16)}{accountId && accountId.length > 16 ? "..." : ""}
+              <div className="flex flex-col items-end px-3 py-1 rounded-none bg-[#171717] border border-[#2E2E2E] text-xs">
+                <span className="font-mono text-[#FAFAFA] font-medium text-[11px] sm:text-xs">
+                  {accountId?.slice(0, 16)}
+                  {accountId && accountId.length > 16 ? "..." : ""}
                 </span>
-                <span className="font-mono text-emerald-400 text-[10px] sm:text-[11px]">
+                <span className="font-mono text-[#894DEF] text-[10px] sm:text-[11px] font-semibold">
                   {formatBalance(tokenBalance)} wNEAR
                 </span>
               </div>
               <button
                 onClick={disconnect}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-mono bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="px-3 py-1.5 rounded-none text-xs font-mono bg-[#171717] hover:bg-[#262626] border border-[#2E2E2E] text-[#B8B8B8] hover:text-[#FAFAFA] transition-colors"
                 title="Disconnect Wallet"
               >
                 Sign Out
@@ -155,13 +165,13 @@ export function Navbar() {
             <div className="flex items-center gap-2" suppressHydrationWarning>
               <button
                 onClick={connect}
-                className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-black transition-colors flex items-center gap-1.5 shadow-sm shadow-emerald-500/20"
+                className="px-4 py-2 rounded-none text-xs sm:text-sm font-semibold bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] transition-colors flex items-center gap-1.5"
               >
                 Connect Wallet
               </button>
               <button
                 onClick={() => setShowAccountInput(!showAccountInput)}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-mono bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border border-zinc-800 hover:text-zinc-200 transition-colors"
+                className="px-3 py-2 rounded-none text-xs font-mono bg-[#171717] hover:bg-[#262626] text-[#B8B8B8] border border-[#2E2E2E] hover:text-[#FAFAFA] transition-colors"
                 title="Switch testnet dev persona or enter account ID"
               >
                 Dev Account
@@ -173,37 +183,40 @@ export function Navbar() {
 
       {/* Gentle Wallet Notice Banner */}
       {walletError && (
-        <div className="bg-amber-500/10 border-t border-b border-amber-500/20 px-4 py-2 text-xs flex items-center justify-between gap-2 text-amber-300">
+        <div className="bg-[#171717] border-t border-b border-[#2E2E2E] px-4 py-2 text-xs flex items-center justify-between gap-2 text-[#FAFAFA]">
           <div className="flex items-center gap-2">
-            <span className="font-bold font-mono">ℹ</span>
+            <span className="font-bold font-mono text-[#894DEF]">ℹ</span>
             <span>{walletError}</span>
           </div>
           <button
             onClick={clearWalletError}
-            className="text-amber-400 hover:text-amber-200 text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20"
+            className="text-[#B8B8B8] hover:text-[#FAFAFA] text-xs font-mono px-2 py-0.5 rounded-none bg-[#262626] border border-[#2E2E2E]"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* Mobile & Tablet Nav Row with horizontal overflow scrolling */}
-      <div className="lg:hidden border-t border-zinc-850 bg-zinc-950/90 px-4 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none" suppressHydrationWarning>
+      {/* Mobile & Tablet Nav Row */}
+      <div
+        className="lg:hidden border-t border-[#2E2E2E] bg-[#171717] px-4 py-2 flex items-center gap-1.5 overflow-x-auto"
+        suppressHydrationWarning
+      >
         {NAV_LINKS.map((link) => {
           const isActive = mounted ? pathname === link.href : link.href === "/";
           return (
             <Link
               key={link.href}
               href={link.href}
-              className={`px-2.5 py-1 rounded-lg text-xs font-mono whitespace-nowrap transition-all shrink-0 ${
+              className={`px-2.5 py-1 rounded-none text-xs font-mono whitespace-nowrap transition-colors shrink-0 border ${
                 isActive
-                  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold shadow-sm shadow-emerald-500/10"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent"
+                  ? "bg-[#262626] text-[#FAFAFA] border-[#894DEF] font-semibold"
+                  : "text-[#B8B8B8] hover:text-[#FAFAFA] hover:bg-[#262626] border-transparent"
               }`}
             >
               {link.label}
               {link.badge && (
-                <span className="ml-1 text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400">
+                <span className="ml-1 text-[9px] px-1 py-0.2 rounded-none bg-[#0D0D0D] text-[#B8B8B8] border border-[#2E2E2E]">
                   {link.badge}
                 </span>
               )}
@@ -214,16 +227,16 @@ export function Navbar() {
 
       {/* Dev Account Quick Switcher Tray */}
       {showAccountInput && !isConnected && (
-        <div className="bg-zinc-900/95 border-b border-zinc-800 px-4 py-3 text-xs space-y-2 backdrop-blur animate-fade-in" suppressHydrationWarning>
+        <div className="bg-[#171717] border-b border-[#2E2E2E] px-4 py-3 text-xs space-y-2" suppressHydrationWarning>
           <div className="flex flex-wrap items-center justify-between gap-2 max-w-7xl mx-auto">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-zinc-400 font-mono text-[11px]">Quick Personas:</span>
+              <span className="text-[#B8B8B8] font-mono text-[11px]">Quick Personas:</span>
               {DEV_PERSONAS.map((p) => (
                 <button
                   key={p.id}
                   type="button"
                   onClick={() => handleQuickSelect(p.id)}
-                  className="px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] border border-zinc-700 transition-colors"
+                  className="px-2.5 py-1 rounded-none bg-[#262626] hover:bg-[#0D0D0D] text-[#FAFAFA] font-mono text-[11px] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors"
                 >
                   {p.label}
                 </button>
@@ -236,18 +249,18 @@ export function Navbar() {
                 placeholder="Custom testnet account (e.g. alice.testnet)"
                 value={inputAcc}
                 onChange={(e) => setInputAcc(e.target.value)}
-                className="bg-black/70 border border-zinc-700 px-3 py-1 rounded-lg text-white font-mono text-xs flex-1 focus:outline-none focus:border-emerald-500"
+                className="bg-[#0D0D0D] border border-[#2E2E2E] px-3 py-1.5 rounded-none text-[#FAFAFA] font-mono text-xs flex-1 focus:outline-none focus:border-[#894DEF]"
               />
               <button
                 type="submit"
-                className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-3 py-1 rounded-lg font-mono text-xs transition-colors"
+                className="bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] font-semibold px-3 py-1.5 rounded-none font-mono text-xs transition-colors"
               >
                 Set
               </button>
               <button
                 type="button"
                 onClick={() => setShowAccountInput(false)}
-                className="text-zinc-500 hover:text-zinc-300 px-1 text-sm"
+                className="text-[#B8B8B8] hover:text-[#FAFAFA] px-2 text-sm"
               >
                 ✕
               </button>

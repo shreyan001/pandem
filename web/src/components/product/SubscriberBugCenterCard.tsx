@@ -43,42 +43,42 @@ export function SubscriberBugCenterCard({ bugReports: initialBugs, treasury, pro
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
+    <div className="p-6 rounded-none bg-[#171717] border border-[#2E2E2E] space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2E2E2E]">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+          <h3 className="text-lg font-bold text-[#FAFAFA] flex items-center gap-2">
             <span>Subscriber Bug Reporting & Escrow Warranty</span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-[#262626] text-[#894DEF] border border-[#2E2E2E]">
               7% Reserve Gated
             </span>
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Bug reports are free for subscribers. Unresolved critical bugs hold the 7% treasury warranty with a 70-day dispute window.
+          <p className="text-xs text-[#B8B8B8] mt-1">
+            Bug reports are free for subscribers. Active bugs hold the treasury warranty reserve across 7-day milestone review cycles.
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-4 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-mono text-xs font-semibold border border-amber-500/30 transition-colors"
+          className="px-4 py-2 rounded-none bg-[#262626] hover:bg-[#171717] text-[#FAFAFA] font-mono text-xs font-semibold border border-[#2E2E2E] hover:border-[#894DEF] transition-colors"
         >
           + File Free Bug Ticket
         </button>
       </div>
 
       {/* Warranty Reserve Banner */}
-      <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
+      <div className="p-4 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
         <div className="space-y-0.5">
-          <span className="text-zinc-400">Current Bug Warranty Pool (7% of Treasury):</span>
-          <div className="text-sm font-bold text-amber-400">{treasury.bug_warranty_reserve_usd}</div>
+          <span className="text-[#6B6B6B]">Current Bug Warranty Pool (7% of Treasury):</span>
+          <div className="text-sm font-bold text-[#894DEF]">{treasury.bug_warranty_reserve_usd}</div>
         </div>
         <div className="space-y-0.5 sm:text-right">
-          <span className="text-zinc-400">Mandatory Escrow Warranty Window:</span>
-          <div className="text-sm font-bold text-white">{treasury.escrow_warranty_days} Days</div>
+          <span className="text-[#6B6B6B]">Mandatory Escrow Warranty Window:</span>
+          <div className="text-sm font-bold text-[#FAFAFA]">{treasury.escrow_warranty_days} Days</div>
         </div>
       </div>
 
       {feedback && (
-        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-300">
+        <div className="p-3.5 rounded-none bg-[#262626] border border-[#894DEF] text-xs font-mono text-[#FAFAFA]">
           {feedback}
         </div>
       )}
@@ -86,43 +86,43 @@ export function SubscriberBugCenterCard({ bugReports: initialBugs, treasury, pro
       {/* Bug Reports List */}
       <div className="space-y-3">
         {bugReports.length === 0 ? (
-          <div className="text-center py-8 text-xs font-mono text-zinc-500">
+          <div className="text-center py-8 text-xs font-mono text-[#6B6B6B]">
             No active bug reports filed. Service operating under full SLA compliance.
           </div>
         ) : (
           bugReports.map((bug) => (
             <div
               key={bug.id}
-              className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-2 hover:border-zinc-700/80 transition-colors"
+              className="p-4 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] space-y-2 hover:border-[#894DEF] transition-colors"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${
+                    className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-none border ${
                       bug.severity === "Critical"
-                        ? "bg-red-500/10 text-red-400 border-red-500/30"
+                        ? "bg-[#262626] text-rose-400 border-rose-800"
                         : bug.severity === "High"
-                        ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                        : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                        ? "bg-[#262626] text-[#A273F2] border-[#894DEF]"
+                        : "bg-[#171717] text-[#B8B8B8] border-[#2E2E2E]"
                     }`}
                   >
                     {bug.severity}
                   </span>
-                  <span className="text-sm font-semibold text-zinc-100">{bug.title}</span>
+                  <span className="text-sm font-semibold text-[#FAFAFA]">{bug.title}</span>
                 </div>
 
                 <div className="flex items-center gap-2 text-xs font-mono">
-                  <span className="text-zinc-500">Held:</span>
-                  <span className="text-amber-400 font-bold">{bug.warranty_reserve_hold_usd}</span>
+                  <span className="text-[#6B6B6B]">Held:</span>
+                  <span className="text-[#894DEF] font-bold">{bug.warranty_reserve_hold_usd}</span>
                 </div>
               </div>
 
-              <p className="text-xs text-zinc-400 leading-relaxed">{bug.description}</p>
+              <p className="text-xs text-[#B8B8B8] leading-relaxed">{bug.description}</p>
 
-              <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-1 border-t border-zinc-900">
+              <div className="flex items-center justify-between text-[10px] font-mono text-[#6B6B6B] pt-2 border-t border-[#2E2E2E]">
                 <span>By: {bug.submitted_by} • {bug.submitted_at}</span>
-                <span className="text-zinc-400 font-semibold">
-                  Status: <span className="text-emerald-400">{bug.status.replace("_", " ")}</span> (SLA: {bug.sla_hours_remaining}h)
+                <span className="text-[#B8B8B8] font-semibold">
+                  Status: <span className="text-[#FAFAFA]">{bug.status.replace("_", " ")}</span> (SLA: {bug.sla_hours_remaining}h)
                 </span>
               </div>
             </div>
@@ -132,29 +132,29 @@ export function SubscriberBugCenterCard({ bugReports: initialBugs, treasury, pro
 
       {/* Modal to File Free Bug */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md p-6 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
-              <h4 className="text-base font-bold text-white">File Subscriber Bug Ticket</h4>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-none">
+          <div className="w-full max-w-md p-6 rounded-none bg-[#171717] border border-[#2E2E2E] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2E2E2E]">
+              <h4 className="text-base font-bold text-[#FAFAFA]">File Subscriber Bug Ticket</h4>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-zinc-400 hover:text-white font-mono text-sm"
+                className="text-[#B8B8B8] hover:text-[#FAFAFA] font-mono text-sm"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-[#B8B8B8]">
               Free for active subscribers. Filing a valid bug holds a portion of the 7% smart contract warranty reserve until resolved.
             </p>
 
             <form onSubmit={handleSubmitBug} className="space-y-3">
               <div>
-                <label className="block text-[11px] font-mono text-zinc-400 mb-1">Severity Level</label>
+                <label className="block text-[11px] font-mono text-[#B8B8B8] mb-1">Severity Level</label>
                 <select
                   value={severity}
                   onChange={(e) => setSeverity(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-3.5 py-2.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] text-xs text-[#FAFAFA] focus:outline-none focus:border-[#894DEF]"
                 >
                   <option value="Low">Low (Cosmetic / Minor UI)</option>
                   <option value="Medium">Medium (Non-critical functional bug)</option>
@@ -164,25 +164,25 @@ export function SubscriberBugCenterCard({ bugReports: initialBugs, treasury, pro
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono text-zinc-400 mb-1">Issue Summary</label>
+                <label className="block text-[11px] font-mono text-[#B8B8B8] mb-1">Issue Summary</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Model inference timeout on 4k context tokens"
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-3.5 py-2.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] text-xs text-[#FAFAFA] focus:outline-none focus:border-[#894DEF]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono text-zinc-400 mb-1">Reproduction Steps & Expected Behavior</label>
+                <label className="block text-[11px] font-mono text-[#B8B8B8] mb-1">Reproduction Steps & Expected Behavior</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Detailed description of the issue..."
                   rows={4}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white focus:outline-none focus:border-amber-500 resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E] text-xs text-[#FAFAFA] focus:outline-none focus:border-[#894DEF] resize-none"
                   required
                 />
               </div>
@@ -191,13 +191,13 @@ export function SubscriberBugCenterCard({ bugReports: initialBugs, treasury, pro
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 font-mono text-xs hover:bg-zinc-700"
+                  className="px-4 py-2 rounded-none bg-[#0D0D0D] text-[#B8B8B8] hover:text-[#FAFAFA] font-mono text-xs border border-[#2E2E2E]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold font-mono text-xs"
+                  className="px-4 py-2 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-semibold font-mono text-xs"
                 >
                   File Ticket (Free)
                 </button>

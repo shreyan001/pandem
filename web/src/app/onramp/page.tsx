@@ -56,11 +56,11 @@ export default function OnRampPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-none bg-cyan-400 animate-pulse" />
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                 1Click Cross-Chain On-Ramp
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold">
+              <span className="px-2.5 py-0.5 rounded-none text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold">
                 Mainnet Edge
               </span>
             </div>
@@ -70,14 +70,14 @@ export default function OnRampPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400">
+            <span className="text-xs font-mono px-3 py-1.5 rounded-none bg-zinc-900 border border-zinc-800 text-zinc-400">
               Protocol: <strong className="text-white">NEAR Intents 1Click</strong>
             </span>
           </div>
         </div>
 
         {/* Hard Rule Notice Banner */}
-        <div className="mt-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-start gap-3">
+        <div className="mt-6 p-4 rounded-none bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-start gap-3">
           <span className="text-base shrink-0 mt-0.5">ℹ</span>
           <div>
             <div className="font-bold text-amber-200">
@@ -94,7 +94,7 @@ export default function OnRampPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Configuration Form */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-6">
+          <div className="rounded-none border border-zinc-800 bg-zinc-900/60 p-6 space-y-6">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <span>Configure Ingress Intent</span>
               <span className="text-xs font-mono text-zinc-500 font-normal">(EXACT_OUTPUT)</span>
@@ -116,7 +116,7 @@ export default function OnRampPage() {
                         setSelectedChain(chain.id);
                         setSelectedToken(chain.tokens[0]);
                       }}
-                      className={`p-3 rounded-xl border text-center transition-all font-mono text-xs flex flex-col items-center gap-1 ${
+                      className={`p-3 rounded-none border text-center transition-all font-mono text-xs flex flex-col items-center gap-1 ${
                         isSelected
                           ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 font-bold shadow-sm shadow-cyan-500/10"
                           : "bg-zinc-950/80 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white"
@@ -141,9 +141,9 @@ export default function OnRampPage() {
                     key={token}
                     type="button"
                     onClick={() => setSelectedToken(token)}
-                    className={`px-4 py-2 rounded-xl border font-mono text-xs transition-all ${
+                    className={`px-4 py-2 rounded-none border font-mono text-xs transition-all ${
                       selectedToken === token
-                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-400 font-bold"
+                        ? "bg-[#262626] border-[#894DEF] text-[#894DEF] font-bold"
                         : "bg-zinc-950/80 border-zinc-800 text-zinc-400 hover:text-white"
                     }`}
                   >
@@ -164,9 +164,9 @@ export default function OnRampPage() {
                     key={p}
                     type="button"
                     onClick={() => setTargetPeriods(p)}
-                    className={`py-2 px-3 rounded-xl border text-center font-mono text-xs transition-all ${
+                    className={`py-2 px-3 rounded-none border text-center font-mono text-xs transition-all ${
                       targetPeriods === p
-                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-400 font-bold"
+                        ? "bg-[#262626] border-[#894DEF] text-[#894DEF] font-bold"
                         : "bg-zinc-950/80 border-zinc-800 text-zinc-400 hover:text-white"
                     }`}
                   >
@@ -186,7 +186,7 @@ export default function OnRampPage() {
                 value={destinationAccount}
                 onChange={(e) => setDestinationAccount(e.target.value)}
                 placeholder="e.g. alice.near"
-                className="w-full bg-black/80 border border-zinc-800 px-3.5 py-2 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
+                className="w-full bg-black/80 border border-zinc-800 px-3.5 py-2 rounded-none text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
               />
               <span className="text-[11px] text-zinc-500 font-mono block">
                 Crucial: 1Click solver will execute the contract call on your behalf; the contract pulls the subscriber and refund address directly from the custom payload.
@@ -197,11 +197,11 @@ export default function OnRampPage() {
             <button
               onClick={handleGenerateQuote}
               disabled={isQuoting}
-              className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs font-mono transition-all shadow-md shadow-cyan-500/20 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-none bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs font-mono transition-all shadow-md shadow-cyan-500/20 flex items-center justify-center gap-2"
             >
               {isQuoting ? (
                 <>
-                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-none animate-spin" />
                   <span>Requesting 1Click Solver Quote...</span>
                 </>
               ) : (
@@ -214,21 +214,21 @@ export default function OnRampPage() {
         {/* Right Column: Quote Preview & Payload */}
         <div className="lg:col-span-5 space-y-6">
           {/* Quote Card */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 space-y-5">
+          <div className="rounded-none border border-zinc-800 bg-zinc-950/80 p-6 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-zinc-850">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-none bg-[#894DEF] animate-pulse" />
                 <span className="text-xs font-mono text-white font-bold uppercase">
                   Dry Run Quote Summary
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-850 text-zinc-400">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-zinc-850 text-zinc-400">
                 1Click v0 REST
               </span>
             </div>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-850 space-y-1">
+              <div className="p-3.5 rounded-none bg-zinc-900 border border-zinc-850 space-y-1">
                 <div className="flex justify-between text-zinc-400">
                   <span>Payer Sends (Est.):</span>
                   <span className="text-white font-bold">
@@ -240,10 +240,10 @@ export default function OnRampPage() {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-850 space-y-1">
+              <div className="p-3.5 rounded-none bg-zinc-900 border border-zinc-850 space-y-1">
                 <div className="flex justify-between text-zinc-400">
                   <span>Escrow Receives (Exact):</span>
-                  <span className="text-emerald-400 font-bold">
+                  <span className="text-[#894DEF] font-bold">
                     {targetOutputAmount} USDC (NEP-141)
                   </span>
                 </div>
@@ -274,11 +274,11 @@ export default function OnRampPage() {
                 <span className="text-xs font-mono text-zinc-400 uppercase font-semibold">
                   customRecipientMsg Payload
                 </span>
-                <span className="text-[10px] font-mono text-emerald-400">
+                <span className="text-[10px] font-mono text-[#894DEF]">
                   Valid NEP-141 Msg
                 </span>
               </div>
-              <div className="bg-black/90 p-3 rounded-xl border border-zinc-850 font-mono text-[11px] text-emerald-400 overflow-x-auto">
+              <div className="bg-black/90 p-3 rounded-none border border-zinc-850 font-mono text-[11px] text-[#894DEF] overflow-x-auto">
                 <pre>{JSON.stringify(customRecipientPayload, null, 2)}</pre>
               </div>
             </div>

@@ -31,7 +31,7 @@ export const Badge: React.FC<BadgeProps> = ({
   const variantStyles: Record<BadgeVariant, string> = {
     default: "bg-spectr-surface-raised border-spectr-hairline text-spectr-ink",
     primary: "bg-spectr-primary/15 border-spectr-primary/50 text-spectr-primary-hover font-semibold",
-    success: "bg-emerald-950/40 border-emerald-700/60 text-spectr-success font-medium",
+    success: "bg-[#14532D]/40 border-[#166534] text-spectr-success font-medium",
     warning: "bg-amber-950/40 border-amber-700/60 text-spectr-warning font-medium",
     danger: "bg-rose-950/40 border-rose-800/60 text-spectr-danger font-medium",
     score: "bg-spectr-surface border-spectr-primary text-spectr-ink font-bold tracking-tight px-2.5 py-1",

@@ -12,11 +12,11 @@ export default function GovernancePage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-none bg-purple-400 animate-pulse" />
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                 Protocol Governance & Waterfall Contingency Hub
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 font-semibold">
+              <span className="px-2.5 py-0.5 rounded-none text-xs font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 font-semibold">
                 NEAR Testnet
               </span>
             </div>
@@ -26,11 +26,11 @@ export default function GovernancePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
-            <div className="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300">
+            <div className="px-3.5 py-2 rounded-none bg-zinc-900 border border-zinc-800 text-zinc-300">
               <span className="text-zinc-500">Escrow: </span>
-              <span className="text-emerald-400">{PANDEM_ESCROW_ID.slice(0, 16)}...</span>
+              <span className="text-[#894DEF]">{PANDEM_ESCROW_ID.slice(0, 16)}...</span>
             </div>
-            <div className="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300">
+            <div className="px-3.5 py-2 rounded-none bg-zinc-900 border border-zinc-800 text-zinc-300">
               <span className="text-zinc-500">Contingency Split: </span>
               <span className="text-purple-400 font-bold">20.0% (2000 BPS)</span>
             </div>
@@ -39,8 +39,8 @@ export default function GovernancePage() {
 
         {/* Governance Invariants Callout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-          <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-850 space-y-1.5">
-            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 font-bold">
+          <div className="p-4 rounded-none bg-zinc-900/40 border border-zinc-850 space-y-1.5">
+            <div className="flex items-center gap-2 text-xs font-mono text-[#894DEF] font-bold">
               <span>01</span>
               <span>Subscriber Vote Weighting</span>
             </div>
@@ -49,7 +49,7 @@ export default function GovernancePage() {
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-850 space-y-1.5">
+          <div className="p-4 rounded-none bg-zinc-900/40 border border-zinc-850 space-y-1.5">
             <div className="flex items-center gap-2 text-xs font-mono text-purple-400 font-bold">
               <span>02</span>
               <span>20% Hard Buffer Cap</span>
@@ -59,7 +59,7 @@ export default function GovernancePage() {
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-850 space-y-1.5">
+          <div className="p-4 rounded-none bg-zinc-900/40 border border-zinc-850 space-y-1.5">
             <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 font-bold">
               <span>03</span>
               <span>72-Hour Timelock & Quorum</span>
@@ -81,7 +81,7 @@ export default function GovernancePage() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
             <span>Community Ranking & Scoring Architecture</span>
-            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="text-xs font-mono px-2.5 py-0.5 rounded-none bg-[#262626] text-[#894DEF] border border-[#2E2E2E]">
               Sybil Defense
             </span>
           </h2>

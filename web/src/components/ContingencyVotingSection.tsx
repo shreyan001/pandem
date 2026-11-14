@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useId } from "react";
+import { useState } from "react";
 import { useNearWallet } from "../context/NearWalletContext";
 import { PANDEM_ESCROW_ID } from "@pandem/shared";
 
@@ -98,7 +98,7 @@ export function ContingencyVotingSection() {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [voteFeedback, setVoteFeedback] = useState<string | null>(null);
 
-  // Form State for Submit Proposal Modal
+  // Submit Modal Form State
   const [formProductId, setFormProductId] = useState<string>("1");
   const [formTitle, setFormTitle] = useState<string>("");
   const [formRecipient, setFormRecipient] = useState<string>("");
@@ -106,77 +106,78 @@ export function ContingencyVotingSection() {
   const [formDescription, setFormDescription] = useState<string>("");
   const [formError, setFormError] = useState<string | null>(null);
 
-  const selectedProductObj = AVAILABLE_PRODUCTS.find((p) => p.id === formProductId) || AVAILABLE_PRODUCTS[0];
+  const selectedProductObj =
+    AVAILABLE_PRODUCTS.find((p) => p.id === formProductId) || AVAILABLE_PRODUCTS[0];
 
-  const handleVote = (proposalId: string, choice: "YES" | "NO") => {
-    setUserVotes((prev) => {
-      const existingVote = prev[proposalId];
-      if (existingVote === choice) return prev; // already voted this way
+  const handleVote = (proposalId: string, vote: "YES" | "NO") => {
+    if (!isConnected) {
+      connect();
+      return;
+    }
 
-      setProposals((propList) =>
-        propList.map((p) => {
-          if (p.id !== proposalId) return p;
+    const previousVote = userVotes[proposalId];
+    setUserVotes((prev) => ({ ...prev, [proposalId]: vote }));
 
-          let newYes = p.yesVotesWeight;
-          let newNo = p.noVotesWeight;
+    setProposals((prev) =>
+      prev.map((p) => {
+        if (p.id !== proposalId) return p;
 
-          if (existingVote === "YES") newYes -= 1.0;
-          if (existingVote === "NO") newNo -= 1.0;
+        let newYes = p.yesVotesWeight;
+        let newNo = p.noVotesWeight;
+        let voterDelta = previousVote ? 0 : 1;
 
-          if (choice === "YES") newYes += 1.0;
-          if (choice === "NO") newNo += 1.0;
+        if (previousVote === "YES") newYes -= 1.0;
+        if (previousVote === "NO") newNo -= 1.0;
 
-          return {
-            ...p,
-            yesVotesWeight: Math.round(newYes * 10) / 10,
-            noVotesWeight: Math.round(newNo * 10) / 10,
-            totalVoters: existingVote ? p.totalVoters : p.totalVoters + 1,
-          };
-        })
-      );
+        if (vote === "YES") newYes += 1.0;
+        if (vote === "NO") newNo += 1.0;
 
-      setVoteFeedback(`Vote recorded: ${choice} on ${proposalId}`);
-      setTimeout(() => setVoteFeedback(null), 3000);
+        return {
+          ...p,
+          yesVotesWeight: newYes,
+          noVotesWeight: newNo,
+          totalVoters: p.totalVoters + voterDelta,
+        };
+      })
+    );
 
-      return { ...prev, [proposalId]: choice };
-    });
+    setVoteFeedback(
+      `Vote recorded! Cast ${vote} on ${proposalId} using wallet ${accountId}.`
+    );
+    setTimeout(() => setVoteFeedback(null), 4000);
   };
 
   const handleSubmitProposal = (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
-
-    const amt = parseFloat(formAmount);
-    if (isNaN(amt) || amt <= 0) {
-      setFormError("Requested amount must be a positive number.");
-      return;
-    }
-
-    if (amt > selectedProductObj.maxCap) {
-      setFormError(
-        `Requested amount (${amt} wNEAR) exceeds the 20% contingency pool limit (${selectedProductObj.maxCap} wNEAR) for this product.`
-      );
-      return;
-    }
-
     if (!formTitle.trim()) {
-      setFormError("Proposal title is required.");
+      setFormError("Please provide a proposal title.");
+      return;
+    }
+    if (!formRecipient.trim() || !formRecipient.includes(".")) {
+      setFormError("Recipient must be a valid NEAR account (e.g. team.testnet).");
       return;
     }
 
-    if (!formRecipient.trim()) {
-      setFormError("Target recipient account is required.");
+    const numAmount = parseFloat(formAmount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      setFormError("Amount must be greater than 0 wNEAR.");
+      return;
+    }
+    if (numAmount > selectedProductObj.maxCap) {
+      setFormError(
+        `Amount exceeds the 20% contingency cap (${selectedProductObj.maxCap} wNEAR) for product #${selectedProductObj.id}.`
+      );
       return;
     }
 
     const newProposal: ContingencyProposal = {
       id: `PROP-00${proposals.length + 1}`,
-      productId: formProductId,
+      productId: selectedProductObj.id,
       productName: selectedProductObj.name,
       title: formTitle.trim(),
-      description: formDescription.trim() || "Emergency infrastructure fix proposal.",
+      description: formDescription.trim() || "Community remediation proposal.",
       targetRecipient: formRecipient.trim(),
-      requestedAmountWNear: amt,
+      requestedAmountWNear: numAmount,
       maxAllowedWNear: selectedProductObj.maxCap,
       contingencyPoolTotal: selectedProductObj.maxCap * 5,
       status: "Active Voting",
@@ -185,7 +186,7 @@ export function ContingencyVotingSection() {
       noVotesWeight: 0.0,
       totalVoters: 1,
       quorumThresholdPct: 50,
-      createdAt: new Date().toISOString().slice(0, 10),
+      createdAt: new Date().toISOString().split("T")[0],
     };
 
     setProposals([newProposal, ...proposals]);
@@ -193,8 +194,9 @@ export function ContingencyVotingSection() {
     setFormTitle("");
     setFormRecipient("");
     setFormDescription("");
-    setVoteFeedback(`Proposal ${newProposal.id} successfully created and entered into voting!`);
-    setTimeout(() => setVoteFeedback(null), 4000);
+    setFormError(null);
+    setVoteFeedback(`Proposal ${newProposal.id} published for active community voting!`);
+    setTimeout(() => setVoteFeedback(null), 5000);
   };
 
   const filteredProposals = proposals.filter((p) => {
@@ -205,20 +207,20 @@ export function ContingencyVotingSection() {
   return (
     <div className="space-y-8">
       {/* Top Banner & Governance Description */}
-      <div className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black p-6 sm:p-8 space-y-6 shadow-xl">
+      <div className="rounded-none border border-[#2E2E2E] bg-[#171717] p-6 sm:p-8 space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              <span className="w-2.5 h-2.5 rounded-none bg-[#894DEF]" />
+              <span className="px-2.5 py-0.5 rounded-none text-xs font-mono font-bold bg-[#262626] text-[#894DEF] border border-[#2E2E2E]">
                 WaterfallContingencyHub
               </span>
-              <span className="text-xs font-mono text-zinc-500">20% Escrow Reserve</span>
+              <span className="text-xs font-mono text-[#6B6B6B]">20% Escrow Reserve</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#FAFAFA] tracking-tight">
               Contingency Fix-Proposal Voting
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#B8B8B8] leading-relaxed">
               Every subscription continuously channels <strong>20.0% into the product contingency reserve</strong>. When unforeseen outages, security vulnerabilities, or failovers occur, stewards and subscribers vote on community fix proposals to disburse remediation funds without touching subscriber escrow.
             </p>
           </div>
@@ -226,7 +228,7 @@ export function ContingencyVotingSection() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             <button
               onClick={() => setIsSubmitModalOpen(true)}
-              className="px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm font-mono transition-all shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2"
+              className="px-5 py-3 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-bold text-xs sm:text-sm font-mono transition-colors flex items-center justify-center gap-2"
             >
               <span>+ Submit Fix Proposal</span>
             </button>
@@ -234,31 +236,31 @@ export function ContingencyVotingSection() {
         </div>
 
         {/* Live Voting Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-zinc-800/80 text-xs font-mono">
-          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-850">
-            <span className="text-zinc-500 block text-[11px]">Active Proposals:</span>
-            <span className="text-white font-bold text-base mt-0.5 block">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[#2E2E2E] text-xs font-mono">
+          <div className="p-3.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+            <span className="text-[#6B6B6B] block text-[11px]">Active Proposals:</span>
+            <span className="text-[#FAFAFA] font-bold text-base mt-0.5 block">
               {proposals.filter((p) => p.status === "Active Voting").length}
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-850">
-            <span className="text-zinc-500 block text-[11px]">Contingency Buffer Cap:</span>
-            <span className="text-purple-400 font-bold text-base mt-0.5 block">
+          <div className="p-3.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+            <span className="text-[#6B6B6B] block text-[11px]">Contingency Buffer Cap:</span>
+            <span className="text-[#894DEF] font-bold text-base mt-0.5 block">
               20.0% Max
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-850">
-            <span className="text-zinc-500 block text-[11px]">Quorum Required:</span>
-            <span className="text-emerald-400 font-bold text-base mt-0.5 block">
+          <div className="p-3.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+            <span className="text-[#6B6B6B] block text-[11px]">Quorum Required:</span>
+            <span className="text-[#FAFAFA] font-bold text-base mt-0.5 block">
               ≥ 50% Participation
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-850">
-            <span className="text-zinc-500 block text-[11px]">Voting Period:</span>
-            <span className="text-cyan-400 font-bold text-base mt-0.5 block">
+          <div className="p-3.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+            <span className="text-[#6B6B6B] block text-[11px]">Voting Period:</span>
+            <span className="text-[#A273F2] font-bold text-base mt-0.5 block">
               72 Hours (3 Days)
             </span>
           </div>
@@ -267,23 +269,23 @@ export function ContingencyVotingSection() {
 
       {/* Action Feedback Banner */}
       {voteFeedback && (
-        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono flex items-center gap-2 animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+        <div className="p-3.5 rounded-none bg-[#262626] border border-[#894DEF] text-[#FAFAFA] text-xs font-mono flex items-center gap-2">
+          <span className="w-2 h-2 rounded-none bg-[#894DEF]" />
           <span>{voteFeedback}</span>
         </div>
       )}
 
       {/* Filter Tabs */}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {["All", "Active Voting", "Passed", "Rejected"].map((tab) => (
             <button
               key={tab}
               onClick={() => setFilterStatus(tab)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-colors shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-none text-xs font-mono font-medium transition-colors shrink-0 border ${
                 filterStatus === tab
-                  ? "bg-zinc-200 text-black font-bold shadow-sm"
-                  : "bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800"
+                  ? "bg-[#894DEF] text-[#FAFAFA] border-[#FAFAFA] font-bold"
+                  : "bg-[#171717] hover:bg-[#262626] text-[#B8B8B8] hover:text-[#FAFAFA] border-[#2E2E2E]"
               }`}
             >
               {tab}
@@ -291,7 +293,7 @@ export function ContingencyVotingSection() {
           ))}
         </div>
 
-        <span className="text-xs font-mono text-zinc-500 hidden sm:inline">
+        <span className="text-xs font-mono text-[#6B6B6B] hidden sm:inline">
           Showing {filteredProposals.length} Proposals
         </span>
       </div>
@@ -302,7 +304,7 @@ export function ContingencyVotingSection() {
           const totalVotes = proposal.yesVotesWeight + proposal.noVotesWeight;
           const yesPct = totalVotes > 0 ? Math.round((proposal.yesVotesWeight / totalVotes) * 100) : 0;
           const noPct = totalVotes > 0 ? 100 - yesPct : 0;
-          const quorumCurrentPct = Math.min(100, Math.round((proposal.totalVoters / 30) * 100)); // normalized quorum
+          const quorumCurrentPct = Math.min(100, Math.round((proposal.totalVoters / 30) * 100));
           const isQuorumReached = quorumCurrentPct >= proposal.quorumThresholdPct;
           const currentVote = userVotes[proposal.id];
           const isActive = proposal.status === "Active Voting";
@@ -310,34 +312,34 @@ export function ContingencyVotingSection() {
           return (
             <div
               key={proposal.id}
-              className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-7 space-y-6 hover:border-zinc-700 transition-all shadow-lg"
+              className="rounded-none border border-[#2E2E2E] bg-[#171717] p-6 sm:p-7 space-y-6 hover:border-[#894DEF] transition-colors"
             >
               {/* Proposal Header */}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-zinc-800">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-[#2E2E2E]">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs font-bold text-zinc-400">
+                    <span className="font-mono text-xs font-bold text-[#6B6B6B]">
                       {proposal.id}
                     </span>
-                    <span className="text-zinc-600">•</span>
-                    <span className="text-xs font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                    <span className="text-[#2E2E2E]">•</span>
+                    <span className="text-xs font-mono text-[#894DEF] bg-[#262626] px-2 py-0.5 rounded-none border border-[#2E2E2E]">
                       Product #{proposal.productId}: {proposal.productName}
                     </span>
                     <span
-                      className={`text-xs font-mono px-2.5 py-0.5 rounded-full border font-semibold flex items-center gap-1.5 ${
+                      className={`text-xs font-mono px-2.5 py-0.5 rounded-none border font-semibold flex items-center gap-1.5 ${
                         isActive
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                          ? "bg-[#262626] text-[#FAFAFA] border-[#894DEF]"
                           : proposal.status === "Passed"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                          : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+                          ? "bg-[#262626] text-[#FAFAFA] border-[#2E2E2E]"
+                          : "bg-[#262626] text-rose-400 border-rose-800"
                       }`}
                     >
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${
+                        className={`w-1.5 h-1.5 rounded-none ${
                           isActive
-                            ? "bg-amber-400 animate-pulse"
+                            ? "bg-[#894DEF]"
                             : proposal.status === "Passed"
-                            ? "bg-emerald-400"
+                            ? "bg-[#FAFAFA]"
                             : "bg-rose-400"
                         }`}
                       />
@@ -345,22 +347,22 @@ export function ContingencyVotingSection() {
                     </span>
                   </div>
 
-                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#FAFAFA] tracking-tight">
                     {proposal.title}
                   </h3>
 
-                  <p className="text-xs text-zinc-300 leading-relaxed max-w-3xl">
+                  <p className="text-xs text-[#B8B8B8] leading-relaxed max-w-3xl">
                     {proposal.description}
                   </p>
                 </div>
 
                 {/* Amount Requested Badge */}
-                <div className="text-right shrink-0 p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-                  <span className="text-[10px] font-mono text-zinc-500 block uppercase">Requested Allocation</span>
-                  <div className="text-lg font-mono font-extrabold text-white">
-                    {proposal.requestedAmountWNear} <span className="text-xs font-normal text-zinc-400">wNEAR</span>
+                <div className="text-right shrink-0 p-3.5 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+                  <span className="text-[10px] font-mono text-[#6B6B6B] block uppercase">Requested Allocation</span>
+                  <div className="text-lg font-mono font-extrabold text-[#FAFAFA]">
+                    {proposal.requestedAmountWNear} <span className="text-xs font-normal text-[#B8B8B8]">wNEAR</span>
                   </div>
-                  <span className="text-[10px] font-mono text-purple-400 block mt-0.5">
+                  <span className="text-[10px] font-mono text-[#894DEF] block mt-0.5">
                     (Max: {proposal.maxAllowedWNear} wN cap)
                   </span>
                 </div>
@@ -368,53 +370,53 @@ export function ContingencyVotingSection() {
 
               {/* Target & Time Information */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-                <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-850">
-                  <span className="text-zinc-500 block text-[11px]">Disbursement Recipient:</span>
-                  <span className="text-cyan-400 font-bold mt-0.5 block truncate">
+                <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+                  <span className="text-[#6B6B6B] block text-[11px]">Disbursement Recipient:</span>
+                  <span className="text-[#FAFAFA] font-bold mt-0.5 block truncate">
                     {proposal.targetRecipient}
                   </span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-850">
-                  <span className="text-zinc-500 block text-[11px]">Voting Window:</span>
-                  <span className={`font-bold mt-0.5 block ${isActive ? "text-amber-400" : "text-zinc-400"}`}>
+                <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+                  <span className="text-[#6B6B6B] block text-[11px]">Voting Window:</span>
+                  <span className={`font-bold mt-0.5 block ${isActive ? "text-[#894DEF]" : "text-[#B8B8B8]"}`}>
                     {isActive ? `⏳ ${proposal.timeRemaining} remaining` : proposal.timeRemaining}
                   </span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-850">
-                  <span className="text-zinc-500 block text-[11px]">Total Participation:</span>
-                  <span className="text-white font-bold mt-0.5 block">
+                <div className="p-3 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
+                  <span className="text-[#6B6B6B] block text-[11px]">Total Participation:</span>
+                  <span className="text-[#FAFAFA] font-bold mt-0.5 block">
                     {proposal.totalVoters} Subscribers ({totalVotes.toFixed(1)} wN voting weight)
                   </span>
                 </div>
               </div>
 
               {/* Quorum & Approval Progress Bars */}
-              <div className="space-y-4 p-4 rounded-2xl bg-zinc-950/80 border border-zinc-850">
+              <div className="space-y-4 p-4 rounded-none bg-[#0D0D0D] border border-[#2E2E2E]">
                 {/* 1. Approval Ratio Bar */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-mono">
-                    <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+                    <span className="text-[#FAFAFA] font-semibold flex items-center gap-1.5">
                       <span>✓ Support (YES):</span>
-                      <strong>{yesPct}%</strong>
-                      <span className="text-zinc-500">({proposal.yesVotesWeight.toFixed(1)} wN)</span>
+                      <strong className="text-[#894DEF]">{yesPct}%</strong>
+                      <span className="text-[#6B6B6B]">({proposal.yesVotesWeight.toFixed(1)} wN)</span>
                     </span>
-                    <span className="text-rose-400 font-semibold flex items-center gap-1.5">
+                    <span className="text-[#B8B8B8] font-semibold flex items-center gap-1.5">
                       <span>✕ Reject (NO):</span>
                       <strong>{noPct}%</strong>
-                      <span className="text-zinc-500">({proposal.noVotesWeight.toFixed(1)} wN)</span>
+                      <span className="text-[#6B6B6B]">({proposal.noVotesWeight.toFixed(1)} wN)</span>
                     </span>
                   </div>
 
                   {/* Dual Bar */}
-                  <div className="h-3 w-full bg-zinc-900 rounded-full overflow-hidden flex border border-zinc-800">
+                  <div className="h-3 w-full bg-[#171717] rounded-none overflow-hidden flex border border-[#2E2E2E]">
                     <div
-                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                      className="h-full bg-[#894DEF] transition-all duration-300"
                       style={{ width: `${yesPct}%` }}
                     />
                     <div
-                      className="h-full bg-gradient-to-r from-rose-500 to-rose-600 transition-all duration-500"
+                      className="h-full bg-[#262626] transition-all duration-300"
                       style={{ width: `${noPct}%` }}
                     />
                   </div>
@@ -423,25 +425,25 @@ export function ContingencyVotingSection() {
                 {/* 2. Quorum Threshold Bar */}
                 <div className="space-y-1.5 pt-1">
                   <div className="flex justify-between text-[11px] font-mono">
-                    <span className="text-zinc-400 flex items-center gap-1.5">
+                    <span className="text-[#B8B8B8] flex items-center gap-1.5">
                       <span>Quorum Progress:</span>
-                      <strong className={isQuorumReached ? "text-emerald-400" : "text-amber-400"}>
+                      <strong className={isQuorumReached ? "text-[#FAFAFA]" : "text-[#894DEF]"}>
                         {quorumCurrentPct}% / {proposal.quorumThresholdPct}% Required
                       </strong>
                     </span>
-                    <span className={`text-[10px] px-2 py-0.2 rounded ${
+                    <span className={`text-[10px] px-2 py-0.5 rounded-none border ${
                       isQuorumReached
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        ? "bg-[#262626] text-[#FAFAFA] border-[#894DEF]"
+                        : "bg-[#262626] text-[#B8B8B8] border-[#2E2E2E]"
                     }`}>
                       {isQuorumReached ? "Quorum Threshold Reached" : "Quorum Pending"}
                     </span>
                   </div>
 
-                  <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-800 relative">
+                  <div className="h-2 w-full bg-[#171717] rounded-none overflow-hidden border border-[#2E2E2E]">
                     <div
-                      className={`h-full transition-all duration-500 ${
-                        isQuorumReached ? "bg-emerald-400" : "bg-amber-400"
+                      className={`h-full transition-all duration-300 ${
+                        isQuorumReached ? "bg-[#894DEF]" : "bg-[#262626]"
                       }`}
                       style={{ width: `${quorumCurrentPct}%` }}
                     />
@@ -454,20 +456,20 @@ export function ContingencyVotingSection() {
                 <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="text-xs font-mono">
                     {currentVote ? (
-                      <span className="flex items-center gap-2 text-white font-semibold">
+                      <span className="flex items-center gap-2 text-[#FAFAFA] font-semibold">
                         <span>Your Current Vote:</span>
                         <span
-                          className={`px-2.5 py-1 rounded-lg border font-bold ${
+                          className={`px-2.5 py-1 rounded-none border font-bold ${
                             currentVote === "YES"
-                              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                              : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                              ? "bg-[#262626] text-[#894DEF] border-[#894DEF]"
+                              : "bg-[#262626] text-rose-400 border-rose-700"
                           }`}
                         >
                           {currentVote === "YES" ? "✓ Voted YES (Support)" : "✕ Voted NO (Reject)"}
                         </span>
                       </span>
                     ) : (
-                      <span className="text-zinc-400">
+                      <span className="text-[#B8B8B8]">
                         Cast your subscriber vote using your connected NEAR testnet wallet:
                       </span>
                     )}
@@ -476,10 +478,10 @@ export function ContingencyVotingSection() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => handleVote(proposal.id, "YES")}
-                      className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition-all flex items-center gap-1.5 shadow-md ${
+                      className={`px-4 py-2 rounded-none font-mono text-xs font-bold transition-colors flex items-center gap-1.5 border ${
                         currentVote === "YES"
-                          ? "bg-emerald-500 text-black shadow-emerald-500/20 scale-[1.02]"
-                          : "bg-zinc-800 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/40 text-zinc-200 border border-zinc-700"
+                          ? "bg-[#894DEF] text-[#FAFAFA] border-[#FAFAFA]"
+                          : "bg-[#0D0D0D] hover:bg-[#262626] text-[#FAFAFA] border-[#2E2E2E] hover:border-[#894DEF]"
                       }`}
                     >
                       <span>✓ Vote YES (Support)</span>
@@ -487,10 +489,10 @@ export function ContingencyVotingSection() {
 
                     <button
                       onClick={() => handleVote(proposal.id, "NO")}
-                      className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition-all flex items-center gap-1.5 shadow-md ${
+                      className={`px-4 py-2 rounded-none font-mono text-xs font-bold transition-colors flex items-center gap-1.5 border ${
                         currentVote === "NO"
-                          ? "bg-rose-600 text-white shadow-rose-600/20 scale-[1.02]"
-                          : "bg-zinc-800 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/40 text-zinc-200 border border-zinc-700"
+                          ? "bg-rose-700 text-white border-white"
+                          : "bg-[#0D0D0D] hover:bg-[#262626] text-[#B8B8B8] border-[#2E2E2E] hover:border-rose-600"
                       }`}
                     >
                       <span>✕ Vote NO (Reject)</span>
@@ -505,27 +507,27 @@ export function ContingencyVotingSection() {
 
       {/* Submit Proposal Modal */}
       {isSubmitModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-none">
+          <div className="bg-[#171717] border border-[#2E2E2E] rounded-none max-w-xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[#2E2E2E]">
               <div>
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <h3 className="text-xl font-bold text-[#FAFAFA] flex items-center gap-2">
                   <span>Submit Contingency Fix Proposal</span>
                 </h3>
-                <p className="text-xs text-zinc-400 font-mono mt-0.5">
+                <p className="text-xs text-[#B8B8B8] font-mono mt-0.5">
                   Propose an emergency allocation from the 20% contingency pool.
                 </p>
               </div>
               <button
                 onClick={() => setIsSubmitModalOpen(false)}
-                className="text-zinc-500 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+                className="text-[#B8B8B8] hover:text-[#FAFAFA] p-1 rounded-none hover:bg-[#262626] transition-colors"
               >
                 ✕
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono">
+              <div className="p-3.5 rounded-none bg-[#262626] border border-rose-700 text-rose-400 text-xs font-mono">
                 {formError}
               </div>
             )}
@@ -533,13 +535,13 @@ export function ContingencyVotingSection() {
             <form onSubmit={handleSubmitProposal} className="space-y-4 text-xs font-mono">
               {/* Product Select */}
               <div className="space-y-1.5">
-                <label className="text-zinc-400 block font-semibold uppercase">
+                <label className="text-[#B8B8B8] block font-semibold uppercase">
                   1. Target Product
                 </label>
                 <select
                   value={formProductId}
                   onChange={(e) => setFormProductId(e.target.value)}
-                  className="w-full bg-black/80 border border-zinc-700 px-3.5 py-2.5 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 rounded-none text-[#FAFAFA] font-mono text-xs focus:outline-none focus:border-[#894DEF]"
                 >
                   {AVAILABLE_PRODUCTS.map((prod) => (
                     <option key={prod.id} value={prod.id}>
@@ -551,7 +553,7 @@ export function ContingencyVotingSection() {
 
               {/* Proposal Title */}
               <div className="space-y-1.5">
-                <label className="text-zinc-400 block font-semibold uppercase">
+                <label className="text-[#B8B8B8] block font-semibold uppercase">
                   2. Proposal Title
                 </label>
                 <input
@@ -559,13 +561,13 @@ export function ContingencyVotingSection() {
                   placeholder="e.g. Failover Worker Provisioning for Sentinel"
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full bg-black/80 border border-zinc-700 px-3.5 py-2.5 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 rounded-none text-[#FAFAFA] font-mono text-xs focus:outline-none focus:border-[#894DEF]"
                 />
               </div>
 
               {/* Target Recipient */}
               <div className="space-y-1.5">
-                <label className="text-zinc-400 block font-semibold uppercase">
+                <label className="text-[#B8B8B8] block font-semibold uppercase">
                   3. Target Recipient Testnet Account
                 </label>
                 <input
@@ -573,17 +575,17 @@ export function ContingencyVotingSection() {
                   placeholder="e.g. security-team.testnet"
                   value={formRecipient}
                   onChange={(e) => setFormRecipient(e.target.value)}
-                  className="w-full bg-black/80 border border-zinc-700 px-3.5 py-2.5 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 rounded-none text-[#FAFAFA] font-mono text-xs focus:outline-none focus:border-[#894DEF]"
                 />
               </div>
 
-              {/* Requested Amount (with 20% limit check) */}
+              {/* Requested Amount */}
               <div className="space-y-1.5">
                 <div className="flex justify-between">
-                  <label className="text-zinc-400 font-semibold uppercase">
+                  <label className="text-[#B8B8B8] font-semibold uppercase">
                     4. Requested Allocation (wNEAR)
                   </label>
-                  <span className="text-purple-400">
+                  <span className="text-[#894DEF]">
                     Max Allowed: {selectedProductObj.maxCap} wNEAR (20% Cap)
                   </span>
                 </div>
@@ -594,13 +596,13 @@ export function ContingencyVotingSection() {
                   max={selectedProductObj.maxCap}
                   value={formAmount}
                   onChange={(e) => setFormAmount(e.target.value)}
-                  className="w-full bg-black/80 border border-zinc-700 px-3.5 py-2.5 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2.5 rounded-none text-[#FAFAFA] font-mono text-xs focus:outline-none focus:border-[#894DEF]"
                 />
               </div>
 
               {/* Fix Description */}
               <div className="space-y-1.5">
-                <label className="text-zinc-400 block font-semibold uppercase">
+                <label className="text-[#B8B8B8] block font-semibold uppercase">
                   5. Technical Justification & Remediation Plan
                 </label>
                 <textarea
@@ -608,7 +610,7 @@ export function ContingencyVotingSection() {
                   placeholder="Explain why this contingency allocation is necessary to restore heartbeat compliance..."
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full bg-black/80 border border-zinc-700 px-3.5 py-2 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#0D0D0D] border border-[#2E2E2E] px-3.5 py-2 rounded-none text-[#FAFAFA] font-mono text-xs focus:outline-none focus:border-[#894DEF]"
                 />
               </div>
 
@@ -617,13 +619,13 @@ export function ContingencyVotingSection() {
                 <button
                   type="button"
                   onClick={() => setIsSubmitModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-300 font-medium text-xs hover:bg-zinc-700 transition-colors"
+                  className="flex-1 py-2.5 rounded-none border border-[#2E2E2E] bg-[#0D0D0D] text-[#B8B8B8] hover:text-[#FAFAFA] font-medium text-xs hover:bg-[#262626] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs font-mono transition-colors shadow-lg shadow-purple-600/20"
+                  className="flex-1 py-2.5 rounded-none bg-[#894DEF] hover:bg-[#A273F2] text-[#FAFAFA] border border-[#FAFAFA] font-bold text-xs font-mono transition-colors"
                 >
                   Submit for On-Chain Voting →
                 </button>

@@ -8,6 +8,17 @@ const config: Config = {
     "./src/ui/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    borderRadius: {
+      DEFAULT: "0px",
+      none: "0px",
+      sm: "0px",
+      md: "0px",
+      lg: "0px",
+      xl: "0px",
+      "2xl": "0px",
+      "3xl": "0px",
+      full: "0px",
+    },
     extend: {
       colors: {
         spectr: {
@@ -20,7 +31,7 @@ const config: Config = {
           "primary-hover": "#A273F2",
           ink: "#FAFAFA",
           body: "#B8B8B8",
-          muted: "#737373",
+          muted: "#6B6B6B",
           success: "#4ADE80",
           warning: "#FBBF24",
           danger: "#EF4444",
@@ -29,9 +40,6 @@ const config: Config = {
       fontFamily: {
         sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
-      },
-      borderRadius: {
-        none: "0px",
       },
     },
   },

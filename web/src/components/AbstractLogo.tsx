@@ -166,7 +166,7 @@ export function AbstractLogo({ slug, name, className = "w-10 h-10", size = 40 }:
 
   return (
     <div
-      className={`inline-flex items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 shadow-inner group-hover:border-zinc-700 transition-colors ${className}`}
+      className={`inline-flex items-center justify-center p-2 rounded-none bg-[#171717] border border-[#2E2E2E] hover:border-[#894DEF] transition-colors ${className}`}
       style={{ width: size, height: size }}
       title={name || slug}
     >

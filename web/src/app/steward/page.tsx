@@ -90,13 +90,13 @@ export default function StewardDashboardPage() {
             <h1 className="text-3xl font-extrabold text-white tracking-tight">
               Steward Operations Dashboard
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">
+            <span className="px-2 py-0.5 rounded-none text-xs font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">
               /steward
             </span>
           </div>
           <p className="text-xs text-zinc-400 font-mono mt-1 flex items-center gap-2">
             <span>Authorized Steward:</span>
-            <span className="text-emerald-400 font-bold">{stewardAccount}</span>
+            <span className="text-[#894DEF] font-bold">{stewardAccount}</span>
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export default function StewardDashboardPage() {
           <button
             onClick={fetchProducts}
             disabled={isLoading}
-            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono border border-zinc-700 transition-colors"
+            className="px-3 py-1.5 rounded-none bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono border border-zinc-700 transition-colors"
           >
             {isLoading ? "Refreshing..." : "↻ Refresh State"}
           </button>
@@ -113,9 +113,9 @@ export default function StewardDashboardPage() {
 
       {/* Notifications */}
       {successTx && (
-        <div className="my-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+        <div className="my-6 p-4 rounded-none bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2 font-mono">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-none bg-amber-400 animate-pulse" />
             <span>Killswitch executed on-chain! Product status updated to Abandoned.</span>
           </div>
           <button onClick={() => setSuccessTx(null)} className="text-zinc-400 hover:text-white">✕</button>
@@ -123,7 +123,7 @@ export default function StewardDashboardPage() {
       )}
 
       {error && (
-        <div className="my-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+        <div className="my-6 p-4 rounded-none bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
           {error}
         </div>
       )}
@@ -142,7 +142,7 @@ export default function StewardDashboardPage() {
             return (
               <div
                 key={item.id}
-                className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-6 hover:border-zinc-700 transition-all shadow-lg"
+                className="rounded-none border border-zinc-800 bg-zinc-900/60 p-6 space-y-6 hover:border-zinc-700 transition-all shadow-lg"
               >
                 {/* Top Info */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
@@ -152,15 +152,15 @@ export default function StewardDashboardPage() {
                         Product #{item.id}
                       </span>
                       <span
-                        className={`text-xs font-mono px-2 py-0.5 rounded-full border font-semibold flex items-center gap-1.5 ${
+                        className={`text-xs font-mono px-2 py-0.5 rounded-none border font-semibold flex items-center gap-1.5 ${
                           isActive
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            ? "bg-[#262626] text-[#894DEF] border-[#2E2E2E]"
                             : "bg-rose-500/10 text-rose-400 border-rose-500/30"
                         }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            isActive ? "bg-emerald-400 animate-pulse" : "bg-rose-400"
+                          className={`w-1.5 h-1.5 rounded-none ${
+                            isActive ? "bg-[#894DEF] animate-pulse" : "bg-rose-400"
                           }`}
                         />
                         {item.product.status}
@@ -184,30 +184,30 @@ export default function StewardDashboardPage() {
 
                 {/* Reserves & Heartbeat Metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
-                  <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800">
+                  <div className="p-3.5 rounded-none bg-zinc-950/60 border border-zinc-800">
                     <span className="text-zinc-500 block">Operational Reserve (30%):</span>
                     <span className="text-base font-bold text-cyan-400 mt-1 block">
                       {formatYocto(item.product.ops_reserve)} wNEAR
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800">
+                  <div className="p-3.5 rounded-none bg-zinc-950/60 border border-zinc-800">
                     <span className="text-zinc-500 block">Contingency Reserve (20%):</span>
                     <span className="text-base font-bold text-purple-400 mt-1 block">
                       {formatYocto(item.product.contingency_reserve)} wNEAR
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800">
+                  <div className="p-3.5 rounded-none bg-zinc-950/60 border border-zinc-800">
                     <span className="text-zinc-500 block">Last Verified Heartbeat:</span>
-                    <span className="text-base font-bold text-emerald-400 mt-1 block">
+                    <span className="text-base font-bold text-[#894DEF] mt-1 block">
                       Period #{item.product.last_heartbeat_period}
                     </span>
                   </div>
                 </div>
 
                 {/* Killswitch Action Banner */}
-                <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-4 rounded-none bg-zinc-950/80 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="font-semibold text-white text-sm">
                       {isAbandoned ? "Product Terminated" : "Emergency Steward Killswitch"}
@@ -222,7 +222,7 @@ export default function StewardDashboardPage() {
                   {!isAbandoned && (
                     <button
                       onClick={() => setKillswitchModalId(item.id)}
-                      className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors whitespace-nowrap shadow-md shadow-rose-600/20"
+                      className="px-4 py-2 rounded-none bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs font-mono transition-colors whitespace-nowrap shadow-md shadow-rose-600/20"
                     >
                       Pull Killswitch (declare_abandoned) ⚠
                     </button>
@@ -237,7 +237,7 @@ export default function StewardDashboardPage() {
       {/* Killswitch Confirmation Modal */}
       {killswitchModalId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-zinc-900 border border-rose-500/40 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-zinc-900 border border-rose-500/40 rounded-none max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-2 text-rose-400 font-bold text-lg">
               <span>⚠</span>
               <span>Confirm Product Abandonment</span>
@@ -255,7 +255,7 @@ export default function StewardDashboardPage() {
                 type="text"
                 value={killswitchReason}
                 onChange={(e) => setKillswitchReason(e.target.value)}
-                className="w-full bg-black/60 border border-zinc-700 px-3 py-2 rounded-lg text-white font-mono text-xs focus:outline-none focus:border-rose-500"
+                className="w-full bg-black/60 border border-zinc-700 px-3 py-2 rounded-none text-white font-mono text-xs focus:outline-none focus:border-rose-500"
               />
             </div>
 
@@ -263,7 +263,7 @@ export default function StewardDashboardPage() {
               <button
                 type="button"
                 onClick={() => setKillswitchModalId(null)}
-                className="flex-1 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-300 font-medium text-xs hover:bg-zinc-700 transition-colors"
+                className="flex-1 py-2 rounded-none border border-zinc-700 bg-zinc-800 text-zinc-300 font-medium text-xs hover:bg-zinc-700 transition-colors"
               >
                 Cancel
               </button>
@@ -271,7 +271,7 @@ export default function StewardDashboardPage() {
                 type="button"
                 onClick={handleExecuteKillswitch}
                 disabled={isSubmitting}
-                className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-md shadow-rose-600/20"
+                className="flex-1 py-2 rounded-none bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-md shadow-rose-600/20"
               >
                 {isSubmitting ? "Submitting Tx..." : "Confirm Killswitch"}
               </button>

@@ -55,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-black text-zinc-100" suppressHydrationWarning>
+    <html lang="en" className="dark bg-[#0D0D0D] text-[#FAFAFA]" suppressHydrationWarning>
       <head>
         <Script
           id="early-extension-filter"
@@ -64,24 +64,24 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="antialiased min-h-screen flex flex-col bg-black text-zinc-100 selection:bg-emerald-500 selection:text-black"
+        className="antialiased min-h-screen flex flex-col bg-[#0D0D0D] text-[#FAFAFA] selection:bg-[#894DEF] selection:text-[#FAFAFA]"
         suppressHydrationWarning
       >
         <ExtensionErrorGuard>
           <NearWalletProvider>
             <Navbar />
             <div className="flex-1">{children}</div>
-            <footer className="border-t border-zinc-800/80 py-8 text-center text-xs text-zinc-500 font-mono">
+            <footer className="border-t border-[#2E2E2E] bg-[#0D0D0D] py-8 text-center text-xs text-[#B8B8B8] font-mono">
               <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   Pandem Protocol · Built for NEAR Hackathon (Real-World Money & Privacy Tracks)
                 </div>
-                <div className="flex items-center gap-4 text-zinc-400">
+                <div className="flex items-center gap-4 text-[#B8B8B8]">
                   <a
                     href="https://explorer.testnet.near.org"
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-emerald-400 transition-colors"
+                    className="hover:text-[#894DEF] transition-colors"
                   >
                     NEAR Testnet Explorer
                   </a>
@@ -90,7 +90,7 @@ export default function RootLayout({
                     href="https://cloud.near.ai"
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-emerald-400 transition-colors"
+                    className="hover:text-[#894DEF] transition-colors"
                   >
                     NEAR AI Cloud TEE
                   </a>
